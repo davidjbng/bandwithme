@@ -35,6 +35,11 @@ export default function AppTabs() {
           md={{ default: 'event', selected: 'event_repeat' }}
         />
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="user">
+        <NativeTabs.Trigger.Label>User</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="person.crop.circle" md="person" />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
