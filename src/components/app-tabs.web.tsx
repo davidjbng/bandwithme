@@ -31,7 +31,7 @@ export default function AppTabs() {
             <TabButton>Termine</TabButton>
           </TabTrigger>
           <TabTrigger name="user" href="/user" asChild>
-            <TabButton>User</TabButton>
+            <TabButton>Profil</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>

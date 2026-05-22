@@ -1,6 +1,7 @@
 import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react';
 import { useQuery } from 'convex/react';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { api } from '../../convex/_generated/api';
 import { useEffect, useState } from 'react';
 import {
@@ -8,15 +9,29 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   TextInput,
+  View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { devProfile, isDevProfileEnabled } from '@/lib/dev-profile';
+
+const availableInstruments = [
+  'Vocals',
+  'Guitar',
+  'Bass',
+  'Drums',
+  'Keys',
+  'Saxophone',
+  'Trumpet',
+  'Violin',
+];
 
 export default function UserScreen() {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -28,7 +43,16 @@ export default function UserScreen() {
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profileName, setProfileName] = useState(devProfile.name);
+  const [pictureUrl, setPictureUrl] = useState(devProfile.pictureUrl);
+  const [selectedInstruments, setSelectedInstruments] = useState(devProfile.instruments);
   const theme = useTheme();
+  const safeAreaInsets = useSafeAreaInsets();
+
+  const insets = {
+    top: safeAreaInsets.top,
+    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
+  };
 
   useEffect(() => {
     if (Platform.OS === 'web' || !code) {
@@ -95,18 +119,129 @@ export default function UserScreen() {
     }
   }
 
+  function toggleInstrument(instrument: string) {
+    setSelectedInstruments((current) =>
+      current.includes(instrument)
+        ? current.filter((selectedInstrument) => selectedInstrument !== instrument)
+        : [...current, instrument]
+    );
+  }
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
+    <>
+      <Stack.Screen options={{ title: 'Profil' }} />
+      <ScrollView
+        style={[styles.scrollView, { backgroundColor: theme.background }]}
+        contentInset={insets}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.scrollContent}>
+        <ThemedView style={styles.container}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={styles.content}>
           <ThemedView style={styles.header}>
-            <ThemedText type="subtitle">User</ThemedText>
+            <ThemedText type="subtitle">Profil</ThemedText>
             <ThemedText style={styles.centerText} themeColor="textSecondary">
-              Sign in with a one-time link sent to your email.
+              Verwalte dein Dev-Profil und melde dich optional mit deinem Account an.
             </ThemedText>
           </ThemedView>
+
+          {isDevProfileEnabled && (
+            <ThemedView type="backgroundElement" style={styles.card}>
+              <View style={styles.profileHeader}>
+                <Image source={pictureUrl} contentFit="cover" style={styles.avatar} />
+                <View style={styles.profileSummary}>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Dev-Profil
+                  </ThemedText>
+                  <ThemedText selectable type="smallBold">
+                    {profileName || 'Unbenannt'}
+                  </ThemedText>
+                  <ThemedText selectable type="small" themeColor="textSecondary">
+                    {selectedInstruments.length === 0
+                      ? 'Keine Instrumente ausgewählt'
+                      : selectedInstruments.join(', ')}
+                  </ThemedText>
+                </View>
+              </View>
+
+              <View style={styles.fieldGroup}>
+                <ThemedText type="smallBold">Name</ThemedText>
+                <TextInput
+                  onChangeText={setProfileName}
+                  placeholder="Dein Name"
+                  placeholderTextColor={theme.textSecondary}
+                  style={[styles.input, { borderColor: theme.backgroundSelected, color: theme.text }]}
+                  value={profileName}
+                />
+              </View>
+
+              <View style={styles.fieldGroup}>
+                <ThemedText type="smallBold">Bild-URL</ThemedText>
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  inputMode="url"
+                  onChangeText={setPictureUrl}
+                  placeholder="https://example.com/profile.jpg"
+                  placeholderTextColor={theme.textSecondary}
+                  style={[styles.input, { borderColor: theme.backgroundSelected, color: theme.text }]}
+                  value={pictureUrl}
+                />
+              </View>
+
+              <View style={styles.fieldGroup}>
+                <ThemedText type="smallBold">Instrumente</ThemedText>
+                <View style={styles.chipList}>
+                  {availableInstruments.map((instrument) => {
+                    const isSelected = selectedInstruments.includes(instrument);
+
+                    return (
+                      <Pressable
+                        key={instrument}
+                        onPress={() => toggleInstrument(instrument)}
+                        style={({ pressed }) => [pressed && styles.pressed]}>
+                        <ThemedView
+                          type={isSelected ? undefined : 'backgroundSelected'}
+                          style={[
+                            styles.chip,
+                            isSelected && { backgroundColor: theme.text },
+                          ]}>
+                          <ThemedText
+                            type="smallBold"
+                            style={isSelected && { color: theme.background }}>
+                            {instrument}
+                          </ThemedText>
+                        </ThemedView>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <View style={styles.fieldGroup}>
+                <ThemedText type="smallBold">Aktuelle Bands</ThemedText>
+                <View style={styles.bandList}>
+                  {devProfile.bands.map((band) => (
+                    <ThemedView key={`${band.name}-${band.role ?? 'member'}`} style={styles.bandRow}>
+                      <ThemedText selectable type="smallBold">
+                        {band.name}
+                      </ThemedText>
+                      {band.role && (
+                        <ThemedText selectable type="small" themeColor="textSecondary">
+                          {band.role}
+                        </ThemedText>
+                      )}
+                    </ThemedView>
+                  ))}
+                </View>
+              </View>
+
+              <ThemedText type="small" themeColor="textSecondary">
+                Dev-only: Änderungen bleiben lokal bis zum nächsten Reload.
+              </ThemedText>
+            </ThemedView>
+          )}
 
           <ThemedView type="backgroundElement" style={styles.card}>
             {isLoading ? (
@@ -114,7 +249,7 @@ export default function UserScreen() {
             ) : isAuthenticated ? (
               <>
                 <ThemedText type="small" themeColor="textSecondary">
-                  Signed in as
+                  Angemeldet als
                 </ThemedText>
                 <ThemedText type="smallBold">{user?.email ?? user?.name ?? 'Loading account...'}</ThemedText>
                 <Pressable
@@ -126,11 +261,14 @@ export default function UserScreen() {
                     pressed && styles.pressed,
                     isSubmitting && styles.disabled,
                   ]}>
-                  <ThemedText style={[styles.buttonText, { color: theme.background }]}>Log out</ThemedText>
+                  <ThemedText style={[styles.buttonText, { color: theme.background }]}>Abmelden</ThemedText>
                 </Pressable>
               </>
             ) : (
               <>
+                <ThemedText type="small" themeColor="textSecondary">
+                  Sign in with a one-time link sent to your email.
+                </ThemedText>
                 <ThemedText type="smallBold">Email address</ThemedText>
                 <TextInput
                   autoCapitalize="none"
@@ -172,27 +310,27 @@ export default function UserScreen() {
             )}
           </ThemedView>
         </KeyboardAvoidingView>
-      </SafeAreaView>
-    </ThemedView>
+        </ThemedView>
+      </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
   },
-  safeArea: {
-    flex: 1,
+  scrollContent: {
+    alignItems: 'center',
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.five,
+  },
+  container: {
+    width: '100%',
     maxWidth: MaxContentWidth,
-    paddingBottom: BottomTabInset + Spacing.three,
   },
   content: {
-    flex: 1,
-    justifyContent: 'center',
     gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
   },
   header: {
     alignItems: 'center',
@@ -205,6 +343,23 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.four,
     gap: Spacing.three,
     padding: Spacing.four,
+  },
+  profileHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: Spacing.three,
+  },
+  avatar: {
+    borderRadius: 40,
+    height: 80,
+    width: 80,
+  },
+  profileSummary: {
+    flex: 1,
+    gap: Spacing.half,
+  },
+  fieldGroup: {
+    gap: Spacing.two,
   },
   input: {
     borderRadius: Spacing.three,
@@ -222,6 +377,24 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: 700,
+  },
+  chipList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.two,
+  },
+  chip: {
+    borderRadius: 999,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  bandList: {
+    gap: Spacing.two,
+  },
+  bandRow: {
+    borderRadius: Spacing.three,
+    gap: Spacing.half,
+    padding: Spacing.three,
   },
   disabled: {
     opacity: 0.5,
