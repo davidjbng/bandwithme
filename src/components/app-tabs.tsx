@@ -27,6 +27,14 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="termine">
+        <NativeTabs.Trigger.Label>Termine</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          sf={{ default: 'calendar', selected: 'calendar.badge.plus' }}
+          md={{ default: 'event', selected: 'event_repeat' }}
+        />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
