@@ -34,23 +34,6 @@ export default function TermineScreen() {
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.contentContainer}>
         <ThemedView style={styles.container}>
-          <ThemedView style={styles.heroCard}>
-            <View style={styles.heroGlow} />
-            <View style={[styles.heroIcon, { backgroundColor: theme.backgroundElement }]}>
-              <SymbolView
-                tintColor={theme.text}
-                name={{ ios: 'calendar.badge.plus', android: 'event_upcoming', web: 'event_upcoming' }}
-                size={34}
-              />
-            </View>
-            <ThemedText type="subtitle" style={styles.centerText}>
-              Termine
-            </ThemedText>
-            <ThemedText themeColor="textSecondary" style={styles.heroCopy}>
-              Plane Proben, Auftritte oder Treffen und halte wiederkehrende Termine an einem Ort fest.
-            </ThemedText>
-          </ThemedView>
-
           <ThemedView style={styles.listSection}>
             <View style={styles.sectionHeader}>
               <View>
@@ -155,37 +138,9 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     maxWidth: MaxContentWidth,
-    gap: Spacing.four,
-  },
-  heroCard: {
-    borderRadius: Spacing.five,
-    overflow: 'hidden',
-    alignItems: 'center',
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.five,
-  },
-  heroGlow: {
-    position: 'absolute',
-    top: -64,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: '#7C3AED33',
-  },
-  heroIcon: {
-    width: 72,
-    height: 72,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   centerText: {
     textAlign: 'center',
-  },
-  heroCopy: {
-    textAlign: 'center',
-    maxWidth: 520,
   },
   listSection: {
     gap: Spacing.three,
