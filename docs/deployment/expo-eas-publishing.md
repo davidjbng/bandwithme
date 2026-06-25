@@ -36,25 +36,25 @@ Praktisch heißt das:
 - **schnelles lokales Testen mit Expo Go** → weiter über `expo start`
 - **OTA-Testing des gepushten Main-Stands** → sinnvoller mit einem Development Build / Preview Build
 
-## Aktueller echter Blocker für Device-Tests
+## Aktueller Stand für Device-Tests
 
-Die aktuell hinterlegten Convex-EAS-Umgebungswerte zeigen noch auf eine **lokale / anonyme Entwicklungsumgebung**.
+Die EAS-Umgebungswerte wurden jetzt auf ein **echtes Remote-Convex-Deployment** umgestellt:
 
-Das reicht zum erfolgreichen Publishen eines Updates, ist aber **nicht gut genug für echte Gerätetests außerhalb dieses Rechners**, weil lokale Host-URLs auf einem externen Gerät nicht erreichbar sind.
+- `CONVEX_DEPLOYMENT=dev/david-jebing`
+- `EXPO_PUBLIC_CONVEX_URL=https://blissful-spaniel-445.eu-west-1.convex.cloud`
+- `EXPO_PUBLIC_CONVEX_SITE_URL=https://blissful-spaniel-445.eu-west-1.convex.site`
 
-## Was noch nötig ist, damit Main-Pushes auf Geräten wirklich sinnvoll testbar sind
+Damit ist der **Client-/OTA-Pfad** jetzt korrekt auf Remote ausgerichtet und `eas update` konnte mit diesen EAS-Werten erneut erfolgreich veröffentlicht werden.
 
-1. **Remote Convex Deployment statt lokaler anonymer Dev-Instanz**
-   - aktuell fehlt ein angemeldeter Convex-Account / echtes Remote-Deployment
-   - `convex deployment create ...` schlägt in anonymous mode fehl
+## Was noch nötig ist, damit Auth und Gerätetests vollständig sauber sind
 
-2. **Dann EAS-Env-Werte auf die Remote-Convex-URLs umstellen**
-   - `CONVEX_DEPLOYMENT`
-   - `EXPO_PUBLIC_CONVEX_URL`
-   - `EXPO_PUBLIC_CONVEX_SITE_URL`
+1. **Convex-Server-Umgebung für Auth prüfen/setzen**
+   - `convex/auth.config.ts` verwendet `CONVEX_SITE_URL`
+   - `convex/auth.ts` verwendet für E-Mail-Magic-Links optional `SITE_URL`
+   - für echte Magic-Link-Mails wird zusätzlich `AUTH_RESEND_KEY` oder `RESEND_API_KEY` in Convex benötigt
 
-3. **Optional, aber empfohlen: ein Preview-/Development-Build für OTA-Tests**
-   - damit veröffentlichte EAS Updates wirklich wie gedacht auf dem Gerät testbar sind
+2. **Optional, aber empfohlen: ein Preview-/Development-Build für OTA-Tests**
+   - damit veröffentlichte EAS Updates wirklich wie gedacht im Dev Client auf dem Gerät testbar sind
 
 ## Kurzfazit
 
