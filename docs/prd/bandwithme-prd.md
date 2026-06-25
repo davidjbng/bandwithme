@@ -11,7 +11,7 @@ Bands organisieren Proben, Auftritte, Songideen und Rückmeldungen oft verteilt 
 Band With Me wird eine web-first Expo-App mit nativer Produktlogik, die zuerst für Davids eigene Band entwickelt wird, aber später auf weitere Bands erweitert werden kann. Die erste Version konzentriert sich auf vier Kernbereiche:
 
 1. **Terminplanung** für Proben und Auftritte
-2. **Teilnahme-Status** mit klarer Ja/Nein-Zusage
+2. **Teilnahme-Status** mit sichtbaren offenen, Ja- und Nein-Zuständen
 3. **Song Voting** für neue oder zu probende Songs
 4. **Profile & Mitgliedschaft** mit Magic-Link-Login, Instrumenten und spielerischen Avataren
 
@@ -69,9 +69,9 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 14. Als Bandmitglied möchte ich dieselben Informationen auf dem Smartphone verdichtet sehen, damit die App mobil schnell benutzbar bleibt.
 15. Als Bandmitglied möchte ich zwischen Light und Dark Mode eine gute Experience haben, damit die App unabhängig von Systempräferenz hochwertig wirkt.
 16. Als Bandmitglied möchte ich mich per Magic Link anmelden, damit ich kein zusätzliches Passwort verwalten muss.
-17. Als Admin möchte ich Mitglieder einladen können, damit nur echte Bandmitglieder Zugang erhalten.
+17. Als Admin möchte ich einen bandgebundenen Einladungslink teilen können, damit nur echte Bandmitglieder Zugang erhalten.
 18. Als Bandmitglied möchte ich mein Profil selbst bearbeiten können, damit Name, Instrumente und Darstellung aktuell bleiben.
-19. Als Bandmitglied möchte ich Instrumente in meinem Profil hinterlegen, damit bei Terminen klarer ist, wer welche Rolle abdeckt.
+19. Als Bandmitglied möchte ich mehrere Instrumente und ein Hauptinstrument in meinem Profil hinterlegen, damit bei Terminen klarer ist, wer welche Rolle abdeckt.
 20. Als Bandmitglied möchte ich einen sympathischen Avatar oder ein Bild haben, damit Zusagen persönlicher und schneller erfassbar sind.
 21. Als Bandmitglied möchte ich sehen, welche Songs aktuell zur Abstimmung stehen, damit ich weiß, woran die Band als Nächstes arbeiten könnte.
 22. Als Bandmitglied möchte ich für Songs stimmen können, damit die Band Prioritäten demokratisch setzen kann.
@@ -89,28 +89,33 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 34. Als Bandmitglied möchte ich, dass Hauptaktionen mit wenigen Taps erreichbar sind, damit die App sich leicht und schnell anfühlt.
 35. Als Bandmitglied möchte ich, dass visuelle Animationen subtil und unterstützend sind, damit die App lebendig wirkt ohne anstrengend zu werden.
 36. Als Admin möchte ich Proben und Auftritte als unterschiedliche Objekttypen mit gemeinsamem Planungsfundament anlegen können, damit die Datenstruktur einfach bleibt und die Darstellung trotzdem klar getrennt ist.
-37. Als Entwicklerteam möchten wir web-first entwickeln können, damit Iteration und Feinschliff im Browser schnell erfolgen.
-38. Als Entwicklerteam möchten wir die erste Version entlang weniger, klarer Domänenobjekte umsetzen, damit die Umsetzung schnell bleibt.
-39. Als Entwicklerteam möchten wir die App so schneiden, dass spätere Erweiterungen wie Bandkasse, Aufgaben oder Multi-Band-Support möglich bleiben.
-40. Als Bandmitglied möchte ich nicht mit unnötigen Feldern oder komplexen Workflows überladen werden, damit die App im Alltag tatsächlich benutzt wird.
+37. Als Bandmitglied möchte ich offene Zusagen als eigenen sichtbaren Zustand sehen, damit unbeantwortete Termine sofort erkennbar sind.
+38. Als Bandmitglied möchte ich über einen Einladungslink meiner Band beitreten können, damit der Zugang in Chats und Gruppen einfach verteilt werden kann.
+39. Als Admin möchte ich Profile anderer Mitglieder bei Bedarf korrigieren können, damit Banddaten konsistent bleiben.
+40. Als Bandmitglied möchte ich sehen, wenn ein aktueller oder zukünftiger Termin abgesagt oder geändert wurde, damit ich mich nicht auf veraltete Planung verlasse.
+41. Als Entwicklerteam möchten wir web-first entwickeln können, damit Iteration und Feinschliff im Browser schnell erfolgen.
+42. Als Entwicklerteam möchten wir die erste Version entlang weniger, klarer Domänenobjekte umsetzen, damit die Umsetzung schnell bleibt.
+43. Als Entwicklerteam möchten wir die App so schneiden, dass spätere Erweiterungen wie Bandkasse, Aufgaben oder Multi-Band-Support möglich bleiben.
+44. Als Bandmitglied möchte ich nicht mit unnötigen Feldern oder komplexen Workflows überladen werden, damit die App im Alltag tatsächlich benutzt wird.
 
 ## Scope Summary (V1)
 
 ### In Scope
 - Magic-Link-Login
 - Admin + Bandmitglied
-- Mitgliedereinladung durch Admin
-- Profilverwaltung mit Name, Instrument(en), Bild/Avatar
+- Mitgliedereinladung durch bandgebundenen Einladungslink
+- Profilverwaltung mit Name, Hauptinstrument, weiteren Instrumenten, Bild/Avatar
 - Terminliste
 - Einzeltermine für Proben und Auftritte
 - Serientermine für Proben
-- Ja/Nein-Zusagen
+- offene / Ja / Nein-Zusagen
 - Übersicht der Zusagen pro Termin
 - Song Voting mit manuell angelegten Songs
 - Song-Links (z. B. Spotify, YouTube)
 - aktiver Repertoire-/Probe-Kontext für Songs
 - Setlist-Auswahl für Auftritte
 - Reihenfolge in Setlists
+- abgesagt / geändert markierte aktuelle und zukünftige Termine
 - ICS-/Kalender-Export
 - responsive Web-UX für Mobile / Tablet / Desktop
 - Light & Dark Mode
@@ -183,7 +188,8 @@ Unterteilt in:
 ### User Profile
 - Name
 - Bild/Avatar
-- Instrumente
+- Hauptinstrument
+- weitere Instrumente
 - optionale spätere Präferenzen
 
 ### Event Series
@@ -199,7 +205,7 @@ Unterteilt in:
 
 ### RSVP
 - Beziehung zwischen Mitglied und Event Instance
-- Status: `yes` oder `no`
+- Status: `open`, `yes` oder `no`
 
 ### Song
 - Titel
@@ -218,6 +224,7 @@ Unterteilt in:
 ### Performance Setlist
 - ausgewählte Songs für einen Auftritt
 - geordnete Reihenfolge
+- existiert immer im Kontext genau eines Auftritts
 
 ## Implementation Decisions
 
@@ -226,8 +233,14 @@ Unterteilt in:
 - Wiederkehrende Proben sollten über ein erstklassiges Serienkonzept modelliert werden, statt nur kopierte Einzeltermine zu erzeugen.
 - Eine Probenserie bleibt nach Erstellung ein eigenständiges Objekt, damit Änderungen an zukünftigen Terminen zentral gesteuert werden können.
 - Der Kalenderexport sollte pro konkretem Termin verfügbar sein; Serienexport ist wünschenswert, kann aber technisch schrittweise ausgebaut werden.
+- Der Beitritt zur Band sollte über einen bandgebundenen Einladungslink in Chat- und Gruppen-Kontexten funktionieren.
 - Voting, aktiver Probefokus und Auftritts-Setlists sollen **inhaltlich verbunden**, aber als separate UI-Zustände modelliert werden.
 - Song-Kandidaten benötigen in V1 kein komplexes Taxonomie-System; ihr Status ergibt sich aus Kontexten wie Voting, aktives Proben, Setlist.
+- Alle Bandmitglieder dürfen Songs anlegen; Song-Erstellung ist kein exklusives Admin-Recht.
+- Setlists existieren in V1 nicht frei schwebend, sondern immer als Teil genau eines Auftritts.
+- Zusagen sind im UI dreistufig sichtbar: offen, zugesagt, abgesagt.
+- Profile unterstützen ein Hauptinstrument plus weitere Instrumente; Admins dürfen bei Bedarf auch fremde Profile korrigieren.
+- Aktuelle und zukünftige Termine sollen statt Löschung als abgesagt oder geändert markiert dargestellt werden können.
 - Zugangsmodell in V1: nur eingeladene Mitglieder mit Magic-Link-Login.
 - Die bestehende Profilfläche sollte von einem Dev-Profil zu einer echten Mitglieds-/Bandprofil-Ansicht weiterentwickelt werden.
 - Die bestehende Terminfläche ist ein sinnvoller Startpunkt für den Rehearsal/Performance-Bereich und sollte nicht komplett neu erfunden werden.
@@ -240,7 +253,7 @@ Unterteilt in:
 
 ### Phase 1 — Foundation
 - Rollenmodell (`admin`, `member`)
-- Einladungsfluss
+- Einladungslink-Fluss
 - echtes Mitgliedsprofil
 - Basis-Navigation und Home-Cockpit-Rahmen
 
@@ -248,8 +261,9 @@ Unterteilt in:
 - Event-Datenmodell
 - Einzeltermine
 - Probenserien
-- RSVP Ja/Nein
+- RSVP offen/Ja/Nein
 - Terminliste und Detailansicht
+- Status für abgesagt/geändert
 - ICS-Export
 
 ### Phase 3 — Songs
@@ -284,6 +298,7 @@ Unterteilt in:
 - Responsive Tests sollten mindestens Mobile- und Desktop-Layouts für die wichtigsten Oberflächen prüfen.
 - Kalenderexport sollte auf korrekt erzeugte Dateien/Links getestet werden.
 - Profiltests sollten Rollen- und Bearbeitungsrechte absichern.
+- Tests sollten offene Zusagen, abgesagte/geänderte Termine und auftrittsgebundene Setlists explizit abdecken.
 - Falls bereits ähnliche Tests existieren, sollten neue Tests dieselbe Testtiefe und denselben Stil übernehmen, statt neue Testmuster einzuführen.
 - Empfehlenswerte Test-Schwerpunkte pro Modul:
   - **Domain/Backend:** Event-, RSVP-, Vote-, Setlist-Logik
@@ -294,7 +309,7 @@ Unterteilt in:
 
 - Eine Band kann sich einladen und einloggen.
 - Proben und Auftritte können zuverlässig angelegt und angezeigt werden.
-- Mitglieder können pro Termin schnell mit Ja/Nein reagieren.
+- Mitglieder können pro Termin schnell mit offen/Ja/Nein umgehen und unbeantwortete Zusagen klar erkennen.
 - Der aktuelle Planungsstand ist ohne Chat-Nachfragen erkennbar.
 - Songs können gesammelt, gevotet und für Proben/Auftritte weiterverwendet werden.
 - Die App fühlt sich im Browser bereits hochwertig genug an, dass sie gern benutzt wird.

@@ -1,0 +1,3 @@
+# Setlists gehören immer zu einem Auftritt
+
+Band With Me behandelt Setlists in V1 nicht als freie, losgelöste Entwürfe, sondern immer als Teil genau eines Auftritts. Das ist überraschend genug, schwer später rückwirkend sauber umzubauen und Ergebnis eines echten Trade-offs: freie Setlist-Entwürfe wären flexibler, würden aber das Modell früher als nötig von der konkreten Auftrittsplanung entkoppeln.

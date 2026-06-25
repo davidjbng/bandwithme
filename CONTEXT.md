@@ -37,8 +37,12 @@ Der Oberbegriff für eine konkrete Probe oder einen konkreten Auftritt.
 _Avoid_: Slot, Kalenderobjekt
 
 **Zusage**:
-Die Ja/Nein-Rückmeldung eines Bandmitglieds zu einem konkreten Termin.
+Die Rückmeldung eines Bandmitglieds zu einem konkreten Termin mit einem sichtbaren Status wie offen, zugesagt oder abgesagt.
 _Avoid_: RSVP, Antwort, Attendance
+
+**Offene Zusage**:
+Der sichtbare Standardzustand einer noch nicht beantworteten Zusage.
+_Avoid_: Unbekannt, pending, maybe
 
 **Song**:
 Ein musikalisches Stück, das von der Band gesammelt, bewertet, geprobt oder aufgeführt werden kann.
@@ -48,6 +52,10 @@ _Avoid_: Track, Nummer, Content
 Der Bereich, in dem Bandmitglieder Songs priorisieren, indem sie Stimmen abgeben.
 _Avoid_: Ranking, Poll, Songwahl
 
+**Einladungslink**:
+Ein bandgebundener Beitrittslink, über den neue Bandmitglieder in die App kommen und der Band beitreten können.
+_Avoid_: Invite code, Registration link, Magic link
+
 **Probefokus**:
 Die kleine Menge von Songs, auf die sich die Band aktuell in den nächsten Proben konzentriert.
 _Avoid_: Queue, Backlog, Active List
@@ -55,3 +63,7 @@ _Avoid_: Queue, Backlog, Active List
 **Setlist**:
 Die geordnete Auswahl von Songs für einen konkreten Auftritt.
 _Avoid_: Playlist, Songliste, Running Order
+
+**Hauptinstrument**:
+Das primäre Instrument eines Bandmitglieds, auch wenn zusätzlich weitere Instrumente gepflegt werden.
+_Avoid_: Primary role, Main skill
