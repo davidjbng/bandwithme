@@ -52,10 +52,6 @@ _Avoid_: Track, Nummer, Content
 Der Bereich, in dem Bandmitglieder Songs priorisieren, indem sie Stimmen abgeben.
 _Avoid_: Ranking, Poll, Songwahl
 
-**Archivierter Song**:
-Ein Song, der nicht mehr im Song-Voting auftaucht, aber als bestehende Referenz in der Bandhistorie und in Setlists erhalten bleibt.
-_Avoid_: Gelöschter Song, entfernter Song
-
 **Einladungslink**:
 Ein bandgebundener Beitrittslink, über den neue Bandmitglieder in die App kommen und der Band beitreten können.
 _Avoid_: Invite code, Registration link, Magic link
@@ -73,7 +69,7 @@ Das bewusste, bestätigungspflichtige Entfernen einer gesamten Band durch einen 
 _Avoid_: Reset, deactivate band
 
 **Bandmitglied entfernen**:
-Die Admin-Aktion, mit der ein anderes Mitglied aus einer Band entfernt wird.
+Die Admin-Aktion, mit der ein anderes Mitglied aus einer Band entfernt wird; andere Admins dürfen entfernt werden, solange mindestens ein Admin verbleibt.
 _Avoid_: Kick, ban, unsubscribe
 
 **Setlist**:

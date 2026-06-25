@@ -4,10 +4,10 @@ Diese Datei sammelt die aktuell noch offenen Schärfungsfragen aus der zweiten G
 
 ## Offene Fragen
 
-1. Sollen **bestehende Zusagen `yes`/`no`** bei einer Terminänderung ebenfalls unverändert bestehen bleiben oder speziell markiert werden?
-2. Sollen Bandmitglieder bei einer Terminänderung zusätzlich **sichtbar benachrichtigt** werden, oder reicht die Änderung in der Liste/Detailansicht?
-3. Dürfen Admins auch **andere Admins** aus der Band entfernen, oder braucht es dafür eine Einschränkung?
-4. Wenn ein Nutzer mehrere Bands im Datenmodell hat, welche Band ist nach erneutem Einstieg die **aktive Standard-Band**?
+1. Soll die App **nicht-blockierende In-App-Hinweise** für Änderungen später vorbereiten, obwohl V1 noch keine Benachrichtigungen hat?
+2. Braucht ein **Bandbeitritt per Link** in V1 noch eine Zwischenseite zur Bestätigung, bevor man wirklich Mitglied wird?
+3. Soll es für **archivierte Songs** zusätzlich einen sichtbaren Archiv-Bereich geben oder reicht es, sie einfach aus dem Voting zu entfernen?
+4. Sollen **Titel für Proben** später genauso unterstützt werden wie für Auftritte, oder bleiben sie vorerst optional/unwichtig?
 
 ## Bereits entschiedene Punkte
 
@@ -35,13 +35,16 @@ Diese Datei sammelt die aktuell noch offenen Schärfungsfragen aus der zweiten G
 - **Wenn ein Song in eine Setlist übernommen wird, verschwindet er aus dem Song-Voting durch Archivierung.**
 - **Bandmitglieder dürfen eine Band jederzeit selbst verlassen.**
 - **Admins dürfen andere Bandmitglieder aus der Band entfernen.** Mitglieder ohne Admin-Rolle können nur sich selbst entfernen.
+- **Admins dürfen auch andere Admins entfernen, solange mindestens ein Admin übrig bleibt.**
 - **Nur Admins dürfen eine Band löschen, und zwar bestätigt als bewusste Destruktiv-Aktion.** Zur Bestätigung muss der Bandname eingegeben werden.
 - **Auftritte unterstützen einen Titel.** Er soll prominent angezeigt werden; für V1 behandeln wir ihn als optionales, aber wichtiges Feld.
 - **Geänderte Termine zeigen einen Status-Badge plus kurze Änderungsnotiz, aber keine Historie.**
 - **Archivierte Songs können jederzeit wieder ins Voting zurückgeholt werden.**
 - **Die Standard-Terminliste ist chronologisch und visuell klar zwischen Probe und Auftritt unterscheidbar.**
 - **Terminänderungen verändern bestehende Zusagen nicht automatisch.** Offene, zugesagte und abgesagte Zustände bleiben bestehen.
+- **Bei Terminänderungen reicht in V1 die Sichtbarkeit in der App-UI.** Es gibt keine zusätzlichen Benachrichtigungen oder Pushs.
+- **Wenn ein Nutzer mehrere Bands im Datenmodell hat, wird die zuletzt aktive Band als Standard-Band verwendet.**
 
 ## Aktuelle Empfehlung
 
-Als Nächstes sollten **Benachrichtigungsverhalten bei Terminänderungen**, **Admin-zu-Admin-Grenzen**, **aktive Standard-Band** und der **Umgang mit bestehenden Zusagen nach Änderungen** final geschärft werden. Diese Regeln betreffen die Alltagssicherheit der V1 stärker als zusätzliche große Feature-Bausteine.
+Das PRD ist jetzt für den MVP ausreichend geschärft. Die verbleibenden Fragen betreffen Feinschliff und spätere UX-Entscheidungen, nicht mehr die Grundstruktur des Produkts.

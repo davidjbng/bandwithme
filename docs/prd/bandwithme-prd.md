@@ -101,10 +101,11 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 45. Als Admin möchte ich eine Band nur nach expliziter Bestätigung durch Eingabe des Bandnamens löschen können, damit diese destruktive Aktion nicht versehentlich passiert.
 46. Als Bandmitglied möchte ich bei einem geänderten Termin kurz sehen, was sich geändert hat, damit ich den Unterschied ohne Historie verstehe.
 47. Als Bandmitglied möchte ich archivierte Songs wieder ins Voting zurückholen können, damit frühere Ideen später erneut priorisiert werden können.
-48. Als Entwicklerteam möchten wir web-first entwickeln können, damit Iteration und Feinschliff im Browser schnell erfolgen.
-49. Als Entwicklerteam möchten wir die erste Version entlang weniger, klarer Domänenobjekte umsetzen, damit die Umsetzung schnell bleibt.
-50. Als Entwicklerteam möchten wir die App so schneiden, dass spätere Erweiterungen wie Bandkasse, Aufgaben oder Multi-Band-Support möglich bleiben.
-51. Als Bandmitglied möchte ich nicht mit unnötigen Feldern oder komplexen Workflows überladen werden, damit die App im Alltag tatsächlich benutzt wird.
+48. Als Nutzer mit mehreren Bands im Datenmodell möchte ich beim erneuten Einstieg automatisch in meiner zuletzt aktiven Band landen, damit ich ohne Wechsel-UI direkt weiterarbeiten kann.
+49. Als Entwicklerteam möchten wir web-first entwickeln können, damit Iteration und Feinschliff im Browser schnell erfolgen.
+50. Als Entwicklerteam möchten wir die erste Version entlang weniger, klarer Domänenobjekte umsetzen, damit die Umsetzung schnell bleibt.
+51. Als Entwicklerteam möchten wir die App so schneiden, dass spätere Erweiterungen wie Bandkasse, Aufgaben oder Multi-Band-Support möglich bleiben.
+52. Als Bandmitglied möchte ich nicht mit unnötigen Feldern oder komplexen Workflows überladen werden, damit die App im Alltag tatsächlich benutzt wird.
 
 ## Scope Summary (V1)
 
@@ -248,6 +249,7 @@ Unterteilt in:
 - Neue Nutzer sollen in V1 explizit zwischen „Band erstellen“ und „Band beitreten“ wählen können; der Ersteller der Band wird automatisch Admin.
 - Bandmitglieder dürfen ihre eigene Mitgliedschaft selbst beenden; das Löschen einer ganzen Band bleibt eine bestätigungspflichtige Admin-Aktion.
 - Das Löschen einer Band verlangt in V1 einen Bestätigungsdialog mit Eingabe des Bandnamens.
+- Andere Admins dürfen entfernt werden, solange mindestens ein Admin in der Band verbleibt.
 - Song-Kandidaten benötigen in V1 kein komplexes Taxonomie-System; ihr Status ergibt sich aus Kontexten wie Voting und Setlist.
 - Alle Bandmitglieder dürfen Songs anlegen; Song-Erstellung ist kein exklusives Admin-Recht.
 - Ein Song besitzt in V1 genau einen Referenzlink; Spotify- und YouTube-Links erhalten bevorzugte Erkennung, andere Links bleiben trotzdem gültig.
@@ -258,10 +260,12 @@ Unterteilt in:
 - Aktuelle und zukünftige Termine sind von allen Bandmitgliedern bearbeitbar und können als abgesagt oder geändert markiert werden.
 - Geänderte Termine zeigen eine kurze Änderungsnotiz statt einer vollständigen Änderungshistorie.
 - Terminänderungen verändern bestehende Zusagen nicht automatisch.
+- Bei Terminänderungen reicht in V1 die Sichtbarkeit in der App; es gibt keine zusätzlichen Benachrichtigungen oder Pushs.
 - Vergangene Termine verschwinden aus der Standard-UI, statt prominent historisiert zu werden.
 - Profile unterstützen ein Hauptinstrument plus weitere Instrumente; Admins dürfen bei Bedarf auch fremde Profile korrigieren.
 - Zugangsmodell in V1: nur eingeladene Mitglieder mit Magic-Link-Login.
 - Das Datenmodell darf mehrere Bands pro Nutzer zulassen, auch wenn die V1-UI dieses Konzept noch nicht hervorhebt.
+- Wenn mehrere Bands im Datenmodell existieren, wird die zuletzt aktive Band als Standard-Band verwendet.
 - Die bestehende Profilfläche sollte von einem Dev-Profil zu einer echten Mitglieds-/Bandprofil-Ansicht weiterentwickelt werden.
 - Die bestehende Terminfläche ist ein sinnvoller Startpunkt für den Rehearsal/Performance-Bereich und sollte nicht komplett neu erfunden werden.
 - Das erste starke UX-Seam ist ein **Band-Cockpit**, das mehrere Domänen zusammenfasst, ohne die tieferen Bereiche zu ersetzen.
@@ -326,6 +330,7 @@ Unterteilt in:
 - Song-Tests sollten Archivierungsregeln und das Entfernen aus dem Voting nach Setlist-Übernahme absichern.
 - Mitgliedschafts-Tests sollten Selbst-Austritt und Band-Löschung mit Bestätigung absichern.
 - Termin-Tests sollten absichern, dass Änderungen bestehende Zusagen nicht automatisch verändern.
+- Mitgliedschafts-Tests sollten absichern, dass beim Entfernen von Admins mindestens ein Admin verbleibt.
 - Falls bereits ähnliche Tests existieren, sollten neue Tests dieselbe Testtiefe und denselben Stil übernehmen, statt neue Testmuster einzuführen.
 - Empfehlenswerte Test-Schwerpunkte pro Modul:
   - **Domain/Backend:** Event-, RSVP-, Vote-, Setlist-Logik
