@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Band With Me — Playful Stage</title>
+  <style>
+    :root { --bg:#120f12; --surface:#1f1a20; --surface-2:#2b242c; --text:#fff7ef; --muted:#d4c7bf; --accent:#f4c430; --accent-2:#c9ff3b; --accent-3:#e58db2; --warm:#7a4b2a; --border:rgba(255,255,255,.08); }
+    :root[data-theme="light"] { --bg:#faf5ef; --surface:#ffffff; --surface-2:#f0e7dc; --text:#1e1714; --muted:#75695f; --accent:#f0b400; --accent-2:#b4ee2f; --accent-3:#d979a2; --warm:#8b5835; --border:rgba(0,0,0,.08); }
+    * { box-sizing:border-box; } body { margin:0; font-family: Inter, system-ui, sans-serif; background: radial-gradient(circle at top left, rgba(229,141,178,.28), transparent 28%), radial-gradient(circle at top right, rgba(201,255,59,.18), transparent 20%), var(--bg); color:var(--text); }
+    button { font:inherit; }
+    .page { max-width:1280px; margin:0 auto; padding:20px; display:grid; gap:20px; }
+    .hero { display:grid; grid-template-columns: 1.2fr .8fr; gap:20px; }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)), var(--surface); border:1px solid var(--border); border-radius:28px; padding:22px; box-shadow: 0 28px 60px rgba(0,0,0,.22); }
+    .hero-title { font-size: clamp(34px, 5vw, 64px); line-height:.95; margin:10px 0 14px; max-width: 9ch; }
+    .eyebrow { font-size:12px; text-transform:uppercase; letter-spacing:.14em; color:var(--muted); }
+    .lead { color:var(--muted); max-width: 54ch; line-height:1.55; }
+    .topline { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+    .buttons { display:flex; flex-wrap:wrap; gap:12px; margin-top:18px; }
+    .primary, .ghost { min-height:46px; border-radius:16px; padding:0 18px; cursor:pointer; }
+    .primary { border:0; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#181818; font-weight:800; }
+    .ghost { border:1px solid var(--border); background:transparent; color:var(--text); }
+    .segmented { display:inline-flex; gap:6px; padding:6px; border-radius:999px; background:var(--surface-2); }
+    .segmented button { border:0; background:transparent; color:var(--muted); border-radius:999px; padding:10px 14px; min-height:42px; cursor:pointer; }
+    .segmented button[aria-pressed="true"] { background:rgba(255,255,255,.12); color:var(--text); }
+    :root[data-theme="light"] .segmented button[aria-pressed="true"] { background:#fff; }
+    .status-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+    .status { padding:10px 12px; border-radius:999px; background:var(--surface-2); font-size:14px; }
+    .mini-grid { display:grid; gap:14px; }
+    .showcase { display:grid; grid-template-columns: repeat(3, 1fr); gap:20px; }
+    .tile { display:grid; gap:10px; padding:18px; border-radius:22px; background:var(--surface-2); min-height: 180px; }
+    .avatars { display:flex; gap:8px; flex-wrap:wrap; }
+    .avatar { width:40px; height:40px; border-radius:14px; display:grid; place-items:center; background:linear-gradient(135deg, var(--accent-3), var(--accent)); color:#181818; font-weight:800; }
+    .song-row { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:12px 14px; border-radius:16px; background:rgba(255,255,255,.04); }
+    :root[data-theme="light"] .song-row { background:rgba(0,0,0,.04); }
+    .spark { height:10px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; }
+    :root[data-theme="light"] .spark { background:rgba(0,0,0,.08); }
+    .spark span { display:block; height:100%; background:linear-gradient(90deg, var(--accent-3), var(--accent), var(--accent-2)); border-radius:999px; }
+    [hidden] { display:none !important; }
+    @media (max-width: 980px) { .hero, .showcase { grid-template-columns:1fr; } .hero-title { max-width: unset; } }
+    @media (max-width: 640px) { .page { padding:16px; } .card { padding:18px; border-radius:24px; } .buttons > * { width:100%; } .segmented { width:100%; justify-content:space-between; } }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <article class="card">
+        <div class="topline">
+          <div>
+            <div class="eyebrow">Band With Me</div>
+            <div class="hero-title">Planung mit Bühnengefühl.</div>
+          </div>
+          <div class="segmented">
+            <button data-theme-button="light">Hell</button>
+            <button data-theme-button="dark">Dunkel</button>
+          </div>
+        </div>
+        <p class="lead">Diese Richtung gibt der App mehr Charakter: weniger Tool-Vibe, mehr Produktidentität. Gut geeignet, wenn Band With Me sich später deutlich von klassischer Vereinssoftware absetzen soll.</p>
+        <div class="buttons">
+          <button class="primary">Nächste Probe zusagen</button>
+          <button class="ghost" data-panel-target="events">Termine</button>
+          <button class="ghost" data-panel-target="songs">Songs</button>
+        </div>
+        <div class="status-row">
+          <span class="status">Mittwoch · Probe · 5/6 Zusagen</span>
+          <span class="status">Sommerfest · Setlist in Arbeit</span>
+          <span class="status">Voting lebt · 3 heiße Kandidaten</span>
+        </div>
+      </article>
+      <aside class="card">
+        <div class="eyebrow">Momentaufnahme</div>
+        <h2 style="margin:10px 0 12px;">Heute relevant</h2>
+        <div class="mini-grid">
+          <div class="song-row"><strong>Nächste Probe</strong><span>19:30</span></div>
+          <div class="song-row"><strong>Nächster Auftritt</strong><span>17. Aug</span></div>
+          <div class="song-row"><strong>Top-Vote</strong><span>Reptilia</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="showcase" data-panel="events">
+      <article class="card tile">
+        <div class="eyebrow">Probe</div>
+        <strong style="font-size:22px;">Wöchentliche Session</strong>
+        <div style="color:var(--muted);">Jugendhaus · Mittwoch 19:30 · wiederholt sich wöchentlich</div>
+        <div class="avatars"><div class="avatar">DV</div><div class="avatar">PK</div><div class="avatar">LM</div><div class="avatar">TS</div><div class="avatar">MA</div><div class="avatar" style="opacity:.5;">BE</div></div>
+      </article>
+      <article class="card tile">
+        <div class="eyebrow">Auftritt</div>
+        <strong style="font-size:22px;">Sommerfest Nordpark</strong>
+        <div style="color:var(--muted);">Dresscode dunkel/gelb · Bühne rechts · 8 Songs geplant</div>
+        <div class="song-row"><span>Setlist-Fortschritt</span><strong>8 / 10 fix</strong></div>
+        <div class="spark"><span style="width:80%"></span></div>
+      </article>
+      <article class="card tile">
+        <div class="eyebrow">Probefokus</div>
+        <strong style="font-size:22px;">Songs mit Momentum</strong>
+        <div class="mini-grid">
+          <div class="song-row"><span>Mr. Brightside</span><strong>Slot 1</strong></div>
+          <div class="song-row"><span>Take Me Out</span><strong>Slot 2</strong></div>
+          <div class="song-row"><span>Reptilia</span><strong>neu</strong></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="showcase" data-panel="songs" hidden>
+      <article class="card tile"><div class="eyebrow">Voting</div><strong style="font-size:22px;">Reptilia</strong><div style="color:var(--muted);">9 Stimmen · hohe Energie für den nächsten Gig</div><div class="spark"><span style="width:86%"></span></div></article>
+      <article class="card tile"><div class="eyebrow">Voting</div><strong style="font-size:22px;">Do I Wanna Know?</strong><div style="color:var(--muted);">7 Stimmen · könnte später in die Setlist</div><div class="spark"><span style="width:70%"></span></div></article>
+      <article class="card tile"><div class="eyebrow">Aktion</div><strong style="font-size:22px;">Für Probe übernehmen</strong><div style="color:var(--muted);">Top-Songs direkt in den aktiven Probenkontext ziehen.</div><button class="primary" style="margin-top:auto;">Fokus aktualisieren</button></article>
+    </section>
+  </main>
+
+<script>
+  const root = document.documentElement;
+  const storedTheme = localStorage.getItem('bwm-theme') || 'dark';
+  root.dataset.theme = storedTheme;
+
+  function setTheme(next) {
+    root.dataset.theme = next;
+    localStorage.setItem('bwm-theme', next);
+    document.querySelectorAll('[data-theme-button]').forEach((btn) => {
+      btn.setAttribute('aria-pressed', String(btn.dataset.themeButton === next));
+    });
+  }
+
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-theme-button]');
+    if (button) setTheme(button.dataset.themeButton);
+
+    const filter = event.target.closest('[data-filter]');
+    if (filter) {
+      const mode = filter.dataset.filter;
+      document.querySelectorAll('[data-filter]').forEach((node) => {
+        node.setAttribute('aria-pressed', String(node === filter));
+      });
+      document.querySelectorAll('[data-event-type]').forEach((card) => {
+        card.hidden = mode !== 'all' && card.dataset.eventType !== mode;
+      });
+    }
+
+    const section = event.target.closest('[data-panel-target]');
+    if (section) {
+      const target = section.dataset.panelTarget;
+      document.querySelectorAll('[data-panel]').forEach((panel) => {
+        panel.hidden = panel.dataset.panel !== target;
+      });
+      document.querySelectorAll('[data-panel-target]').forEach((node) => {
+        node.setAttribute('aria-pressed', String(node === section));
+      });
+    }
+  });
+
+  setTheme(storedTheme);
+</script>
+
+</body>
+</html>
