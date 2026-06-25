@@ -17,7 +17,7 @@ Eine Person mit Zugriff auf die Band-App, die an Planung, Zusagen oder Songs tei
 _Avoid_: User, Teilnehmer, Gast
 
 **Admin**:
-Ein Bandmitglied mit erweiterten Rechten zum Einladen und Verwalten planungsrelevanter Daten.
+Ein Bandmitglied mit erweiterten Rechten für Bandverwaltung, Einladungen und übergeordnete Mitgliedspflege.
 _Avoid_: Owner, Superuser
 
 **Probe**:
@@ -56,10 +56,6 @@ _Avoid_: Ranking, Poll, Songwahl
 Ein bandgebundener Beitrittslink, über den neue Bandmitglieder in die App kommen und der Band beitreten können.
 _Avoid_: Invite code, Registration link, Magic link
 
-**Probefokus**:
-Die kleine Menge von Songs, auf die sich die Band aktuell in den nächsten Proben konzentriert.
-_Avoid_: Queue, Backlog, Active List
-
 **Setlist**:
 Die geordnete Auswahl von Songs für einen konkreten Auftritt.
 _Avoid_: Playlist, Songliste, Running Order
@@ -67,3 +63,7 @@ _Avoid_: Playlist, Songliste, Running Order
 **Hauptinstrument**:
 Das primäre Instrument eines Bandmitglieds, auch wenn zusätzlich weitere Instrumente gepflegt werden.
 _Avoid_: Primary role, Main skill
+
+**Kalender hinzufügen**:
+Die Betriebssystem-Aktion, mit der ein einzelner Termin mit vorausgefüllten Daten an die persönliche Kalender-App übergeben wird.
+_Avoid_: ICS-Export, Serienexport, Sync
