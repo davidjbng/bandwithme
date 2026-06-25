@@ -6,8 +6,8 @@ Diese Datei sammelt die aktuell noch offenen Schärfungsfragen aus der zweiten G
 
 1. Wie wird die **erste Band** in V1 angelegt: automatisch beim ersten Admin-Onboarding oder über einen expliziten „Band erstellen“-Schritt?
 2. Wie sichtbar soll **Mehrfach-Band-Mitgliedschaft** in der V1-UI sein, wenn das Modell sie technisch schon erlaubt?
-3. Sollen **vergangene Termine** sofort verschwinden oder noch kurz über einen versteckten Verlauf/Filter erreichbar sein?
-4. Wie sollen **Auftritts-Detailinfos nach der Erstellung** ergänzt werden: inline auf der Detailseite oder in einem separaten Bearbeiten-Flow?
+3. Wie sollen **Auftritts-Detailinfos nach der Erstellung** ergänzt werden: inline auf der Detailseite oder in einem separaten Bearbeiten-Flow?
+4. Sollen **Songs gelöscht werden dürfen**, auch wenn sie schon in einer Setlist verwendet wurden, oder nur aus zukünftigen Setlists entfernt werden?
 
 ## Bereits entschiedene Punkte
 
