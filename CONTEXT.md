@@ -72,6 +72,10 @@ _Avoid_: Remove member, unsubscribe
 Das bewusste, bestätigungspflichtige Entfernen einer gesamten Band durch einen Admin.
 _Avoid_: Reset, deactivate band
 
+**Bandmitglied entfernen**:
+Die Admin-Aktion, mit der ein anderes Mitglied aus einer Band entfernt wird.
+_Avoid_: Kick, ban, unsubscribe
+
 **Setlist**:
 Die geordnete Auswahl von Songs für einen konkreten Auftritt.
 _Avoid_: Playlist, Songliste, Running Order
@@ -85,7 +89,7 @@ Die Betriebssystem-Aktion, mit der ein einzelner Termin mit vorausgefüllten Dat
 _Avoid_: ICS-Export, Serienexport, Sync
 
 **Terminänderung**:
-Die markierte Anpassung eines bestehenden aktuellen oder zukünftigen Termins, sichtbar über Status und kurze Notiz statt über eine vollständige Historie.
+Die markierte Anpassung eines bestehenden aktuellen oder zukünftigen Termins, sichtbar über Status und kurze Notiz statt über eine vollständige Historie, ohne bestehende Zusagen automatisch zu verändern.
 _Avoid_: Audit log, version history
 
 **Archivierter Song**:

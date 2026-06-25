@@ -97,13 +97,14 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 41. Als Bandmitglied möchte ich, dass vergangene Termine aus der Standardansicht verschwinden, damit die Planungsliste sauber bleibt.
 42. Als Bandmitglied möchte ich, dass ein Song nach Übernahme in eine Setlist aus dem Voting verschwindet, damit das Voting nur neue oder offene Kandidaten zeigt.
 43. Als Bandmitglied möchte ich eine Band selbst verlassen können, damit ich meine Zugehörigkeit eigenständig verwalten kann.
-44. Als Admin möchte ich eine Band nur nach expliziter Bestätigung löschen können, damit diese destruktive Aktion nicht versehentlich passiert.
-45. Als Bandmitglied möchte ich bei einem geänderten Termin kurz sehen, was sich geändert hat, damit ich den Unterschied ohne Historie verstehe.
-46. Als Bandmitglied möchte ich archivierte Songs wieder ins Voting zurückholen können, damit frühere Ideen später erneut priorisiert werden können.
-47. Als Entwicklerteam möchten wir web-first entwickeln können, damit Iteration und Feinschliff im Browser schnell erfolgen.
-48. Als Entwicklerteam möchten wir die erste Version entlang weniger, klarer Domänenobjekte umsetzen, damit die Umsetzung schnell bleibt.
-49. Als Entwicklerteam möchten wir die App so schneiden, dass spätere Erweiterungen wie Bandkasse, Aufgaben oder Multi-Band-Support möglich bleiben.
-50. Als Bandmitglied möchte ich nicht mit unnötigen Feldern oder komplexen Workflows überladen werden, damit die App im Alltag tatsächlich benutzt wird.
+44. Als Admin möchte ich andere Bandmitglieder aus der Band entfernen können, damit die Mitgliederliste korrekt bleibt.
+45. Als Admin möchte ich eine Band nur nach expliziter Bestätigung durch Eingabe des Bandnamens löschen können, damit diese destruktive Aktion nicht versehentlich passiert.
+46. Als Bandmitglied möchte ich bei einem geänderten Termin kurz sehen, was sich geändert hat, damit ich den Unterschied ohne Historie verstehe.
+47. Als Bandmitglied möchte ich archivierte Songs wieder ins Voting zurückholen können, damit frühere Ideen später erneut priorisiert werden können.
+48. Als Entwicklerteam möchten wir web-first entwickeln können, damit Iteration und Feinschliff im Browser schnell erfolgen.
+49. Als Entwicklerteam möchten wir die erste Version entlang weniger, klarer Domänenobjekte umsetzen, damit die Umsetzung schnell bleibt.
+50. Als Entwicklerteam möchten wir die App so schneiden, dass spätere Erweiterungen wie Bandkasse, Aufgaben oder Multi-Band-Support möglich bleiben.
+51. Als Bandmitglied möchte ich nicht mit unnötigen Feldern oder komplexen Workflows überladen werden, damit die App im Alltag tatsächlich benutzt wird.
 
 ## Scope Summary (V1)
 
@@ -114,7 +115,8 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 - Mitgliedereinladung durch bandgebundenen Einladungslink
 - Profilverwaltung mit Name, Hauptinstrument, weiteren Instrumenten, Bild/Avatar
 - Band selbst verlassen
-- Band löschen durch Admin mit Bestätigung
+- Bandmitglieder durch Admin entfernbar
+- Band löschen durch Admin mit Bestätigung und Bandnamen-Eingabe
 - Terminliste
 - Einzeltermine für Proben und Auftritte
 - Serientermine für Proben
@@ -195,6 +197,7 @@ Unterteilt in:
 - enthält Rolle (`admin`, `member`)
 - dient später als Basis für Einladungen und Rechte
 - erlaubt selbstständigen Austritt eines Bandmitglieds
+- erlaubt Admins das Entfernen anderer Bandmitglieder
 
 ### User Profile
 - Name
@@ -244,6 +247,7 @@ Unterteilt in:
 - Der Beitritt zur Band sollte über einen bandgebundenen Einladungslink in Chat- und Gruppen-Kontexten funktionieren.
 - Neue Nutzer sollen in V1 explizit zwischen „Band erstellen“ und „Band beitreten“ wählen können; der Ersteller der Band wird automatisch Admin.
 - Bandmitglieder dürfen ihre eigene Mitgliedschaft selbst beenden; das Löschen einer ganzen Band bleibt eine bestätigungspflichtige Admin-Aktion.
+- Das Löschen einer Band verlangt in V1 einen Bestätigungsdialog mit Eingabe des Bandnamens.
 - Song-Kandidaten benötigen in V1 kein komplexes Taxonomie-System; ihr Status ergibt sich aus Kontexten wie Voting und Setlist.
 - Alle Bandmitglieder dürfen Songs anlegen; Song-Erstellung ist kein exklusives Admin-Recht.
 - Ein Song besitzt in V1 genau einen Referenzlink; Spotify- und YouTube-Links erhalten bevorzugte Erkennung, andere Links bleiben trotzdem gültig.
@@ -253,6 +257,7 @@ Unterteilt in:
 - Zusagen sind im UI dreistufig sichtbar: offen, zugesagt, abgesagt.
 - Aktuelle und zukünftige Termine sind von allen Bandmitgliedern bearbeitbar und können als abgesagt oder geändert markiert werden.
 - Geänderte Termine zeigen eine kurze Änderungsnotiz statt einer vollständigen Änderungshistorie.
+- Terminänderungen verändern bestehende Zusagen nicht automatisch.
 - Vergangene Termine verschwinden aus der Standard-UI, statt prominent historisiert zu werden.
 - Profile unterstützen ein Hauptinstrument plus weitere Instrumente; Admins dürfen bei Bedarf auch fremde Profile korrigieren.
 - Zugangsmodell in V1: nur eingeladene Mitglieder mit Magic-Link-Login.
@@ -271,6 +276,7 @@ Unterteilt in:
 - Band-erstellen- / Band-beitreten-Flow
 - Einladungslink-Fluss
 - Band-verlassen- / Band-löschen-Flow
+- Mitglied entfernen
 - echtes Mitgliedsprofil
 - Basis-Navigation und Home-Cockpit-Rahmen
 
@@ -279,7 +285,7 @@ Unterteilt in:
 - Einzeltermine
 - Probenserien
 - RSVP offen/Ja/Nein
-- Terminliste und Detailansicht
+- Terminliste und Detailansicht (chronologisch, aber visuell unterscheidbar)
 - Status für abgesagt/geändert
 - Änderungsnotiz
 - Kalender-Handoff für Einzeltermine
@@ -319,6 +325,7 @@ Unterteilt in:
 - Tests sollten offene Zusagen, abgesagte/geänderte Termine und auftrittsgebundene Setlists explizit abdecken.
 - Song-Tests sollten Archivierungsregeln und das Entfernen aus dem Voting nach Setlist-Übernahme absichern.
 - Mitgliedschafts-Tests sollten Selbst-Austritt und Band-Löschung mit Bestätigung absichern.
+- Termin-Tests sollten absichern, dass Änderungen bestehende Zusagen nicht automatisch verändern.
 - Falls bereits ähnliche Tests existieren, sollten neue Tests dieselbe Testtiefe und denselben Stil übernehmen, statt neue Testmuster einzuführen.
 - Empfehlenswerte Test-Schwerpunkte pro Modul:
   - **Domain/Backend:** Event-, RSVP-, Vote-, Setlist-Logik

@@ -4,10 +4,10 @@ Diese Datei sammelt die aktuell noch offenen Schärfungsfragen aus der zweiten G
 
 ## Offene Fragen
 
-1. Wer darf in V1 **Bandmitglieder aus einer Band entfernen** — nur Admins oder auch Mitglieder sich gegenseitig?
-2. Wie genau funktioniert **Band löschen**: sofort nach Bestätigung oder mit zusätzlicher Sicherheitsstufe wie Texteingabe?
-3. Sollen **Auftritte und Proben** in derselben Terminliste standardmäßig gemischt chronologisch erscheinen oder standardmäßig getrennt gruppiert sein?
-4. Was passiert mit einer **offenen Zusage**, wenn ein Termin geändert wird: bleibt sie offen bestehen oder soll sie zurückgesetzt / besonders hervorgehoben werden?
+1. Sollen **bestehende Zusagen `yes`/`no`** bei einer Terminänderung ebenfalls unverändert bestehen bleiben oder speziell markiert werden?
+2. Sollen Bandmitglieder bei einer Terminänderung zusätzlich **sichtbar benachrichtigt** werden, oder reicht die Änderung in der Liste/Detailansicht?
+3. Dürfen Admins auch **andere Admins** aus der Band entfernen, oder braucht es dafür eine Einschränkung?
+4. Wenn ein Nutzer mehrere Bands im Datenmodell hat, welche Band ist nach erneutem Einstieg die **aktive Standard-Band**?
 
 ## Bereits entschiedene Punkte
 
@@ -34,11 +34,14 @@ Diese Datei sammelt die aktuell noch offenen Schärfungsfragen aus der zweiten G
 - **Songs werden nicht hart gelöscht, sobald sie relevant genutzt wurden.** Verwendete Songs werden archiviert statt gelöscht.
 - **Wenn ein Song in eine Setlist übernommen wird, verschwindet er aus dem Song-Voting durch Archivierung.**
 - **Bandmitglieder dürfen eine Band jederzeit selbst verlassen.**
-- **Nur Admins dürfen eine Band löschen, und zwar bestätigt als bewusste Destruktiv-Aktion.**
+- **Admins dürfen andere Bandmitglieder aus der Band entfernen.** Mitglieder ohne Admin-Rolle können nur sich selbst entfernen.
+- **Nur Admins dürfen eine Band löschen, und zwar bestätigt als bewusste Destruktiv-Aktion.** Zur Bestätigung muss der Bandname eingegeben werden.
 - **Auftritte unterstützen einen Titel.** Er soll prominent angezeigt werden; für V1 behandeln wir ihn als optionales, aber wichtiges Feld.
 - **Geänderte Termine zeigen einen Status-Badge plus kurze Änderungsnotiz, aber keine Historie.**
 - **Archivierte Songs können jederzeit wieder ins Voting zurückgeholt werden.**
+- **Die Standard-Terminliste ist chronologisch und visuell klar zwischen Probe und Auftritt unterscheidbar.**
+- **Terminänderungen verändern bestehende Zusagen nicht automatisch.** Offene, zugesagte und abgesagte Zustände bleiben bestehen.
 
 ## Aktuelle Empfehlung
 
-Als Nächstes sollten **Mitgliederverwaltung innerhalb einer Band**, **Lösch-Sicherheit**, **Standarddarstellung der Terminliste** und die **Wirkung von Terminänderungen auf Zusagen** geschärft werden. Diese Regeln bestimmen den tatsächlichen Alltagsfluss stärker als neue große Feature-Bausteine.
+Als Nächstes sollten **Benachrichtigungsverhalten bei Terminänderungen**, **Admin-zu-Admin-Grenzen**, **aktive Standard-Band** und der **Umgang mit bestehenden Zusagen nach Änderungen** final geschärft werden. Diese Regeln betreffen die Alltagssicherheit der V1 stärker als zusätzliche große Feature-Bausteine.
