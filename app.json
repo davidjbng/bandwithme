@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "bandwithme",
+    "owner": "davidjbng",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
@@ -45,8 +46,14 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "24716778-ceea-4540-b06d-02474d9f3883"
+        "projectId": "fc58fe98-4cff-4da0-bdc7-08fdcfd99a19"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/fc58fe98-4cff-4da0-bdc7-08fdcfd99a19"
     }
   }
 }

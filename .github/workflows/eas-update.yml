@@ -1,0 +1,41 @@
+name: Publish EAS update on main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  publish-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      CI: '1'
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Publish update to EAS branch main
+        run: |
+          pnpm dlx eas-cli@latest update \
+            --branch main \
+            --message "${{ github.event.head_commit.message || github.sha }}" \
+            --environment production \
+            --non-interactive
