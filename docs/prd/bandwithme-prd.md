@@ -187,8 +187,9 @@ Unterteilt in:
 - optionale spätere Präferenzen
 
 ### Event Series
-- beschreibt wiederkehrende Probentermine
+- beschreibt wiederkehrende Probentermine als eigenständiges Domänenobjekt
 - enthält Wiederholungsregel und Vorlagendaten
+- bleibt nach der Erstellung bearbeitbar und ist nicht nur eine Erstellhilfe
 
 ### Event Instance
 - konkrete Probe oder konkreter Auftritt
@@ -222,7 +223,8 @@ Unterteilt in:
 
 - Die erste Version sollte die Produktdomäne entlang weniger Kernobjekte schneiden: **Band, Membership, Event, RSVP, Song, Vote, Setlist**.
 - Proben und Auftritte sollten kein komplett getrenntes System sein, sondern zwei Event-Typen mit gemeinsamen Basiseigenschaften und typspezifischen Erweiterungen.
-- Wiederkehrende Proben sollten über ein Serienkonzept modelliert werden, statt nur kopierte Einzeltermine zu erzeugen.
+- Wiederkehrende Proben sollten über ein erstklassiges Serienkonzept modelliert werden, statt nur kopierte Einzeltermine zu erzeugen.
+- Eine Probenserie bleibt nach Erstellung ein eigenständiges Objekt, damit Änderungen an zukünftigen Terminen zentral gesteuert werden können.
 - Der Kalenderexport sollte pro konkretem Termin verfügbar sein; Serienexport ist wünschenswert, kann aber technisch schrittweise ausgebaut werden.
 - Voting, aktiver Probefokus und Auftritts-Setlists sollen **inhaltlich verbunden**, aber als separate UI-Zustände modelliert werden.
 - Song-Kandidaten benötigen in V1 kein komplexes Taxonomie-System; ihr Status ergibt sich aus Kontexten wie Voting, aktives Proben, Setlist.
