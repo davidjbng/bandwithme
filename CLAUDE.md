@@ -1,5 +1,9 @@
 @AGENTS.md
 
+## Git conventions
+
+- Commit messages in this repo should include the trailer `Assisted-By: Hermes Agent`.
+
 ## Agent skills
 
 ### Issue tracker
