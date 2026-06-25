@@ -52,9 +52,17 @@ _Avoid_: Track, Nummer, Content
 Der Bereich, in dem Bandmitglieder Songs priorisieren, indem sie Stimmen abgeben.
 _Avoid_: Ranking, Poll, Songwahl
 
+**Archivierter Song**:
+Ein Song, der nicht mehr im Song-Voting auftaucht, aber als bestehende Referenz in der Bandhistorie und in Setlists erhalten bleibt.
+_Avoid_: Gelöschter Song, entfernter Song
+
 **Einladungslink**:
 Ein bandgebundener Beitrittslink, über den neue Bandmitglieder in die App kommen und der Band beitreten können.
 _Avoid_: Invite code, Registration link, Magic link
+
+**Bandbeitritt**:
+Der Einstieg eines Nutzers in eine bestehende Band über einen gültigen Einladungslink.
+_Avoid_: Registrierung, Join Flow, Invite Accept
 
 **Setlist**:
 Die geordnete Auswahl von Songs für einen konkreten Auftritt.

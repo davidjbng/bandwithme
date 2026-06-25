@@ -4,10 +4,10 @@ Diese Datei sammelt die aktuell noch offenen Schärfungsfragen aus der zweiten G
 
 ## Offene Fragen
 
-1. Wie wird die **erste Band** in V1 angelegt: automatisch beim ersten Admin-Onboarding oder über einen expliziten „Band erstellen“-Schritt?
-2. Wie sichtbar soll **Mehrfach-Band-Mitgliedschaft** in der V1-UI sein, wenn das Modell sie technisch schon erlaubt?
-3. Wie sollen **Auftritts-Detailinfos nach der Erstellung** ergänzt werden: inline auf der Detailseite oder in einem separaten Bearbeiten-Flow?
-4. Sollen **Songs gelöscht werden dürfen**, auch wenn sie schon in einer Setlist verwendet wurden, oder nur aus zukünftigen Setlists entfernt werden?
+1. Dürfen Bandmitglieder ihre **eigene Band verlassen**, und wenn ja: direkt selbst oder nur mit Einschränkungen?
+2. Soll es für einen **Auftritt** zusätzlich zu Datum/Uhrzeit/Ort noch ein Pflichtfeld wie Titel/Name geben, oder reicht ein generierter Standardname?
+3. Wie genau wird ein **geänderter Termin** dargestellt: nur Badge/Status oder zusätzlich mit Änderungsvermerk wie „früher 19:30, jetzt 20:00“?
+4. Sollen **archivierte Songs** später wieder ins Voting zurückgeholt werden können?
 
 ## Bereits entschiedene Punkte
 
@@ -27,7 +27,13 @@ Diese Datei sammelt die aktuell noch offenen Schärfungsfragen aus der zweiten G
 - **Alle Bandmitglieder dürfen Setlists bearbeiten.**
 - **Mehrfach-Band-Mitgliedschaft soll technisch möglich sein, aber in der V1-UI nicht betont werden.**
 - **Probefokus wird in V1 gestrichen.**
+- **Neue Nutzer sehen in V1 zwei klare Einstiege:** Band erstellen oder Band beitreten.
+- **Der Ersteller einer Band wird automatisch Admin.**
+- **Mehrfach-Band-Mitgliedschaft ist nur im Datenmodell vorgesehen.** In der V1-UI gibt es keinen Bandwechsel.
+- **Auftritts-Detailinfos werden auf der Auftritts-Detailseite gepflegt.**
+- **Songs werden nicht hart gelöscht, sobald sie relevant genutzt wurden.** Verwendete Songs werden archiviert statt gelöscht.
+- **Wenn ein Song in eine Setlist übernommen wird, verschwindet er aus dem Song-Voting durch Archivierung.**
 
 ## Aktuelle Empfehlung
 
-Als Nächstes sollten **Band-Erstellung**, **Mehrfach-Band-Mitgliedschaft**, **vergangene Termine** und die **Bearbeitungsgrenzen innerhalb der Band** geschärft werden. Diese Entscheidungen bestimmen, wie viel Struktur die V1 wirklich braucht und was bewusst unsichtbar bleiben soll.
+Als Nächstes sollten **Austritt aus Bands**, **Darstellung von Terminänderungen**, **Pflichtfelder bei Auftritten** und der **Lebenszyklus archivierter Songs** geschärft werden. Diese Entscheidungen betreffen die Alltagstauglichkeit der V1 stärker als zusätzliche große Features.

@@ -71,38 +71,42 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 15. Als Bandmitglied möchte ich zwischen Light und Dark Mode eine gute Experience haben, damit die App unabhängig von Systempräferenz hochwertig wirkt.
 16. Als Bandmitglied möchte ich mich per Magic Link anmelden, damit ich kein zusätzliches Passwort verwalten muss.
 17. Als Admin möchte ich einen bandgebundenen Einladungslink teilen können, damit nur echte Bandmitglieder Zugang erhalten.
-18. Als Bandmitglied möchte ich mein Profil selbst bearbeiten können, damit Name, Instrumente und Darstellung aktuell bleiben.
-19. Als Bandmitglied möchte ich mehrere Instrumente und ein Hauptinstrument in meinem Profil hinterlegen, damit bei Terminen klarer ist, wer welche Rolle abdeckt.
-20. Als Bandmitglied möchte ich einen sympathischen Avatar oder ein Bild haben, damit Zusagen persönlicher und schneller erfassbar sind.
-21. Als Bandmitglied möchte ich sehen, welche Songs aktuell zur Abstimmung stehen, damit ich weiß, woran die Band als Nächstes arbeiten könnte.
-22. Als Bandmitglied möchte ich für Songs stimmen können, damit die Band Prioritäten demokratisch setzen kann.
-23. Als Bandmitglied möchte ich nur als eingeloggtes Mitglied abstimmen können, damit das Voting nicht von Außenstehenden beeinflusst wird.
-24. Als Bandmitglied möchte ich Songs manuell anlegen können, damit neue Ideen direkt in den Pool gelangen.
-25. Als Bandmitglied möchte ich einem Song genau einen Link wie Spotify, YouTube oder eine andere Quelle hinzufügen können, damit alle dieselbe Referenz hören können.
-26. Als Bandmitglied möchte ich Songs für einen Auftritt auswählen können, damit aus dem Repertoire eine Setlist entsteht.
-27. Als Bandmitglied möchte ich die Reihenfolge einer Setlist festlegen können, damit der Auftritt sinnvoll strukturiert ist.
-28. Als Bandmitglied möchte ich erkennen, welche Songs bereits für einen kommenden Auftritt vorgesehen sind, damit ich zielgerichtet übe.
+18. Als neuer Nutzer möchte ich direkt zwischen „Band erstellen“ und „Band beitreten“ wählen können, damit mein Einstieg klar ist.
+19. Als Ersteller einer neuen Band möchte ich automatisch Admin werden, damit ich die Band sofort verwalten kann.
+20. Als Bandmitglied möchte ich mein Profil selbst bearbeiten können, damit Name, Instrumente und Darstellung aktuell bleiben.
+21. Als Bandmitglied möchte ich mehrere Instrumente und ein Hauptinstrument in meinem Profil hinterlegen, damit bei Terminen klarer ist, wer welche Rolle abdeckt.
+22. Als Bandmitglied möchte ich einen sympathischen Avatar oder ein Bild haben, damit Zusagen persönlicher und schneller erfassbar sind.
+23. Als Bandmitglied möchte ich sehen, welche Songs aktuell zur Abstimmung stehen, damit ich weiß, woran die Band als Nächstes arbeiten könnte.
+24. Als Bandmitglied möchte ich für Songs stimmen können, damit die Band Prioritäten demokratisch setzen kann.
+25. Als Bandmitglied möchte ich nur als eingeloggtes Mitglied abstimmen können, damit das Voting nicht von Außenstehenden beeinflusst wird.
+26. Als Bandmitglied möchte ich Songs manuell anlegen können, damit neue Ideen direkt in den Pool gelangen.
+27. Als Bandmitglied möchte ich einem Song genau einen Link wie Spotify, YouTube oder eine andere Quelle hinzufügen können, damit alle dieselbe Referenz hören können.
+28. Als Bandmitglied möchte ich Songs für einen Auftritt auswählen können, damit aus dem Repertoire eine Setlist entsteht.
+29. Als Bandmitglied möchte ich die Reihenfolge einer Setlist festlegen können, damit der Auftritt sinnvoll strukturiert ist.
+30. Als Bandmitglied möchte ich erkennen, welche Songs bereits für einen kommenden Auftritt vorgesehen sind, damit ich zielgerichtet übe.
 31. Als Bandmitglied möchte ich auf einem Auftritt Zusatzinfos wie Dresscode oder Location-Hinweise sehen, damit ich vorbereitet bin.
 32. Als Bandmitglied möchte ich Auftrittsinfos in kompakter, scanbarer Form sehen, damit ich sie unterwegs schnell verstehe.
 33. Als Bandmitglied möchte ich leere Zustände verständlich und motivierend erleben, damit die App auch am Anfang nicht tot wirkt.
 34. Als Bandmitglied möchte ich, dass Hauptaktionen mit wenigen Taps erreichbar sind, damit die App sich leicht und schnell anfühlt.
 35. Als Bandmitglied möchte ich, dass visuelle Animationen subtil und unterstützend sind, damit die App lebendig wirkt ohne anstrengend zu werden.
-36. Als Admin möchte ich Proben und Auftritte als unterschiedliche Objekttypen mit gemeinsamem Planungsfundament anlegen können, damit die Datenstruktur einfach bleibt und die Darstellung trotzdem klar getrennt ist.
+36. Als Bandmitglied möchte ich Proben und Auftritte als unterschiedliche Objekttypen mit gemeinsamem Planungsfundament anlegen können, damit die Datenstruktur einfach bleibt und die Darstellung trotzdem klar getrennt ist.
 37. Als Bandmitglied möchte ich offene Zusagen als eigenen sichtbaren Zustand sehen, damit unbeantwortete Termine sofort erkennbar sind.
 38. Als Bandmitglied möchte ich über einen Einladungslink meiner Band beitreten können, damit der Zugang in Chats und Gruppen einfach verteilt werden kann.
 39. Als Admin möchte ich Profile anderer Mitglieder bei Bedarf korrigieren können, damit Banddaten konsistent bleiben.
 40. Als Bandmitglied möchte ich sehen, wenn ein aktueller oder zukünftiger Termin abgesagt oder geändert wurde, damit ich mich nicht auf veraltete Planung verlasse.
 41. Als Bandmitglied möchte ich, dass vergangene Termine aus der Standardansicht verschwinden, damit die Planungsliste sauber bleibt.
-42. Als Entwicklerteam möchten wir web-first entwickeln können, damit Iteration und Feinschliff im Browser schnell erfolgen.
-43. Als Entwicklerteam möchten wir die erste Version entlang weniger, klarer Domänenobjekte umsetzen, damit die Umsetzung schnell bleibt.
-44. Als Entwicklerteam möchten wir die App so schneiden, dass spätere Erweiterungen wie Bandkasse, Aufgaben oder Multi-Band-Support möglich bleiben.
-45. Als Bandmitglied möchte ich nicht mit unnötigen Feldern oder komplexen Workflows überladen werden, damit die App im Alltag tatsächlich benutzt wird.
+42. Als Bandmitglied möchte ich, dass ein Song nach Übernahme in eine Setlist aus dem Voting verschwindet, damit das Voting nur neue oder offene Kandidaten zeigt.
+43. Als Entwicklerteam möchten wir web-first entwickeln können, damit Iteration und Feinschliff im Browser schnell erfolgen.
+44. Als Entwicklerteam möchten wir die erste Version entlang weniger, klarer Domänenobjekte umsetzen, damit die Umsetzung schnell bleibt.
+45. Als Entwicklerteam möchten wir die App so schneiden, dass spätere Erweiterungen wie Bandkasse, Aufgaben oder Multi-Band-Support möglich bleiben.
+46. Als Bandmitglied möchte ich nicht mit unnötigen Feldern oder komplexen Workflows überladen werden, damit die App im Alltag tatsächlich benutzt wird.
 
 ## Scope Summary (V1)
 
 ### In Scope
 - Magic-Link-Login
 - Admin + Bandmitglied
+- Startscreen mit den Optionen „Band erstellen“ oder „Band beitreten“
 - Mitgliedereinladung durch bandgebundenen Einladungslink
 - Profilverwaltung mit Name, Hauptinstrument, weiteren Instrumenten, Bild/Avatar
 - Terminliste
@@ -112,6 +116,7 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 - Übersicht der Zusagen pro Termin
 - Song Voting mit manuell angelegten Songs
 - ein Song-Link pro Song (z. B. Spotify, YouTube oder andere Quelle)
+- Archivierung von Songs statt Löschung, sobald sie relevant verwendet werden
 - Setlist-Auswahl für Auftritte
 - Reihenfolge in Setlists
 - abgesagt / geändert markierte aktuelle und zukünftige Termine
@@ -176,6 +181,7 @@ Unterteilt in:
 ### Band
 - repräsentiert die Band als primären Mandanten
 - hält Name, Basis-Einstellungen und Mitgliederbezug
+- wird beim expliziten Band-erstellen-Flow erstmals angelegt
 
 ### Membership
 - verbindet User mit Band
@@ -207,7 +213,8 @@ Unterteilt in:
 ### Song
 - Titel
 - Artist / Zusatzinfo optional
-- Referenzlinks (Spotify, YouTube etc.)
+- genau ein Referenzlink
+- Archivstatus
 - Ersteller / Timestamps
 
 ### Song Vote
@@ -227,9 +234,11 @@ Unterteilt in:
 - Eine Probenserie bleibt nach Erstellung ein eigenständiges Objekt, damit Änderungen an zukünftigen Terminen zentral gesteuert werden können.
 - Kalenderintegration in V1 bedeutet: ein einzelner Termin wird mit vorausgefüllten Daten an die Betriebssystem-Kalenderfunktion übergeben; es gibt keinen ICS- oder Serienexport.
 - Der Beitritt zur Band sollte über einen bandgebundenen Einladungslink in Chat- und Gruppen-Kontexten funktionieren.
+- Neue Nutzer sollen in V1 explizit zwischen „Band erstellen“ und „Band beitreten“ wählen können; der Ersteller der Band wird automatisch Admin.
 - Song-Kandidaten benötigen in V1 kein komplexes Taxonomie-System; ihr Status ergibt sich aus Kontexten wie Voting und Setlist.
 - Alle Bandmitglieder dürfen Songs anlegen; Song-Erstellung ist kein exklusives Admin-Recht.
 - Ein Song besitzt in V1 genau einen Referenzlink; Spotify- und YouTube-Links erhalten bevorzugte Erkennung, andere Links bleiben trotzdem gültig.
+- Songs werden nicht bevorzugt gelöscht, sondern bei Nutzung oder Abschluss archiviert; in Setlists referenzierte Songs bleiben erhalten.
 - Setlists existieren in V1 nicht frei schwebend, sondern immer als Teil genau eines Auftritts.
 - Setlists sind in V1 von allen Bandmitgliedern bearbeitbar.
 - Zusagen sind im UI dreistufig sichtbar: offen, zugesagt, abgesagt.
@@ -249,6 +258,7 @@ Unterteilt in:
 
 ### Phase 1 — Foundation
 - Rollenmodell (`admin`, `member`)
+- Band-erstellen- / Band-beitreten-Flow
 - Einladungslink-Fluss
 - echtes Mitgliedsprofil
 - Basis-Navigation und Home-Cockpit-Rahmen
@@ -266,6 +276,7 @@ Unterteilt in:
 - Songs anlegen
 - Songlinks
 - Voting
+- Song-Archivierung
 
 ### Phase 4 — Auftritte
 - Performance-spezifische Felder
@@ -294,6 +305,7 @@ Unterteilt in:
 - Kalender-Handoff sollte auf korrekt vorausgefüllte Betriebssystem-Übergaben getestet werden.
 - Profiltests sollten Rollen- und Bearbeitungsrechte absichern.
 - Tests sollten offene Zusagen, abgesagte/geänderte Termine und auftrittsgebundene Setlists explizit abdecken.
+- Song-Tests sollten Archivierungsregeln und das Entfernen aus dem Voting nach Setlist-Übernahme absichern.
 - Falls bereits ähnliche Tests existieren, sollten neue Tests dieselbe Testtiefe und denselben Stil übernehmen, statt neue Testmuster einzuführen.
 - Empfehlenswerte Test-Schwerpunkte pro Modul:
   - **Domain/Backend:** Event-, RSVP-, Vote-, Setlist-Logik
