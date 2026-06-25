@@ -4,10 +4,10 @@ Diese Datei sammelt die aktuell noch offenen Schärfungsfragen aus der zweiten G
 
 ## Offene Fragen
 
-1. Dürfen Bandmitglieder ihre **eigene Band verlassen**, und wenn ja: direkt selbst oder nur mit Einschränkungen?
-2. Soll es für einen **Auftritt** zusätzlich zu Datum/Uhrzeit/Ort noch ein Pflichtfeld wie Titel/Name geben, oder reicht ein generierter Standardname?
-3. Wie genau wird ein **geänderter Termin** dargestellt: nur Badge/Status oder zusätzlich mit Änderungsvermerk wie „früher 19:30, jetzt 20:00“?
-4. Sollen **archivierte Songs** später wieder ins Voting zurückgeholt werden können?
+1. Wer darf in V1 **Bandmitglieder aus einer Band entfernen** — nur Admins oder auch Mitglieder sich gegenseitig?
+2. Wie genau funktioniert **Band löschen**: sofort nach Bestätigung oder mit zusätzlicher Sicherheitsstufe wie Texteingabe?
+3. Sollen **Auftritte und Proben** in derselben Terminliste standardmäßig gemischt chronologisch erscheinen oder standardmäßig getrennt gruppiert sein?
+4. Was passiert mit einer **offenen Zusage**, wenn ein Termin geändert wird: bleibt sie offen bestehen oder soll sie zurückgesetzt / besonders hervorgehoben werden?
 
 ## Bereits entschiedene Punkte
 
@@ -33,7 +33,12 @@ Diese Datei sammelt die aktuell noch offenen Schärfungsfragen aus der zweiten G
 - **Auftritts-Detailinfos werden auf der Auftritts-Detailseite gepflegt.**
 - **Songs werden nicht hart gelöscht, sobald sie relevant genutzt wurden.** Verwendete Songs werden archiviert statt gelöscht.
 - **Wenn ein Song in eine Setlist übernommen wird, verschwindet er aus dem Song-Voting durch Archivierung.**
+- **Bandmitglieder dürfen eine Band jederzeit selbst verlassen.**
+- **Nur Admins dürfen eine Band löschen, und zwar bestätigt als bewusste Destruktiv-Aktion.**
+- **Auftritte unterstützen einen Titel.** Er soll prominent angezeigt werden; für V1 behandeln wir ihn als optionales, aber wichtiges Feld.
+- **Geänderte Termine zeigen einen Status-Badge plus kurze Änderungsnotiz, aber keine Historie.**
+- **Archivierte Songs können jederzeit wieder ins Voting zurückgeholt werden.**
 
 ## Aktuelle Empfehlung
 
-Als Nächstes sollten **Austritt aus Bands**, **Darstellung von Terminänderungen**, **Pflichtfelder bei Auftritten** und der **Lebenszyklus archivierter Songs** geschärft werden. Diese Entscheidungen betreffen die Alltagstauglichkeit der V1 stärker als zusätzliche große Features.
+Als Nächstes sollten **Mitgliederverwaltung innerhalb einer Band**, **Lösch-Sicherheit**, **Standarddarstellung der Terminliste** und die **Wirkung von Terminänderungen auf Zusagen** geschärft werden. Diese Regeln bestimmen den tatsächlichen Alltagsfluss stärker als neue große Feature-Bausteine.

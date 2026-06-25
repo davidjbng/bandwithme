@@ -64,6 +64,14 @@ _Avoid_: Invite code, Registration link, Magic link
 Der Einstieg eines Nutzers in eine bestehende Band über einen gültigen Einladungslink.
 _Avoid_: Registrierung, Join Flow, Invite Accept
 
+**Band verlassen**:
+Der freiwillige Austritt eines Bandmitglieds aus einer Band aus eigener Entscheidung.
+_Avoid_: Remove member, unsubscribe
+
+**Band löschen**:
+Das bewusste, bestätigungspflichtige Entfernen einer gesamten Band durch einen Admin.
+_Avoid_: Reset, deactivate band
+
 **Setlist**:
 Die geordnete Auswahl von Songs für einen konkreten Auftritt.
 _Avoid_: Playlist, Songliste, Running Order
@@ -75,3 +83,11 @@ _Avoid_: Primary role, Main skill
 **Kalender hinzufügen**:
 Die Betriebssystem-Aktion, mit der ein einzelner Termin mit vorausgefüllten Daten an die persönliche Kalender-App übergeben wird.
 _Avoid_: ICS-Export, Serienexport, Sync
+
+**Terminänderung**:
+Die markierte Anpassung eines bestehenden aktuellen oder zukünftigen Termins, sichtbar über Status und kurze Notiz statt über eine vollständige Historie.
+_Avoid_: Audit log, version history
+
+**Archivierter Song**:
+Ein Song, der nicht mehr im Song-Voting auftaucht, aber erhalten bleibt und bei Bedarf wieder ins Voting zurückgeführt werden kann.
+_Avoid_: Gelöschter Song, endgültig entfernter Song
