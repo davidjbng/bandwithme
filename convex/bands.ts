@@ -89,6 +89,109 @@ export const joinByInvite = mutation({
       role: 'member',
     });
 
-    return bandId;
+    return args.bandId;
+  },
+});
+
+export const listMembers = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return [];
+
+    const myMembership = await ctx.db
+      .query('bandMembers')
+      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .first();
+    if (!myMembership) return [];
+
+    const memberships = await ctx.db
+      .query('bandMembers')
+      .withIndex('by_bandId', (q) => q.eq('bandId', myMembership.bandId))
+      .collect();
+
+    return await Promise.all(
+      memberships.map(async (m) => {
+        const user = await ctx.db.get(m.userId);
+        return {
+          id: m._id,
+          userId: m.userId,
+          name: user?.name ?? user?.email?.split('@')[0] ?? 'Bandmitglied',
+          email: user?.email ?? null,
+          role: m.role,
+        };
+      })
+    );
+  },
+});
+
+export const leave = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error('Du musst eingeloggt sein.');
+
+    const membership = await ctx.db
+      .query('bandMembers')
+      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .first();
+    if (!membership) throw new Error('Du bist in keiner Band.');
+
+    // Check: if this user is the last admin, block
+    if (membership.role === 'admin') {
+      const otherAdmins = await ctx.db
+        .query('bandMembers')
+        .withIndex('by_bandId', (q) => q.eq('bandId', membership.bandId))
+        .filter((q) => q.and(q.eq(q.field('role'), 'admin'), q.neq(q.field('userId'), userId)))
+        .first();
+      if (!otherAdmins) {
+        throw new Error('Du bist der letzte Admin. Ernennne zuerst jemand anderen zum Admin.');
+      }
+    }
+
+    await ctx.db.delete(membership._id);
+  },
+});
+
+export const removeMember = mutation({
+  args: {
+    membershipId: v.id('bandMembers'),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error('Du musst eingeloggt sein.');
+
+    const myMembership = await ctx.db
+      .query('bandMembers')
+      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .first();
+    if (!myMembership || myMembership.role !== 'admin') {
+      throw new Error('Nur Admins können Mitglieder entfernen.');
+    }
+
+    const target = await ctx.db.get(args.membershipId);
+    if (!target) throw new Error('Mitglied nicht gefunden.');
+    if (target.bandId !== myMembership.bandId) {
+      throw new Error('Dieses Mitglied ist nicht in deiner Band.');
+    }
+
+    // Cannot remove yourself
+    if (target.userId === userId) {
+      throw new Error('Nutze "Band verlassen" um dich selbst zu entfernen.');
+    }
+
+    // Last admin check
+    if (target.role === 'admin') {
+      const otherAdmins = await ctx.db
+        .query('bandMembers')
+        .withIndex('by_bandId', (q) => q.eq('bandId', target.bandId))
+        .filter((q) => q.and(q.eq(q.field('role'), 'admin'), q.neq(q.field('userId'), target.userId)))
+        .first();
+      if (!otherAdmins) {
+        throw new Error('Der letzte Admin kann nicht entfernt werden.');
+      }
+    }
+
+    await ctx.db.delete(args.membershipId);
   },
 });
