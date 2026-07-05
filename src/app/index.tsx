@@ -1,98 +1,198 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useConvexAuth } from '@convex-dev/auth/react';
+import { SymbolView } from 'expo-symbols';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { useTheme } from '@/hooks/use-theme';
 
 export default function HomeScreen() {
+  const theme = useTheme();
+  const router = useRouter();
+  const safeAreaInsets = useSafeAreaInsets();
+  const { isAuthenticated, isLoading } = useConvexAuth();
+
+  const insets = {
+    ...safeAreaInsets,
+    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
+  };
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
+    <ScrollView
+      style={[styles.scrollView, { backgroundColor: theme.background }]}
+      contentInset={insets}
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={styles.contentContainer}>
+      <ThemedView style={styles.container}>
+        {/* Hero */}
+        <View style={styles.hero}>
+          <ThemedView
+            style={[styles.heroIcon, { backgroundColor: theme.backgroundSelected }]}>
+            <SymbolView
+              tintColor={theme.text}
+              name={{ ios: 'music.note.house.fill', web: 'music_note' }}
+              size={36}
+            />
+          </ThemedView>
+          <ThemedText type="title" style={styles.heroTitle}>
+            Band With Me
           </ThemedText>
-        </ThemedView>
+          <ThemedText type="default" themeColor="textSecondary" style={styles.heroSubtitle}>
+            Proben planen, Songs voten, Auftritte organisieren — alles an einem Ort für deine Band.
+          </ThemedText>
+        </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        {/* Quick Actions */}
+        <View style={styles.actions}>
+          {!isLoading && isAuthenticated ? (
+            <>
+              <Pressable
+                onPress={() => router.push('/termine')}
+                style={({ pressed }) => [styles.actionCard, pressed && styles.pressed]}>
+                <ThemedView type="backgroundElement" style={styles.actionCardInner}>
+                  <View style={styles.actionIconRow}>
+                    <SymbolView
+                      tintColor={theme.text}
+                      name={{ ios: 'calendar', web: 'calendar_today' }}
+                      size={24}
+                    />
+                    <ThemedText type="smallBold">Termine</ThemedText>
+                  </View>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Nächste Proben & Auftritte anzeigen
+                  </ThemedText>
+                </ThemedView>
+              </Pressable>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+              <Pressable
+                onPress={() => router.push('/termine/create')}
+                style={({ pressed }) => [styles.actionCard, pressed && styles.pressed]}>
+                <ThemedView type="backgroundElement" style={styles.actionCardInner}>
+                  <View style={styles.actionIconRow}>
+                    <SymbolView
+                      tintColor={theme.text}
+                      name={{ ios: 'plus.circle.fill', web: 'add_circle' }}
+                      size={24}
+                    />
+                    <ThemedText type="smallBold">Neuer Termin</ThemedText>
+                  </View>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Probe oder Auftritt anlegen
+                  </ThemedText>
+                </ThemedView>
+              </Pressable>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+              <Pressable
+                onPress={() => router.push('/user')}
+                style={({ pressed }) => [styles.actionCard, pressed && styles.pressed]}>
+                <ThemedView type="backgroundElement" style={styles.actionCardInner}>
+                  <View style={styles.actionIconRow}>
+                    <SymbolView
+                      tintColor={theme.text}
+                      name={{ ios: 'person.crop.circle', web: 'person' }}
+                      size={24}
+                    />
+                    <ThemedText type="smallBold">Profil</ThemedText>
+                  </View>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Profil & Band-Einstellungen
+                  </ThemedText>
+                </ThemedView>
+              </Pressable>
+            </>
+          ) : !isLoading ? (
+            <ThemedView type="backgroundElement" style={styles.welcomeCard}>
+              <ThemedText type="smallBold" style={styles.centerText}>
+                Willkommen!
+              </ThemedText>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.centerText}>
+                Logg dich ein, um deine Band zu verwalten.
+              </ThemedText>
+              <Pressable
+                onPress={() => router.push('/user')}
+                style={({ pressed }) => [styles.loginButton, pressed && styles.pressed, { backgroundColor: theme.text }]}>
+                <ThemedText type="smallBold" style={{ color: theme.background }}>
+                  Zum Login
+                </ThemedText>
+              </Pressable>
+            </ThemedView>
+          ) : null}
+        </View>
+      </ThemedView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
   },
-  safeArea: {
-    flex: 1,
+  contentContainer: {
+    alignItems: 'center',
     paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.six,
+    paddingBottom: Spacing.five,
+  },
+  container: {
+    width: '100%',
+    maxWidth: MaxContentWidth,
+    gap: Spacing.five,
+  },
+  hero: {
     alignItems: 'center',
     gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    paddingVertical: Spacing.four,
   },
-  heroSection: {
+  heroIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
   },
-  title: {
+  heroTitle: {
     textAlign: 'center',
   },
-  code: {
-    textTransform: 'uppercase',
+  heroSubtitle: {
+    textAlign: 'center',
+    maxWidth: 480,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
+  actions: {
+    gap: Spacing.two,
+  },
+  actionCard: {
     borderRadius: Spacing.four,
+  },
+  actionCardInner: {
+    padding: Spacing.three,
+    gap: Spacing.one,
+    borderRadius: Spacing.four,
+  },
+  actionIconRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  welcomeCard: {
+    padding: Spacing.four,
+    borderRadius: Spacing.four,
+    gap: Spacing.three,
+    alignItems: 'center',
+  },
+  centerText: {
+    textAlign: 'center',
+  },
+  loginButton: {
+    minHeight: 44,
+    borderRadius: Spacing.three,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.five,
+  },
+  pressed: {
+    opacity: 0.75,
   },
 });
