@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  EXPO_PUBLIC_CONVEX_URL: https://blissful-spaniel-445.eu-west-1.convex.cloud
+  EXPO_PUBLIC_CONVEX_SITE_URL: https://blissful-spaniel-445.eu-west-1.convex.site
+
 jobs:
   typecheck:
     name: TypeScript Check
@@ -60,7 +64,7 @@ jobs:
         run: pnpm web:export
 
       - name: Serve static export
-        run: npx serve dist --listen 8081 --no-clipboard &
+        run: npx serve dist --listen 8081 --no-clipboard --single &
         shell: bash
 
       - name: Wait for web server
