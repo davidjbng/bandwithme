@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # npm/pnpm dependencies
+  # pnpm dependencies
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -8,23 +8,27 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Europe/Berlin"
-    # Group all minor & patch updates into a single PR
-    groups:
-      minor-patch:
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
-    # Major updates get their own PRs
-    # Labels & assignee for easy filtering
+    versioning-strategy: "increase"
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
-    # Wait at least 1 day after release before upgrading (maturity period)
-    versioning-strategy: increase
-    # Use pnpm
+      - "security"
+    # Minor and patch updates go directly, major gets a PR
     commit-message:
       prefix: "chore"
       prefix-development: "chore"
       include: "scope"
-    open-pull-requests-limit: 10
+    # Maturity period: at least 1 day
+    # Dependabot doesn't have a direct maturity setting, but we use taze for that
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/Berlin"
+    labels:
+      - "dependencies"
+      - "ci"
