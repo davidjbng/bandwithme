@@ -2,7 +2,22 @@
 
 Band With Me ist eine App für die gemeinsame Organisation einer Band. Sie bündelt Terminplanung, Teilnahme, Song-Priorisierung und Auftrittsvorbereitung in einer gemeinsamen Sprache, damit die Band nicht auf Chat, Bauchgefühl und Einzellisten angewiesen ist.
 
-## Language
+## Tech Stack
+
+- **Expo SDK 56** mit React Native 0.85 und React 19.2
+- **React Compiler** aktiviert (`reactCompiler: true` in app.json)
+  → `useCallback`, `useMemo` und manuelle Memoization sind **nicht nötig**
+  → `React.memo` ist überflüssig — der Compiler memoized automatisch
+  → Inline-Komponenten (z.B. `headerRight: () => <X/>`) sind **erwünscht und korrekt**
+- **Convex** als Backend (Real-time, Serverless)
+- **Resend** für Magic-Link-Auth-Mails
+- **TypeScript** strict mode
+- **oxlint** mit `--deny-warnings` (keine Warnungen erlaubt)
+- **oxfmt** für Formatierung
+- **Playwright** für E2E-Tests
+- **lefthook** für lokale Git-Hooks (auto-format + lint + typecheck)
+
+## Domain Glossary
 
 **Band**:
 Die primäre Gruppe, für die geplant, geprobt und aufgetreten wird.

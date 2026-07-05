@@ -2,7 +2,6 @@ import { useConvexAuth } from "@convex-dev/auth/react";
 import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useCallback } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -73,23 +72,6 @@ export default function TermineScreen() {
   async function handleResponse(eventId: string, status: RsvpStatus) {
     await setResponse({ eventId: eventId as never, status });
   }
-
-  const renderHeaderRight = useCallback(
-    () => (
-      <Pressable
-        accessibilityLabel="Termin erstellen"
-        onPress={() => (isAuthenticated ? router.push("/termine/create") : router.push("/user"))}
-        style={({ pressed }) => [styles.toolbarButton, pressed && styles.pressed]}
-      >
-        <SymbolView
-          tintColor={theme.text}
-          name={{ ios: "plus.circle.fill", android: "add_circle", web: "add" }}
-          size={24}
-        />
-      </Pressable>
-    ),
-    [isAuthenticated, router, theme.text],
-  );
 
   return (
     <>
@@ -274,7 +256,21 @@ export default function TermineScreen() {
       <Stack.Screen
         options={{
           title: "Termine",
-          headerRight: renderHeaderRight,
+          headerRight: () => (
+            <Pressable
+              accessibilityLabel="Termin erstellen"
+              onPress={() =>
+                isAuthenticated ? router.push("/termine/create") : router.push("/user")
+              }
+              style={({ pressed }) => [styles.toolbarButton, pressed && styles.pressed]}
+            >
+              <SymbolView
+                tintColor={theme.text}
+                name={{ ios: "plus.circle.fill", android: "add_circle", web: "add" }}
+                size={24}
+              />
+            </Pressable>
+          ),
         }}
       />
     </>

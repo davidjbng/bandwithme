@@ -19,6 +19,7 @@
     "no-unused-vars": "error",
     "no-underscore-dangle": ["error", { "allow": ["_id", "_creationTime"] }],
     "react/react-in-jsx-scope": "off",
+    "react/no-unstable-nested-components": "off",
     "react/jsx-key": "error",
     "eslint/no-await-in-loop": "off",
     "typescript/consistent-type-definitions": "off",
