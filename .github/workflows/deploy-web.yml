@@ -44,7 +44,7 @@ jobs:
             --prod \
             --non-interactive \
             --json \
-            --message "${{ github.event.head_commit.message || github.sha }}"
+            --message "CI deploy ${GITHUB_SHA::7}"
 
       - name: Show deployment URL
         run: |
