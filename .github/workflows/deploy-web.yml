@@ -43,8 +43,7 @@ jobs:
           npx eas-cli@latest deploy \
             --prod \
             --non-interactive \
-            --json \
-            --message "CI deploy ${GITHUB_SHA::7}"
+            --json
 
       - name: Show deployment URL
         run: |
