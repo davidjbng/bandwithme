@@ -1,4 +1,6 @@
 import DateTimePicker from '@expo/ui/community/datetime-picker';
+import { useConvexAuth } from '@convex-dev/auth/react';
+import { useMutation } from 'convex/react';
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useMemo, useState } from 'react';
@@ -9,8 +11,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { addEvent, getInitialFormDate, repeatOptions, type RepeatOption } from '@/lib/events';
+import {
+  eventKindLabels,
+  eventKindOptions,
+  getInitialFormDate,
+  repeatOptions,
+  type EventKind,
+  type RepeatOption,
+} from '@/lib/events';
 import { useTheme } from '@/hooks/use-theme';
+import { api } from '../../../convex/_generated/api';
 
 function getInitialEventDate() {
   const { dateValue, timeValue } = getInitialFormDate();
@@ -57,13 +67,17 @@ export default function CreateTermineScreen() {
   const router = useRouter();
   const safeAreaInsets = useSafeAreaInsets();
   const initialDate = useMemo(() => getInitialEventDate(), []);
+  const { isAuthenticated } = useConvexAuth();
+  const createEvent = useMutation(api.termine.create);
 
+  const [kind, setKind] = useState<EventKind>('rehearsal');
   const [name, setName] = useState('');
   const [eventDate, setEventDate] = useState(initialDate);
   const [location, setLocation] = useState('');
   const [repeat, setRepeat] = useState<RepeatOption>('weekly');
   const [androidPickerMode, setAndroidPickerMode] = useState<'date' | 'time' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const insets = {
     ...safeAreaInsets,
@@ -88,9 +102,14 @@ export default function CreateTermineScreen() {
     });
   }
 
-  function handleCreateEvent() {
+  async function handleCreateEvent() {
     const trimmedName = name.trim();
     const trimmedLocation = location.trim();
+
+    if (!isAuthenticated) {
+      setError('Bitte logge dich erst ein, bevor du Termine anlegst.');
+      return;
+    }
 
     if (!trimmedName) {
       setError('Bitte gib dem Termin einen Namen.');
@@ -107,13 +126,23 @@ export default function CreateTermineScreen() {
       return;
     }
 
-    addEvent({
-      name: trimmedName,
-      dateTime: eventDate.toISOString(),
-      location: trimmedLocation,
-      repeat,
-    });
-    router.back();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await createEvent({
+        kind,
+        name: trimmedName,
+        dateTime: eventDate.toISOString(),
+        location: trimmedLocation,
+        repeat: kind === 'performance' ? 'none' : repeat,
+      });
+      router.back();
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Termin konnte nicht gespeichert werden.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -138,8 +167,53 @@ export default function CreateTermineScreen() {
             <View style={styles.formHeaderText}>
               <ThemedText type="smallBold">Neuen Termin erstellen</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
-                Name, Datum, Uhrzeit, Ort und Wiederholung
+                Starte mit einer Probe oder einem Auftritt und sammle danach direkt Zusagen.
               </ThemedText>
+            </View>
+          </View>
+
+          {!isAuthenticated ? (
+            <ThemedView style={[styles.noticeCard, { backgroundColor: theme.background }]}>
+              <ThemedText type="smallBold">Login nötig</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                Für echte Termine und Zusagen brauchst du einen Account. Melde dich im Profil an.
+              </ThemedText>
+              <Pressable onPress={() => router.push('/user')} style={({ pressed }) => pressed && styles.pressed}>
+                <ThemedView style={[styles.noticeButton, { backgroundColor: theme.text }]}>
+                  <ThemedText type="smallBold" style={{ color: theme.background }}>
+                    Zum Profil
+                  </ThemedText>
+                </ThemedView>
+              </Pressable>
+            </ThemedView>
+          ) : null}
+
+          <View style={styles.inputGroup}>
+            <ThemedText type="smallBold">Typ</ThemedText>
+            <View style={styles.kindGrid}>
+              {eventKindOptions.map((option) => {
+                const selected = option.value === kind;
+                return (
+                  <Pressable
+                    key={option.value}
+                    onPress={() => setKind(option.value)}
+                    style={({ pressed }) => [
+                      styles.kindCard,
+                      {
+                        backgroundColor: selected ? theme.text : theme.background,
+                        borderColor: selected ? theme.text : theme.backgroundSelected,
+                        opacity: pressed ? 0.8 : 1,
+                      },
+                    ]}>
+                    <ThemedText type="smallBold" style={{ color: selected ? theme.background : theme.text }}>
+                      {option.label}
+                    </ThemedText>
+                    <ThemedText type="small" style={{ color: selected ? theme.background : theme.textSecondary }}>
+                      {option.hint}
+                    </ThemedText>
+                  </Pressable>
+                );
+              })}
             </View>
           </View>
 
@@ -148,7 +222,7 @@ export default function CreateTermineScreen() {
             <TextInput
               value={name}
               onChangeText={setName}
-              placeholder=""
+              placeholder={kind === 'performance' ? 'z. B. Sommerfest 2026' : 'z. B. Mittwochsprobe'}
               placeholderTextColor={theme.textSecondary}
               style={[
                 styles.input,
@@ -222,7 +296,7 @@ export default function CreateTermineScreen() {
             <TextInput
               value={location}
               onChangeText={setLocation}
-              placeholder="Proberaum, Studio 2"
+              placeholder={kind === 'performance' ? 'Venue, Bühne, Stadt' : 'Proberaum, Studio 2'}
               placeholderTextColor={theme.textSecondary}
               style={[
                 styles.input,
@@ -232,34 +306,41 @@ export default function CreateTermineScreen() {
             />
           </View>
 
-          <View style={styles.inputGroup}>
-            <ThemedText type="smallBold">Wiederholung</ThemedText>
-            <View style={styles.repeatGrid}>
-              {repeatOptions.map((option) => {
-                const selected = option.value === repeat;
+          {kind === 'rehearsal' ? (
+            <View style={styles.inputGroup}>
+              <ThemedText type="smallBold">Wiederholung</ThemedText>
+              <View style={styles.repeatGrid}>
+                {repeatOptions.map((option) => {
+                  const selected = option.value === repeat;
 
-                return (
-                  <Pressable
-                    key={option.value}
-                    onPress={() => setRepeat(option.value)}
-                    style={({ pressed }) => [
-                      styles.repeatPill,
-                      {
-                        backgroundColor: selected ? theme.text : theme.background,
-                        borderColor: selected ? theme.text : theme.backgroundSelected,
-                        opacity: pressed ? 0.75 : 1,
-                      },
-                    ]}>
-                    <ThemedText
-                      type="smallBold"
-                      style={{ color: selected ? theme.background : theme.text }}>
-                      {option.label}
-                    </ThemedText>
-                  </Pressable>
-                );
-              })}
+                  return (
+                    <Pressable
+                      key={option.value}
+                      onPress={() => setRepeat(option.value)}
+                      style={({ pressed }) => [
+                        styles.repeatPill,
+                        {
+                          backgroundColor: selected ? theme.text : theme.background,
+                          borderColor: selected ? theme.text : theme.backgroundSelected,
+                          opacity: pressed ? 0.75 : 1,
+                        },
+                      ]}>
+                      <ThemedText type="smallBold" style={{ color: selected ? theme.background : theme.text }}>
+                        {option.label}
+                      </ThemedText>
+                    </Pressable>
+                  );
+                })}
+              </View>
             </View>
-          </View>
+          ) : (
+            <ThemedView style={[styles.noticeCard, { backgroundColor: theme.background }]}>
+              <ThemedText type="smallBold">Auftritte bleiben vorerst einmalig</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                Wiederholung ist in dieser ersten Umsetzung nur für Proben aktiviert.
+              </ThemedText>
+            </ThemedView>
+          )}
 
           {error ? (
             <ThemedText selectable type="smallBold" style={styles.errorText}>
@@ -268,14 +349,14 @@ export default function CreateTermineScreen() {
           ) : null}
 
           <Pressable onPress={handleCreateEvent} style={({ pressed }) => pressed && styles.pressed}>
-            <ThemedView style={[styles.createButton, { backgroundColor: theme.text }]}>
+            <ThemedView style={[styles.createButton, { backgroundColor: theme.text, opacity: isSubmitting ? 0.6 : 1 }]}>
               <SymbolView
                 tintColor={theme.background}
                 name={{ ios: 'checkmark.circle.fill', android: 'check_circle', web: 'check_circle' }}
                 size={18}
               />
               <ThemedText type="smallBold" style={{ color: theme.background }}>
-                Termin speichern
+                {isSubmitting ? `${eventKindLabels[kind]} wird gespeichert...` : `${eventKindLabels[kind]} speichern`}
               </ThemedText>
             </ThemedView>
           </Pressable>
@@ -336,8 +417,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  noticeCard: {
+    gap: Spacing.two,
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+  },
+  noticeButton: {
+    minHeight: 40,
+    borderRadius: Spacing.three,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.three,
+    alignSelf: 'flex-start',
+  },
   inputGroup: {
     gap: Spacing.two,
+  },
+  kindGrid: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+  },
+  kindCard: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+    gap: Spacing.half,
   },
   row: {
     flexDirection: 'row',

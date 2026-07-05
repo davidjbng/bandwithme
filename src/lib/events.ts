@@ -1,13 +1,15 @@
-import { useSyncExternalStore } from 'react';
-
+export type EventKind = 'rehearsal' | 'performance';
 export type RepeatOption = 'none' | 'weekly' | 'biweekly' | 'monthly';
+export type RsvpStatus = 'yes' | 'maybe' | 'no';
 
-export type EventItem = {
-  id: string;
-  name: string;
-  dateTime: string;
-  location: string;
-  repeat: RepeatOption;
+export const eventKindOptions: { value: EventKind; label: string; hint: string }[] = [
+  { value: 'rehearsal', label: 'Probe', hint: 'regelmäßig, probieren, vorbereiten' },
+  { value: 'performance', label: 'Auftritt', hint: 'Gig, Konzert, Show, Bühnenzeit' },
+];
+
+export const eventKindLabels: Record<EventKind, string> = {
+  rehearsal: 'Probe',
+  performance: 'Auftritt',
 };
 
 export const repeatOptions: { value: RepeatOption; label: string }[] = [
@@ -24,41 +26,11 @@ export const repeatLabels: Record<RepeatOption, string> = {
   monthly: 'Jeden Monat',
 };
 
-let events: EventItem[] = [];
-const listeners = new Set<() => void>();
-
-function emitChange() {
-  for (const listener of listeners) {
-    listener();
-  }
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-
-  return () => {
-    listeners.delete(listener);
-  };
-}
-
-function getSnapshot() {
-  return events;
-}
-
-export function useEvents() {
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
-}
-
-export function addEvent(event: Omit<EventItem, 'id'>) {
-  events = [
-    ...events,
-    {
-      ...event,
-      id: `${Date.now()}-${event.name}`,
-    },
-  ];
-  emitChange();
-}
+export const rsvpOptions: { value: RsvpStatus; label: string; summaryLabel: string }[] = [
+  { value: 'yes', label: 'Dabei', summaryLabel: 'dabei' },
+  { value: 'maybe', label: 'Vielleicht', summaryLabel: 'vielleicht' },
+  { value: 'no', label: 'Kann nicht', summaryLabel: 'absage' },
+];
 
 export function getInitialFormDate() {
   const date = new Date();
@@ -68,16 +40,6 @@ export function getInitialFormDate() {
   const timeValue = date.toTimeString().slice(0, 5);
 
   return { dateValue, timeValue };
-}
-
-export function createDateTime(dateValue: string, timeValue: string) {
-  const parsedDate = new Date(`${dateValue}T${timeValue}:00`);
-
-  if (Number.isNaN(parsedDate.getTime())) {
-    return null;
-  }
-
-  return parsedDate;
 }
 
 export function formatDateTime(value: string) {
@@ -90,4 +52,17 @@ export function formatDateTime(value: string) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
+}
+
+export function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) {
+    return 'BW';
+  }
+
+  return parts
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? '')
+    .join('');
 }
