@@ -3,22 +3,36 @@
   "plugins": ["import", "typescript", "react", "unicorn", "oxc"],
   "categories": {
     "correctness": "error",
-    "suspicious": "warn",
-    "perf": "warn"
+    "suspicious": "error",
+    "perf": "error",
+    "pedantic": "off",
+    "style": "off",
+    "restriction": "off"
   },
   "rules": {
     "no-console": "off",
-    "import/no-cycle": "warn",
+    "import/no-cycle": "off",
     "import/no-default-export": "off",
-    "typescript/no-explicit-any": "warn",
-    "typescript/consistent-type-imports": "warn",
+    "typescript/no-explicit-any": "off",
+    "typescript/consistent-type-imports": "off",
     "unicorn/filename-case": "off",
-    "no-unused-vars": "warn",
-    "no-underscore-dangle": ["warn", { "allow": ["_id", "_creationTime"] }]
+    "no-unused-vars": "error",
+    "no-underscore-dangle": ["error", { "allow": ["_id", "_creationTime"] }],
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-key": "error",
+    "eslint/no-await-in-loop": "off",
+    "typescript/consistent-type-definitions": "off",
+    "oxc/no-barrel-file": "off",
+    "oxc/no-optional-chaining": "off",
+    "unicorn/prefer-node-protocol": "off",
+    "unicorn/throw-new-error": "error",
+    "import/no-named-as-default": "off",
+    "import/no-unassigned-import": "off"
   },
   "settings": {
     "react": {
-      "version": "19.0"
+      "version": "19.0",
+      "runtime": "automatic"
     }
   },
   "ignorePatterns": [

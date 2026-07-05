@@ -43,7 +43,7 @@ export default function BandSettingsScreen() {
     }
   }
 
-  async function handleRemove(membershipId: string, name: string) {
+  async function handleRemove(membershipId: string) {
     setActionError("");
     try {
       await removeMember({ membershipId } as never);
@@ -115,7 +115,7 @@ export default function BandSettingsScreen() {
                   </View>
                   {isAdmin && m.userId !== (band as any).userId && (
                     <Pressable
-                      onPress={() => handleRemove(m.id, m.name)}
+                      onPress={() => handleRemove(m.id)}
                       style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}
                     >
                       <SymbolView
