@@ -1,34 +1,39 @@
 # Lefthook Git hooks for BandWithMe
-# Runs automatically on git commit + after file changes from Hermes Agent
+# Runs automatically on git commit
 #
-# Install hooks: npx lefthook install
-# Run manually:   npx lefthook run pre-commit
+# Install: pnpm exec lefthook install
+# Manual:   pnpm exec lefthook run pre-commit
 
 pre-commit:
-  parallel: true
+  parallel: false
   commands:
-    oxlint:
+    # 1. Auto-format — runs first, re-adds formatted files to commit
+    format:
+      glob: "*.{ts,tsx,js,jsx,json,yaml,yml,md}"
+      run: pnpm format && git update-index --again
+      fail_text: "Formatting failed. Fix manually with: pnpm format"
+
+    # 2. Lint — blocks if errors found (deny-warnings active)
+    lint:
       glob: "*.{ts,tsx,js,jsx}"
       run: pnpm lint
-    oxfmt:
-      glob: "*.{ts,tsx,js,jsx,json,yaml,yml,md}"
-      run: pnpm format:check
+      fail_text: "Lint errors found. Fix before committing."
+
+    # 3. TypeScript — blocks if type errors
     typecheck:
       glob: "*.{ts,tsx}"
       run: pnpm typecheck
+      fail_text: "TypeScript errors found. Fix before committing."
 
 post-commit:
   commands:
-    # Auto-format any remaining files (non-blocking cleanup)
-    oxfmt-fix:
-      glob: "*.{ts,tsx,js,jsx,json,yaml,yml,md}"
-      run: pnpm format
-      interactive: true
-      fail_text: "Warning: oxfmt found files to format. Run 'pnpm format' to fix."
+    # Ensure deps are still current after any changes
+    install-check:
+      run: pnpm install --frozen-lockfile
+      fail_text: "Dependencies may have changed. Run 'pnpm install'."
 
 post-merge:
   commands:
-    # Ensure deps are up-to-date after merge
     install-deps:
       run: pnpm install --frozen-lockfile
       fail_text: "Dependencies may have changed. Run 'pnpm install'."
