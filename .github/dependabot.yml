@@ -17,23 +17,9 @@ updates:
       prefix: "chore"
       prefix-development: "chore"
       include: "scope"
-    # Maturity: keine Updates innerhalb der ersten 24h nach Release
-    # (Dependabot wartet automatisch, aber wir halten 1 Tag via taze-Script)
     insecure-external-code-execution: allow
     groups:
-      # Minor + Patch updates zusammen als ein PR
-      minor-patch:
-        applies-to: version-updates
-        patterns:
-          - "*"
-        update-types:
-          - "minor"
-          - "patch"
-        labels:
-          - "dependencies"
-          - "minor"
-      # Major updates: jeder einzeln (kein Group-Eintrag = individuell)
-      # Expo/React Native core packages als eigenen Eintrag
+      # Expo/React Native core — alle Updates zusammen (minor+patch+major)
       expo-core:
         applies-to: version-updates
         patterns:
@@ -47,11 +33,33 @@ updates:
           - "@react-native/*"
           - "typescript"
         update-types:
+          - "minor"
+          - "patch"
           - "major"
         labels:
           - "dependencies"
-          - "major"
           - "expo"
+      # Alles andere: Minor + Patch zusammen, Major einzeln
+      minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "expo"
+          - "expo-*"
+          - "react-native"
+          - "react-native-*"
+          - "@expo/*"
+          - "react"
+          - "react-dom"
+          - "@react-native/*"
+          - "typescript"
+        update-types:
+          - "minor"
+          - "patch"
+        labels:
+          - "dependencies"
+          - "minor"
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
