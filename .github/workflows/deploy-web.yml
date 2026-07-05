@@ -1,0 +1,52 @@
+name: Deploy Web to EAS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-web:
+    name: Deploy Web
+    runs-on: ubuntu-latest
+    env:
+      EXPO_PUBLIC_CONVEX_URL: https://blissful-spaniel-445.eu-west-1.convex.cloud
+      EXPO_PUBLIC_CONVEX_SITE_URL: https://blissful-spaniel-445.eu-west-1.convex.site
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Deploy Convex backend
+        run: |
+          if [ -n "$CONVEX_DEPLOY_KEY" ]; then
+            echo "Deploying Convex backend..."
+            npx convex deploy --cmd '' --cmd-url-env CONVEX_SITE_URL
+          else
+            echo "⚠ CONVEX_DEPLOY_KEY not set — skipping backend deploy"
+          fi
+
+      - name: Build web export
+        run: pnpm web:export
+
+      - name: Deploy to EAS (production)
+        run: |
+          npx eas-cli@latest deploy \
+            --prod \
+            --non-interactive \
+            --json \
+            --message "${{ github.event.head_commit.message || github.sha }}"
+
+      - name: Show deployment URL
+        run: |
+          echo "🌐 Production: https://bandwithme.expo.app"
+          echo "📊 Dashboard: https://expo.dev/projects/fc58fe98-4cff-4da0-bdc7-08fdcfd99a19/hosting/deployments"
