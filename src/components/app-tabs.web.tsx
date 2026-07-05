@@ -16,7 +16,7 @@ import { MaxContentWidth, Spacing } from "@/constants/theme";
 export default function AppTabs() {
   return (
     <Tabs>
-      <TabSlot style={{ height: "100%" }} />
+      <TabSlot style={styles.tabSlot} />
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
@@ -62,10 +62,18 @@ export function CustomTabList(props: TabListProps) {
   );
 }
 
+const TAB_BAR_HEIGHT = 60;
+
 const styles = StyleSheet.create({
+  tabSlot: {
+    height: "100%",
+    paddingBottom: TAB_BAR_HEIGHT + Spacing.three * 2,
+  },
   tabListContainer: {
     position: "absolute",
-    width: "100%",
+    bottom: 0,
+    left: 0,
+    right: 0,
     padding: Spacing.three,
     justifyContent: "center",
     alignItems: "center",
