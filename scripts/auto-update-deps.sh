@@ -2,7 +2,7 @@
 # Auto-update dependencies using taze
 # Called weekly by Hermes cron job
 # Minor/patch updates: direct push to main if tests pass
-# Major updates: create PR if there are concerns
+# Major updates: create PR
 
 set -euo pipefail
 
@@ -26,67 +26,69 @@ if ! git diff --quiet; then
   exit 0
 fi
 
-# Pull latest
 git pull origin main
 
-# Check for updates with taze (maturity: 1 day minimum)
-echo "=== Checking for dependency updates ==="
-pnpm taze --include-dependencies --write --exclude major 2>&1 || true
+# taze maturity period: 1 Tag Cooldown für neue Releases
+MATURITY="--maturity-period 1"
 
-# If there are changes, commit and push
+# Phase 1: Minor + Patch Updates (direkt auf main)
+echo "=== Phase 1: Minor/Patch Updates ==="
+pnpm taze minor --include-dependencies --write $MATURITY 2>&1 || true
+
 if ! git diff --quiet pnpm-lock.yaml package.json; then
-  echo "=== Dependency updates found ==="
+  echo "=== Updates found, running tests ==="
   git add pnpm-lock.yaml package.json
   git commit -m "chore: update dependencies (auto)
 
-Automated dependency update via taze.
-Minor and patch versions only.
+Automated minor/patch update via taze.
+Maturity: 1 day. Only minor and patch versions.
 
 Assisted-By: Hermes Agent"
-  
-  # Run tests
+
   if pnpm e2e 2>&1; then
     echo "=== Tests passed, pushing ==="
     git push origin main
   else
     echo "=== Tests failed, reverting ==="
     git reset --hard HEAD~1
+    echo "!!! Tests failed after dependency update !!!"
     exit 1
   fi
 else
-  echo "=== No updates available ==="
+  echo "=== No minor/patch updates ==="
 fi
 
-# Now check for major updates and create PR if any
-echo "=== Checking for major updates ==="
-MAJOR_UPDATES=$(pnpm taze --include-dependencies --dry-run 2>&1 | grep -c "major" || true)
-
-if [ "$MAJOR_UPDATES" -gt 0 ]; then
-  echo "=== Major updates available: $MAJOR_UPDATES ==="
-  # Create a branch for major updates
+# Phase 2: Major Updates (als PR)
+echo "=== Phase 2: Major Updates ==="
+MAJOR_OUTPUT=$(pnpm taze major --include-dependencies --fail-on-outdated $MATURITY 2>&1) || {
+  echo "=== Major updates available ==="
   BRANCH="chore/major-updates-$(date +%Y%m%d)"
   git checkout -b "$BRANCH"
-  pnpm taze --write 2>&1 || true
-  git add pnpm-lock.yaml package.json
-  git commit -m "chore: major dependency updates
+  pnpm taze major --write $MATURITY 2>&1 || true
+  
+  if ! git diff --quiet pnpm-lock.yaml package.json; then
+    git add pnpm-lock.yaml package.json
+    git commit -m "chore: major dependency updates
 
 Automated major version update via taze.
-Please review before merging.
+Maturity: 1 day. Please review breaking changes.
 
 Assisted-By: Hermes Agent"
-  git push origin "$BRANCH"
-  
-  # Create PR using GitHub API
-  # This part needs GH_TOKEN
-  gh pr create \
-    --title "chore: major dependency updates ($(date +%Y-%m-%d))" \
-    --body "Automated major version update via taze.\n\nPlease review breaking changes before merging." \
-    --base main \
-    --head "$BRANCH" \
-    --label "dependencies" \
-    2>&1 || echo "gh CLI not available, PR not created automatically"
-  
-  git checkout main
-fi
+    git push origin "$BRANCH"
+
+    gh pr create \
+      --title "chore: major dependency updates ($(date +%Y-%m-%d))" \
+      --body "Automated major version update via taze (1-day maturity).\n\nPlease review breaking changes before merging.\n\nReview checklist:\n- [ ] Check changelogs for breaking changes\n- [ ] Run local e2e tests\n- [ ] Verify Expo/RN compatibility" \
+      --base main \
+      --head "$BRANCH" \
+      --label "dependencies,major" \
+      2>&1 || echo "gh CLI not available, PR not created automatically"
+
+    git checkout main
+  else
+    git checkout main
+    git branch -D "$BRANCH"
+  fi
+}
 
 echo "=== Done ==="

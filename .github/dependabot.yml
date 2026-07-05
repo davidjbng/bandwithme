@@ -9,18 +9,49 @@ updates:
       time: "09:00"
       timezone: "Europe/Berlin"
     versioning-strategy: "increase"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 15
     labels:
       - "dependencies"
       - "security"
-    # Minor and patch updates go directly, major gets a PR
     commit-message:
       prefix: "chore"
       prefix-development: "chore"
       include: "scope"
-    # Maturity period: at least 1 day
-    # Dependabot doesn't have a direct maturity setting, but we use taze for that
-
+    # Maturity: keine Updates innerhalb der ersten 24h nach Release
+    # (Dependabot wartet automatisch, aber wir halten 1 Tag via taze-Script)
+    insecure-external-code-execution: allow
+    groups:
+      # Minor + Patch updates zusammen als ein PR
+      minor-patch:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        labels:
+          - "dependencies"
+          - "minor"
+      # Major updates: jeder einzeln (kein Group-Eintrag = individuell)
+      # Expo/React Native core packages als eigenen Eintrag
+      expo-core:
+        applies-to: version-updates
+        patterns:
+          - "expo"
+          - "expo-*"
+          - "react-native"
+          - "react-native-*"
+          - "@expo/*"
+          - "react"
+          - "react-dom"
+          - "@react-native/*"
+          - "typescript"
+        update-types:
+          - "major"
+        labels:
+          - "dependencies"
+          - "major"
+          - "expo"
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -29,6 +60,10 @@ updates:
       day: "monday"
       time: "09:00"
       timezone: "Europe/Berlin"
+    groups:
+      actions:
+        patterns:
+          - "*"
     labels:
       - "dependencies"
       - "ci"
