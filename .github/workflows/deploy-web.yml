@@ -30,7 +30,7 @@ jobs:
         run: |
           if [ -n "$CONVEX_DEPLOY_KEY" ]; then
             echo "Deploying Convex backend..."
-            npx convex deploy --cmd '' --cmd-url-env CONVEX_SITE_URL
+            npx convex deploy
           else
             echo "⚠ CONVEX_DEPLOY_KEY not set — skipping backend deploy"
           fi
