@@ -46,3 +46,7 @@ example
 # Oh my openagent
 .omo/
 .playwright-cli/
+
+# Playwright
+playwright-report/
+test-results/

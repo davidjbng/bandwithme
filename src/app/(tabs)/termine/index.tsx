@@ -1,13 +1,13 @@
-import { useConvexAuth } from '@convex-dev/auth/react';
-import { useMutation, useQuery } from 'convex/react';
-import { Stack, useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useConvexAuth } from "@convex-dev/auth/react";
+import { useMutation, useQuery } from "convex/react";
+import { Stack, useRouter } from "expo-router";
+import { SymbolView } from "expo-symbols";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import {
   eventKindLabels,
   formatDateTime,
@@ -15,17 +15,11 @@ import {
   repeatLabels,
   rsvpOptions,
   type RsvpStatus,
-} from '@/lib/events';
-import { useTheme } from '@/hooks/use-theme';
-import { api } from '../../../../convex/_generated/api';
+} from "@/lib/events";
+import { useTheme } from "@/hooks/use-theme";
+import { api } from "../../../../convex/_generated/api";
 
-function AvatarStack({
-  names,
-  theme,
-}: {
-  names: string[];
-  theme: ReturnType<typeof useTheme>;
-}) {
+function AvatarStack({ names, theme }: { names: string[]; theme: ReturnType<typeof useTheme> }) {
   if (names.length === 0) {
     return (
       <ThemedText type="small" themeColor="textSecondary">
@@ -46,12 +40,15 @@ function AvatarStack({
               backgroundColor: theme.background,
               borderColor: theme.backgroundElement,
             },
-          ]}>
+          ]}
+        >
           <ThemedText type="smallBold">{getInitials(name)}</ThemedText>
         </View>
       ))}
       {names.length > 4 ? (
-        <View style={[styles.avatar, styles.avatarCount, { backgroundColor: theme.backgroundSelected }]}> 
+        <View
+          style={[styles.avatar, styles.avatarCount, { backgroundColor: theme.backgroundSelected }]}
+        >
           <ThemedText type="smallBold">+{names.length - 4}</ThemedText>
         </View>
       ) : null}
@@ -82,14 +79,17 @@ export default function TermineScreen() {
         style={[styles.scrollView, { backgroundColor: theme.background }]}
         contentInset={insets}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.contentContainer}>
+        contentContainerStyle={styles.contentContainer}
+      >
         <ThemedView style={styles.container}>
           <ThemedView style={styles.listSection}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionTitleWrap}>
                 <ThemedText type="smallBold">Nächste Termine</ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
-                  {events.length === 0 ? 'Noch nichts geplant' : `${events.length} Termine mit echten Zusagen`}
+                  {events.length === 0
+                    ? "Noch nichts geplant"
+                    : `${events.length} Termine mit echten Zusagen`}
                 </ThemedText>
               </View>
             </View>
@@ -99,10 +99,14 @@ export default function TermineScreen() {
                 <View style={styles.signInCopy}>
                   <ThemedText type="smallBold">Login für Zusagen</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
-                    Du kannst die Termine schon sehen. Für echte Zusagen und neue Termine loggst du dich im Profil ein.
+                    Du kannst die Termine schon sehen. Für echte Zusagen und neue Termine loggst du
+                    dich im Profil ein.
                   </ThemedText>
                 </View>
-                <Pressable onPress={() => router.push('/user')} style={({ pressed }) => pressed && styles.pressed}>
+                <Pressable
+                  onPress={() => router.push("/user")}
+                  style={({ pressed }) => pressed && styles.pressed}
+                >
                   <ThemedView style={[styles.signInButton, { backgroundColor: theme.text }]}>
                     <ThemedText type="smallBold" style={{ color: theme.background }}>
                       Zum Profil
@@ -117,7 +121,11 @@ export default function TermineScreen() {
                 <View style={[styles.emptyIcon, { backgroundColor: theme.background }]}>
                   <SymbolView
                     tintColor={theme.textSecondary}
-                    name={{ ios: 'calendar.badge.plus', android: 'event_available', web: 'event_available' }}
+                    name={{
+                      ios: "calendar.badge.plus",
+                      android: "event_available",
+                      web: "event_available",
+                    }}
                     size={28}
                   />
                 </View>
@@ -125,19 +133,23 @@ export default function TermineScreen() {
                   Noch keine Probe und noch kein Auftritt
                 </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.emptyCopy}>
-                  Lege den ersten Termin an. Danach können Bandmitglieder direkt zusagen oder absagen.
+                  Lege den ersten Termin an. Danach können Bandmitglieder direkt zusagen oder
+                  absagen.
                 </ThemedText>
                 <Pressable
-                  onPress={() => (isAuthenticated ? router.push('/termine/create') : router.push('/user'))}
-                  style={({ pressed }) => pressed && styles.pressed}>
+                  onPress={() =>
+                    isAuthenticated ? router.push("/termine/create") : router.push("/user")
+                  }
+                  style={({ pressed }) => pressed && styles.pressed}
+                >
                   <ThemedView style={[styles.emptyButton, { backgroundColor: theme.text }]}>
                     <SymbolView
                       tintColor={theme.background}
-                      name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add' }}
+                      name={{ ios: "plus.circle.fill", android: "add_circle", web: "add" }}
                       size={18}
                     />
                     <ThemedText type="smallBold" style={{ color: theme.background }}>
-                      {isAuthenticated ? 'Termin erstellen' : 'Einloggen und starten'}
+                      {isAuthenticated ? "Termin erstellen" : "Einloggen und starten"}
                     </ThemedText>
                   </ThemedView>
                 </Pressable>
@@ -162,7 +174,9 @@ export default function TermineScreen() {
                             {formatDateTime(event.dateTime)} · {event.location}
                           </ThemedText>
                         </View>
-                        <ThemedView style={[styles.kindBadge, { backgroundColor: theme.background }]}>
+                        <ThemedView
+                          style={[styles.kindBadge, { backgroundColor: theme.background }]}
+                        >
                           <ThemedText type="smallBold">{eventKindLabels[event.kind]}</ThemedText>
                         </ThemedView>
                       </View>
@@ -172,7 +186,10 @@ export default function TermineScreen() {
                           {repeatLabels[event.repeat]}
                         </ThemedText>
                         <ThemedText type="small" themeColor="textSecondary">
-                          {event.responseCounts.yes + event.responseCounts.maybe + event.responseCounts.no} Rückmeldungen
+                          {event.responseCounts.yes +
+                            event.responseCounts.maybe +
+                            event.responseCounts.no}{" "}
+                          Rückmeldungen
                         </ThemedText>
                       </View>
 
@@ -195,8 +212,8 @@ export default function TermineScreen() {
                           <ThemedText type="smallBold">Deine Zusage</ThemedText>
                           <ThemedText type="small" themeColor="textSecondary">
                             {event.viewerResponse
-                              ? `Du bist aktuell auf „${rsvpOptions.find((option) => option.value === event.viewerResponse)?.label ?? ''}“`
-                              : 'Noch keine Antwort'}
+                              ? `Du bist aktuell auf „${rsvpOptions.find((option) => option.value === event.viewerResponse)?.label ?? ""}“`
+                              : "Noch keine Antwort"}
                           </ThemedText>
                         </View>
                         <View style={styles.rsvpActions}>
@@ -214,8 +231,12 @@ export default function TermineScreen() {
                                     borderColor: selected ? theme.text : theme.backgroundSelected,
                                     opacity: !isAuthenticated ? 0.45 : pressed ? 0.75 : 1,
                                   },
-                                ]}>
-                                <ThemedText type="smallBold" style={{ color: selected ? theme.background : theme.text }}>
+                                ]}
+                              >
+                                <ThemedText
+                                  type="smallBold"
+                                  style={{ color: selected ? theme.background : theme.text }}
+                                >
                                   {option.label}
                                 </ThemedText>
                               </Pressable>
@@ -234,15 +255,18 @@ export default function TermineScreen() {
 
       <Stack.Screen
         options={{
-          title: 'Termine',
+          title: "Termine",
           headerRight: () => (
             <Pressable
               accessibilityLabel="Termin erstellen"
-              onPress={() => (isAuthenticated ? router.push('/termine/create') : router.push('/user'))}
-              style={({ pressed }) => [styles.toolbarButton, pressed && styles.pressed]}>
+              onPress={() =>
+                isAuthenticated ? router.push("/termine/create") : router.push("/user")
+              }
+              style={({ pressed }) => [styles.toolbarButton, pressed && styles.pressed]}
+            >
               <SymbolView
                 tintColor={theme.text}
-                name={{ ios: 'plus.circle.fill', android: 'add_circle', web: 'add' }}
+                name={{ ios: "plus.circle.fill", android: "add_circle", web: "add" }}
                 size={24}
               />
             </Pressable>
@@ -258,25 +282,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.five,
     paddingBottom: Spacing.five,
   },
   container: {
-    width: '100%',
+    width: "100%",
     maxWidth: MaxContentWidth,
   },
   centerText: {
-    textAlign: 'center',
+    textAlign: "center",
   },
   listSection: {
     gap: Spacing.three,
   },
   sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     gap: Spacing.three,
   },
   sectionTitleWrap: {
@@ -285,10 +309,10 @@ const styles = StyleSheet.create({
   signInCard: {
     borderRadius: Spacing.four,
     padding: Spacing.three,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.three,
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   signInCopy: {
     flex: 1,
@@ -297,12 +321,12 @@ const styles = StyleSheet.create({
   signInButton: {
     minHeight: 40,
     borderRadius: Spacing.three,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: Spacing.three,
   },
   emptyCard: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: Spacing.two,
     borderRadius: Spacing.four,
     paddingHorizontal: Spacing.four,
@@ -312,19 +336,19 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyCopy: {
-    textAlign: 'center',
+    textAlign: "center",
     maxWidth: 520,
   },
   emptyButton: {
     minHeight: 44,
     borderRadius: Spacing.three,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
     gap: Spacing.two,
     paddingHorizontal: Spacing.three,
     marginTop: Spacing.two,
@@ -332,8 +356,8 @@ const styles = StyleSheet.create({
   toolbarButton: {
     width: 44,
     height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   pressed: {
     opacity: 0.75,
@@ -347,10 +371,10 @@ const styles = StyleSheet.create({
     padding: Spacing.three,
   },
   eventTopRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.two,
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
   eventTitleWrap: {
     flex: 1,
@@ -359,14 +383,14 @@ const styles = StyleSheet.create({
   kindBadge: {
     minHeight: 30,
     borderRadius: 999,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: Spacing.two,
   },
   metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     gap: Spacing.two,
   },
   responseSummary: {
@@ -376,13 +400,13 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
   },
   responseLaneHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   avatarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     minHeight: 30,
   },
   avatar: {
@@ -390,8 +414,8 @@ const styles = StyleSheet.create({
     height: 30,
     borderRadius: 999,
     borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatarCount: {
     marginLeft: Spacing.one,
@@ -404,8 +428,8 @@ const styles = StyleSheet.create({
     gap: Spacing.half,
   },
   rsvpActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: Spacing.two,
   },
   rsvpButton: {

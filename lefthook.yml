@@ -1,0 +1,34 @@
+# Lefthook Git hooks for BandWithMe
+# Runs automatically on git commit + after file changes from Hermes Agent
+#
+# Install hooks: npx lefthook install
+# Run manually:   npx lefthook run pre-commit
+
+pre-commit:
+  parallel: true
+  commands:
+    oxlint:
+      glob: "*.{ts,tsx,js,jsx}"
+      run: pnpm lint
+    oxfmt:
+      glob: "*.{ts,tsx,js,jsx,json,yaml,yml,md}"
+      run: pnpm format:check
+    typecheck:
+      glob: "*.{ts,tsx}"
+      run: pnpm typecheck
+
+post-commit:
+  commands:
+    # Auto-format any remaining files (non-blocking cleanup)
+    oxfmt-fix:
+      glob: "*.{ts,tsx,js,jsx,json,yaml,yml,md}"
+      run: pnpm format
+      interactive: true
+      fail_text: "Warning: oxfmt found files to format. Run 'pnpm format' to fix."
+
+post-merge:
+  commands:
+    # Ensure deps are up-to-date after merge
+    install-deps:
+      run: pnpm install --frozen-lockfile
+      fail_text: "Dependencies may have changed. Run 'pnpm install'."

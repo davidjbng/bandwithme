@@ -224,9 +224,7 @@ export const deleteBand = mutation({
       .query("bandMembers")
       .withIndex("by_bandId", (q) => q.eq("bandId", band._id))
       .collect();
-    for (const m of memberships) {
-      await ctx.db.delete(m._id);
-    }
+    await Promise.all(memberships.map((m) => ctx.db.delete(m._id)));
 
     // Delete band
     await ctx.db.delete(band._id);

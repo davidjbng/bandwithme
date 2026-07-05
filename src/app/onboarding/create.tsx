@@ -1,16 +1,16 @@
-import { useConvexAuth } from '@convex-dev/auth/react';
-import { useMutation } from 'convex/react';
-import { Stack, useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useConvexAuth } from "@convex-dev/auth/react";
+import { useMutation } from "convex/react";
+import { Stack, useRouter } from "expo-router";
+import { SymbolView } from "expo-symbols";
+import { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { api } from '../../../convex/_generated/api';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
+import { api } from "../../../convex/_generated/api";
 
 export default function CreateBandScreen() {
   const theme = useTheme();
@@ -19,8 +19,8 @@ export default function CreateBandScreen() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const createBand = useMutation(api.bands.create);
 
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const insets = {
@@ -29,17 +29,17 @@ export default function CreateBandScreen() {
   };
 
   async function handleCreate() {
-    setError('');
+    setError("");
     if (!name.trim()) {
-      setError('Gib deiner Band einen Namen.');
+      setError("Gib deiner Band einen Namen.");
       return;
     }
     setSubmitting(true);
     try {
       await createBand({ name: name.trim() });
-      router.replace('/');
+      router.replace("/");
     } catch (e: any) {
-      setError(e?.message ?? 'Fehler beim Erstellen der Band.');
+      setError(e?.message ?? "Fehler beim Erstellen der Band.");
     } finally {
       setSubmitting(false);
     }
@@ -48,7 +48,9 @@ export default function CreateBandScreen() {
   if (isLoading) {
     return (
       <ThemedView style={styles.centered}>
-        <ThemedText type="small" themeColor="textSecondary">Lädt…</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">
+          Lädt…
+        </ThemedText>
       </ThemedView>
     );
   }
@@ -56,8 +58,10 @@ export default function CreateBandScreen() {
   if (!isAuthenticated) {
     return (
       <ThemedView style={styles.centered}>
-        <ThemedText type="small" themeColor="textSecondary">Bitte zuerst einloggen.</ThemedText>
-        <Pressable onPress={() => router.push('/user')}>
+        <ThemedText type="small" themeColor="textSecondary">
+          Bitte zuerst einloggen.
+        </ThemedText>
+        <Pressable onPress={() => router.push("/user")}>
           <ThemedText type="linkPrimary">Zum Login</ThemedText>
         </Pressable>
       </ThemedView>
@@ -66,15 +70,16 @@ export default function CreateBandScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Band erstellen' }} />
+      <Stack.Screen options={{ title: "Band erstellen" }} />
       <ScrollView
         style={[styles.scrollView, { backgroundColor: theme.background }]}
         contentInset={insets}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.contentContainer}>
+        contentContainerStyle={styles.contentContainer}
+      >
         <ThemedView style={styles.container}>
           <View style={styles.header}>
-            <SymbolView tintColor={theme.text} name={{ ios: 'music.mic', web: 'mic' }} size={40} />
+            <SymbolView tintColor={theme.text} name={{ ios: "music.mic", web: "mic" }} size={40} />
             <ThemedText type="subtitle">Neue Band gründen</ThemedText>
             <ThemedText type="default" themeColor="textSecondary" style={styles.centerText}>
               Gib deiner Band einen Namen. Du wirst automatisch Admin.
@@ -89,7 +94,7 @@ export default function CreateBandScreen() {
                 {
                   color: theme.text,
                   backgroundColor: theme.backgroundElement,
-                  borderColor: error ? '#ef4444' : theme.backgroundSelected,
+                  borderColor: error ? "#ef4444" : theme.backgroundSelected,
                 },
               ]}
               placeholder="z. B. Die Kellerkinder"
@@ -100,7 +105,9 @@ export default function CreateBandScreen() {
               editable={!submitting}
             />
             {error ? (
-              <ThemedText type="small" style={{ color: '#ef4444' }}>{error}</ThemedText>
+              <ThemedText type="small" style={{ color: "#ef4444" }}>
+                {error}
+              </ThemedText>
             ) : null}
 
             <Pressable
@@ -110,14 +117,17 @@ export default function CreateBandScreen() {
                 styles.submitButton,
                 pressed && styles.pressed,
                 { backgroundColor: theme.text, opacity: submitting ? 0.5 : 1 },
-              ]}>
+              ]}
+            >
               <ThemedText type="smallBold" style={{ color: theme.background }}>
-                {submitting ? 'Wird erstellt…' : 'Band erstellen'}
+                {submitting ? "Wird erstellt…" : "Band erstellen"}
               </ThemedText>
             </Pressable>
 
             <Pressable onPress={() => router.back()} style={styles.cancelButton}>
-              <ThemedText type="small" themeColor="textSecondary">Abbrechen</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                Abbrechen
+              </ThemedText>
             </Pressable>
           </View>
         </ThemedView>
@@ -127,16 +137,16 @@ export default function CreateBandScreen() {
 }
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.two },
+  centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: Spacing.two },
   scrollView: { flex: 1 },
   contentContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.six,
   },
-  container: { width: '100%', maxWidth: MaxContentWidth, gap: Spacing.five },
-  header: { alignItems: 'center', gap: Spacing.two },
-  centerText: { textAlign: 'center' },
+  container: { width: "100%", maxWidth: MaxContentWidth, gap: Spacing.five },
+  header: { alignItems: "center", gap: Spacing.two },
+  centerText: { textAlign: "center" },
   form: { gap: Spacing.two },
   input: {
     borderWidth: 1,
@@ -148,14 +158,14 @@ const styles = StyleSheet.create({
   submitButton: {
     minHeight: 48,
     borderRadius: Spacing.three,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: Spacing.two,
   },
   cancelButton: {
     minHeight: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   pressed: { opacity: 0.75 },
 });

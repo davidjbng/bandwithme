@@ -45,10 +45,12 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 ## Users and Roles
 
 ### Primary users
+
 - **Bandmitglied**: nimmt an Proben und Auftritten teil, stimmt über Songs ab, pflegt Profil und Zusagen
 - **Admin**: kann Mitglieder einladen und verwalten sowie übergeordnete Bandverwaltung übernehmen
 
 ### Future users (not V1)
+
 - weitere Bands / öffentliche Store-Nutzer
 - feinere Rollenmodelle
 
@@ -110,6 +112,7 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 ## Scope Summary (V1)
 
 ### In Scope
+
 - Magic-Link-Login
 - Admin + Bandmitglied
 - Startscreen mit den Optionen „Band erstellen“ oder „Band beitreten“
@@ -135,6 +138,7 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 - Light & Dark Mode
 
 ### Explicitly Out of Scope
+
 - Bandkasse
 - Kommentare bei Zusagen
 - Reminder / Push Notifications
@@ -157,29 +161,37 @@ Die erste Version priorisiert **schnell nutzbaren Mehrwert und starke UX** über
 ## Information Architecture
 
 ### 1. Home / Band-Cockpit
+
 Empfohlener Einstiegsbereich mit:
+
 - nächster Probentermin
 - nächster Auftritt
 - kurze Voting-Übersicht
 - schneller Einstieg in Zusage oder Terminanlage
 
 ### 2. Termine
+
 Unterteilt in:
+
 - **Proben**
 - **Auftritte**
 
 Gemeinsame Basiskonzepte:
+
 - Datum/Uhrzeit
 - Serientermin-Unterstützung (für Proben)
 - Zusagen
 - „Zum Kalender hinzufügen“ pro Einzeltermin
 
 ### 3. Songs
+
 Unterteilt in:
+
 - Songs im Voting
 - Songs, die in Auftritts-Setlists verwendet werden
 
 ### 4. Profil
+
 - Name
 - Bild/Avatar
 - Instrumente
@@ -189,11 +201,13 @@ Unterteilt in:
 ## Domain Model (proposed)
 
 ### Band
+
 - repräsentiert die Band als primären Mandanten
 - hält Name, Basis-Einstellungen und Mitgliederbezug
 - wird beim expliziten Band-erstellen-Flow erstmals angelegt
 
 ### Membership
+
 - verbindet User mit Band
 - enthält Rolle (`admin`, `member`)
 - dient später als Basis für Einladungen und Rechte
@@ -201,6 +215,7 @@ Unterteilt in:
 - erlaubt Admins das Entfernen anderer Bandmitglieder
 
 ### User Profile
+
 - Name
 - Bild/Avatar
 - Hauptinstrument
@@ -208,21 +223,25 @@ Unterteilt in:
 - optionale spätere Präferenzen
 
 ### Event Series
+
 - beschreibt wiederkehrende Probentermine als eigenständiges Domänenobjekt
 - enthält Wiederholungsregel und Vorlagendaten
 - bleibt nach der Erstellung bearbeitbar und ist nicht nur eine Erstellhilfe
 
 ### Event Instance
+
 - konkrete Probe oder konkreter Auftritt
 - Typ: `rehearsal` oder `performance`
 - Datum/Uhrzeit, Ort, Notizen, Statusfähigkeit und Kalender-Handoff
 - bei Performance zusätzlich Titel und Setlist-/Gig-Kontext
 
 ### RSVP
+
 - Beziehung zwischen Mitglied und Event Instance
 - Status: `open`, `yes` oder `no`
 
 ### Song
+
 - Titel
 - Artist / Zusatzinfo optional
 - genau ein Referenzlink
@@ -230,10 +249,12 @@ Unterteilt in:
 - Ersteller / Timestamps
 
 ### Song Vote
+
 - Stimme eines Mitglieds auf einen Song
 - genau eine Stimme pro Mitglied pro Song
 
 ### Performance Setlist
+
 - ausgewählte Songs für einen Auftritt
 - geordnete Reihenfolge
 - existiert immer im Kontext genau eines Auftritts
@@ -276,6 +297,7 @@ Unterteilt in:
 ## Suggested Delivery Phases
 
 ### Phase 1 — Foundation
+
 - Rollenmodell (`admin`, `member`)
 - Band-erstellen- / Band-beitreten-Flow
 - Einladungslink-Fluss
@@ -285,6 +307,7 @@ Unterteilt in:
 - Basis-Navigation und Home-Cockpit-Rahmen
 
 ### Phase 2 — Termine
+
 - Event-Datenmodell
 - Einzeltermine
 - Probenserien
@@ -295,18 +318,21 @@ Unterteilt in:
 - Kalender-Handoff für Einzeltermine
 
 ### Phase 3 — Songs
+
 - Songs anlegen
 - Songlinks
 - Voting
 - Song-Archivierung
 
 ### Phase 4 — Auftritte
+
 - Performance-spezifische Felder
 - Songs in Setlist übernehmen
 - Reihenfolge definieren
 - Übersicht „für nächsten Auftritt vorgesehen“
 
 ### Phase 5 — Polish
+
 - Avatar-System verbessern
 - subtile Animationen
 - bessere Empty States

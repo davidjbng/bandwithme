@@ -1,24 +1,29 @@
-import { getAuthUserId } from '@convex-dev/auth/server';
-import { mutation, query } from './_generated/server';
-import { v } from 'convex/values';
+import { getAuthUserId } from "@convex-dev/auth/server";
+import { mutation, query } from "./_generated/server";
+import { v } from "convex/values";
 
-const eventKind = v.union(v.literal('rehearsal'), v.literal('performance'));
-const repeat = v.union(v.literal('none'), v.literal('weekly'), v.literal('biweekly'), v.literal('monthly'));
-const rsvpStatus = v.union(v.literal('yes'), v.literal('maybe'), v.literal('no'));
+const eventKind = v.union(v.literal("rehearsal"), v.literal("performance"));
+const repeat = v.union(
+  v.literal("none"),
+  v.literal("weekly"),
+  v.literal("biweekly"),
+  v.literal("monthly"),
+);
+const rsvpStatus = v.union(v.literal("yes"), v.literal("maybe"), v.literal("no"));
 
 export const list = query({
   args: {},
   handler: async (ctx) => {
     const viewerId = await getAuthUserId(ctx);
-    const allEvents = await ctx.db.query('events').withIndex('by_dateTime').collect();
+    const allEvents = await ctx.db.query("events").withIndex("by_dateTime").collect();
     const upcomingEvents = allEvents.filter((event) => event.dateTime >= new Date().toISOString());
     const cachedUsers = new Map();
 
     return await Promise.all(
       upcomingEvents.map(async (event) => {
         const responses = await ctx.db
-          .query('eventResponses')
-          .withIndex('by_eventId', (q) => q.eq('eventId', event._id))
+          .query("eventResponses")
+          .withIndex("by_eventId", (q) => q.eq("eventId", event._id))
           .collect();
 
         const participants = {
@@ -31,7 +36,7 @@ export const list = query({
           no: { id: string; name: string; email: string | null }[];
         };
 
-        let viewerResponse: 'yes' | 'maybe' | 'no' | null = null;
+        let viewerResponse: "yes" | "maybe" | "no" | null = null;
 
         for (const response of responses) {
           let user = cachedUsers.get(response.userId);
@@ -40,7 +45,7 @@ export const list = query({
             cachedUsers.set(response.userId, user);
           }
 
-          const fallbackName = user?.email?.split('@')[0] ?? 'Bandmitglied';
+          const fallbackName = user?.email?.split("@")[0] ?? "Bandmitglied";
           const participant = {
             id: response.userId,
             name: user?.name ?? fallbackName,
@@ -69,7 +74,7 @@ export const list = query({
           },
           participants,
         };
-      })
+      }),
     );
   },
 });
@@ -86,12 +91,12 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
 
     if (userId === null) {
-      throw new Error('Du musst eingeloggt sein, um einen Termin zu erstellen.');
+      throw new Error("Du musst eingeloggt sein, um einen Termin zu erstellen.");
     }
 
-    const normalizedRepeat = args.kind === 'performance' ? 'none' : args.repeat;
+    const normalizedRepeat = args.kind === "performance" ? "none" : args.repeat;
 
-    return await ctx.db.insert('events', {
+    return await ctx.db.insert("events", {
       kind: args.kind,
       name: args.name.trim(),
       dateTime: args.dateTime,
@@ -104,24 +109,24 @@ export const create = mutation({
 
 export const setResponse = mutation({
   args: {
-    eventId: v.id('events'),
+    eventId: v.id("events"),
     status: rsvpStatus,
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
 
     if (userId === null) {
-      throw new Error('Du musst eingeloggt sein, um zuzusagen.');
+      throw new Error("Du musst eingeloggt sein, um zuzusagen.");
     }
 
     const event = await ctx.db.get(args.eventId);
     if (!event) {
-      throw new Error('Dieser Termin existiert nicht mehr.');
+      throw new Error("Dieser Termin existiert nicht mehr.");
     }
 
     const existingResponse = await ctx.db
-      .query('eventResponses')
-      .withIndex('by_eventId_and_userId', (q) => q.eq('eventId', args.eventId).eq('userId', userId))
+      .query("eventResponses")
+      .withIndex("by_eventId_and_userId", (q) => q.eq("eventId", args.eventId).eq("userId", userId))
       .unique();
 
     const respondedAt = new Date().toISOString();
@@ -134,7 +139,7 @@ export const setResponse = mutation({
       return existingResponse._id;
     }
 
-    return await ctx.db.insert('eventResponses', {
+    return await ctx.db.insert("eventResponses", {
       eventId: args.eventId,
       userId,
       status: args.status,

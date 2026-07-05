@@ -1,11 +1,11 @@
-import { Email } from '@convex-dev/auth/providers/Email';
-import { convexAuth } from '@convex-dev/auth/server';
+import { Email } from "@convex-dev/auth/providers/Email";
+import { convexAuth } from "@convex-dev/auth/server";
 
 function redirectUrl(redirectTo: string) {
-  const siteUrl = process.env.SITE_URL?.replace(/\/$/, '');
+  const siteUrl = process.env.SITE_URL?.replace(/\/$/, "");
 
   if (siteUrl) {
-    if (redirectTo.startsWith('?') || redirectTo.startsWith('/')) {
+    if (redirectTo.startsWith("?") || redirectTo.startsWith("/")) {
       return `${siteUrl}${redirectTo}`;
     }
     if (redirectTo.startsWith(siteUrl)) {
@@ -13,17 +13,17 @@ function redirectUrl(redirectTo: string) {
     }
   }
 
-  if (redirectTo.startsWith('/')) {
+  if (redirectTo.startsWith("/")) {
     return `bandwithme://${redirectTo.slice(1)}`;
   }
-  if (redirectTo.startsWith('?')) {
+  if (redirectTo.startsWith("?")) {
     return `bandwithme://user${redirectTo}`;
   }
-  if (redirectTo.startsWith('bandwithme://')) {
+  if (redirectTo.startsWith("bandwithme://")) {
     return redirectTo;
   }
 
-  throw new Error('Invalid sign-in redirect URL.');
+  throw new Error("Invalid sign-in redirect URL.");
 }
 
 function resendApiKey() {
@@ -31,7 +31,7 @@ function resendApiKey() {
 }
 
 const Resend = Email({
-  id: 'resend',
+  id: "resend",
   apiKey: resendApiKey(),
   async sendVerificationRequest({ identifier, provider, url }) {
     const apiKey = provider.apiKey;
@@ -43,23 +43,25 @@ const Resend = Email({
       return;
     }
 
-    if (apiKey === 'dev' || apiKey === 'local') {
-      console.log(`Magic link for ${identifier}: ${url}. AUTH_RESEND_KEY is set to local log mode.`);
+    if (apiKey === "dev" || apiKey === "local") {
+      console.log(
+        `Magic link for ${identifier}: ${url}. AUTH_RESEND_KEY is set to local log mode.`,
+      );
       return;
     }
 
     console.log(`Sending magic link to ${identifier} with Resend.`);
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: 'Band With Me <onboarding@resend.dev>',
+        from: "Band With Me <onboarding@resend.dev>",
         to: identifier,
-        subject: 'Sign in to Band With Me',
+        subject: "Sign in to Band With Me",
         text: `Sign in to Band With Me: ${url}`,
       }),
     });

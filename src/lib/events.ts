@@ -1,35 +1,35 @@
-export type EventKind = 'rehearsal' | 'performance';
-export type RepeatOption = 'none' | 'weekly' | 'biweekly' | 'monthly';
-export type RsvpStatus = 'yes' | 'maybe' | 'no';
+export type EventKind = "rehearsal" | "performance";
+export type RepeatOption = "none" | "weekly" | "biweekly" | "monthly";
+export type RsvpStatus = "yes" | "maybe" | "no";
 
 export const eventKindOptions: { value: EventKind; label: string; hint: string }[] = [
-  { value: 'rehearsal', label: 'Probe', hint: 'regelmäßig, probieren, vorbereiten' },
-  { value: 'performance', label: 'Auftritt', hint: 'Gig, Konzert, Show, Bühnenzeit' },
+  { value: "rehearsal", label: "Probe", hint: "regelmäßig, probieren, vorbereiten" },
+  { value: "performance", label: "Auftritt", hint: "Gig, Konzert, Show, Bühnenzeit" },
 ];
 
 export const eventKindLabels: Record<EventKind, string> = {
-  rehearsal: 'Probe',
-  performance: 'Auftritt',
+  rehearsal: "Probe",
+  performance: "Auftritt",
 };
 
 export const repeatOptions: { value: RepeatOption; label: string }[] = [
-  { value: 'none', label: 'Einmalig' },
-  { value: 'weekly', label: 'Wöchentlich' },
-  { value: 'biweekly', label: 'Alle 2 Wochen' },
-  { value: 'monthly', label: 'Monatlich' },
+  { value: "none", label: "Einmalig" },
+  { value: "weekly", label: "Wöchentlich" },
+  { value: "biweekly", label: "Alle 2 Wochen" },
+  { value: "monthly", label: "Monatlich" },
 ];
 
 export const repeatLabels: Record<RepeatOption, string> = {
-  none: 'Keine Wiederholung',
-  weekly: 'Jede Woche',
-  biweekly: 'Alle 2 Wochen',
-  monthly: 'Jeden Monat',
+  none: "Keine Wiederholung",
+  weekly: "Jede Woche",
+  biweekly: "Alle 2 Wochen",
+  monthly: "Jeden Monat",
 };
 
 export const rsvpOptions: { value: RsvpStatus; label: string; summaryLabel: string }[] = [
-  { value: 'yes', label: 'Dabei', summaryLabel: 'dabei' },
-  { value: 'maybe', label: 'Vielleicht', summaryLabel: 'vielleicht' },
-  { value: 'no', label: 'Kann nicht', summaryLabel: 'absage' },
+  { value: "yes", label: "Dabei", summaryLabel: "dabei" },
+  { value: "maybe", label: "Vielleicht", summaryLabel: "vielleicht" },
+  { value: "no", label: "Kann nicht", summaryLabel: "absage" },
 ];
 
 export function getInitialFormDate() {
@@ -45,12 +45,12 @@ export function getInitialFormDate() {
 export function formatDateTime(value: string) {
   const date = new Date(value);
 
-  return new Intl.DateTimeFormat('de-DE', {
-    weekday: 'short',
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
+  return new Intl.DateTimeFormat("de-DE", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
   }).format(date);
 }
 
@@ -58,11 +58,11 @@ export function getInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
 
   if (parts.length === 0) {
-    return 'BW';
+    return "BW";
   }
 
   return parts
     .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('');
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 }

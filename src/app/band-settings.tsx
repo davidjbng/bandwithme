@@ -10,7 +10,7 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { api } from '../../convex/_generated/api';
+import { api } from "../../convex/_generated/api";
 
 export default function BandSettingsScreen() {
   const theme = useTheme();
