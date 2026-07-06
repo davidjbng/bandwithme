@@ -5,15 +5,24 @@ import { type PropsWithChildren } from "react";
 import { Platform } from "react-native";
 import { ConvexReactClient } from "convex/react";
 
-const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
+const PRODUCTION_URL = "https://blissful-spaniel-445.eu-west-1.convex.cloud";
 
-if (!convexUrl) {
-  throw new Error(
-    "Missing EXPO_PUBLIC_CONVEX_URL. Run `pnpm exec convex dev` and expose the deployment URL to Expo.",
-  );
+function getConvexUrl(): string {
+  const env = process.env.EXPO_PUBLIC_CONVEX_URL;
+
+  // EAS Hosting: always use production Convex
+  if (
+    typeof window !== "undefined" &&
+    (window.location.hostname.includes("expo.app") || window.location.hostname === "bandwithme.de")
+  ) {
+    return PRODUCTION_URL;
+  }
+
+  // Local dev: use env var (set by convex dev to localhost)
+  return env || PRODUCTION_URL;
 }
 
-const convex = new ConvexReactClient(convexUrl);
+const convex = new ConvexReactClient(getConvexUrl());
 
 const secureStore: TokenStorage = {
   getItem: SecureStore.getItemAsync,
