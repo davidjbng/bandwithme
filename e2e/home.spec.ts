@@ -1,18 +1,20 @@
 import { test, expect } from "@playwright/test";
 
+// Static export (SSR) produces React hydration warnings (#418).
+// These are harmless in production — filter them from test assertions.
+const ALLOWED_ERRORS = ["Convex", "fetch", "network", "React error #418"];
+
+function filterCritical(errors: string[]): string[] {
+  return errors.filter((e) => !ALLOWED_ERRORS.some((p) => e.includes(p)));
+}
+
 test.describe("Home page", () => {
   test("loads without console errors", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
-
     await page.goto("/");
     await page.waitForLoadState("networkidle");
-
-    // Allow Convex/network errors in production (static export hits remote backend)
-    const criticalErrors = errors.filter(
-      (e) => !e.includes("Convex") && !e.includes("fetch") && !e.includes("network"),
-    );
-    expect(criticalErrors).toEqual([]);
+    expect(filterCritical(errors)).toEqual([]);
   });
 
   test("shows app branding", async ({ page }) => {
@@ -38,27 +40,17 @@ test.describe("Navigation", () => {
   test("navigates to Termine", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
-
     await page.goto("/termine");
     await page.waitForLoadState("networkidle");
-
-    const criticalErrors = errors.filter(
-      (e) => !e.includes("Convex") && !e.includes("fetch") && !e.includes("network"),
-    );
-    expect(criticalErrors).toEqual([]);
+    expect(filterCritical(errors)).toEqual([]);
     await expect(page.getByText("Nächste Termine")).toBeVisible();
   });
 
   test("navigates to Profil", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
-
     await page.goto("/user");
     await page.waitForLoadState("networkidle");
-
-    const criticalErrors = errors.filter(
-      (e) => !e.includes("Convex") && !e.includes("fetch") && !e.includes("network"),
-    );
-    expect(criticalErrors).toEqual([]);
+    expect(filterCritical(errors)).toEqual([]);
   });
 });

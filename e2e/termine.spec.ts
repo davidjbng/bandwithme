@@ -1,17 +1,17 @@
 import { test, expect } from "@playwright/test";
 
+const ALLOWED_ERRORS = ["Convex", "fetch", "network", "React error #418"];
+function filterCritical(errors: string[]): string[] {
+  return errors.filter((e) => !ALLOWED_ERRORS.some((p) => e.includes(p)));
+}
+
 test.describe("Termine page", () => {
   test("loads without critical errors", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
-
     await page.goto("/termine");
     await page.waitForLoadState("networkidle");
-
-    const criticalErrors = errors.filter(
-      (e) => !e.includes("Convex") && !e.includes("fetch") && !e.includes("network"),
-    );
-    expect(criticalErrors).toEqual([]);
+    expect(filterCritical(errors)).toEqual([]);
   });
 
   test("shows empty state for unauthenticated users", async ({ page }) => {

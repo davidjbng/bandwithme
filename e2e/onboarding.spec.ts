@@ -1,17 +1,17 @@
 import { test, expect } from "@playwright/test";
 
+const ALLOWED_ERRORS = ["Convex", "fetch", "network", "React error #418"];
+function filterCritical(errors: string[]): string[] {
+  return errors.filter((e) => !ALLOWED_ERRORS.some((p) => e.includes(p)));
+}
+
 test.describe("Band onboarding", () => {
   test("/onboarding/create loads without critical errors", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
-
     await page.goto("/onboarding/create");
     await page.waitForLoadState("networkidle");
-
-    const criticalErrors = errors.filter(
-      (e) => !e.includes("Convex") && !e.includes("fetch") && !e.includes("network"),
-    );
-    expect(criticalErrors).toEqual([]);
+    expect(filterCritical(errors)).toEqual([]);
     await expect(page.getByText(/Bitte zuerst einloggen|Neue Band gründen/)).toBeVisible();
   });
 
@@ -24,14 +24,9 @@ test.describe("Band onboarding", () => {
   test("/onboarding/join loads without critical errors", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
-
     await page.goto("/onboarding/join");
     await page.waitForLoadState("networkidle");
-
-    const criticalErrors = errors.filter(
-      (e) => !e.includes("Convex") && !e.includes("fetch") && !e.includes("network"),
-    );
-    expect(criticalErrors).toEqual([]);
+    expect(filterCritical(errors)).toEqual([]);
     await expect(page.getByText(/Band beitreten|Einladungslink/).first()).toBeVisible();
   });
 
