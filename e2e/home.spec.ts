@@ -1,15 +1,19 @@
 import { test, expect } from "@playwright/test";
 
-// Static export (SSR) produces React hydration warnings (#418).
-// These are harmless in production — filter them from test assertions.
-const ALLOWED_ERRORS = ["Convex", "fetch", "network", "React error #418"];
+// Only filter these specific harmless patterns.
+// All other errors (including Convex bugs!) must fail the test.
+const ALLOWED_ERRORS = [
+  "React error #418", // SSR hydration mismatch (static export)
+  "net::ERR_BLOCKED_BY_LOCAL", // localhost WebSocket blocked in headless Chrome
+  "WebSocket connection to", // localhost WebSocket unavailable during SSR
+];
 
 function filterCritical(errors: string[]): string[] {
   return errors.filter((e) => !ALLOWED_ERRORS.some((p) => e.includes(p)));
 }
 
 test.describe("Home page", () => {
-  test("loads without console errors", async ({ page }) => {
+  test("loads without critical errors", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
     await page.goto("/");

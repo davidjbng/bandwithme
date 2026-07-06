@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-const ALLOWED_ERRORS = ["Convex", "fetch", "network", "React error #418"];
+const ALLOWED_ERRORS = ["React error #418", "net::ERR_BLOCKED_BY_LOCAL", "WebSocket connection to"];
+
 function filterCritical(errors: string[]): string[] {
   return errors.filter((e) => !ALLOWED_ERRORS.some((p) => e.includes(p)));
 }
