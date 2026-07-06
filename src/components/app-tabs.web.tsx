@@ -1,10 +1,10 @@
 import {
   Tabs,
   TabList,
+  TabListProps,
   TabSlot,
   TabTrigger,
   TabTriggerSlotProps,
-  TabListProps,
 } from "expo-router/ui";
 import { Pressable, View, StyleSheet } from "react-native";
 
@@ -16,9 +16,11 @@ import { MaxContentWidth, Spacing } from "@/constants/theme";
 export default function AppTabs() {
   return (
     <Tabs>
-      <TabSlot style={styles.tabSlot} />
+      <View style={styles.root}>
+        <TabSlot style={styles.tabSlot} />
+      </View>
       <TabList asChild>
-        <CustomTabList>
+        <TabBar>
           <TabTrigger name="home" href="/" asChild>
             <TabButton>Home</TabButton>
           </TabTrigger>
@@ -28,9 +30,22 @@ export default function AppTabs() {
           <TabTrigger name="user" href="/user" asChild>
             <TabButton>Profil</TabButton>
           </TabTrigger>
-        </CustomTabList>
+        </TabBar>
       </TabList>
     </Tabs>
+  );
+}
+
+function TabBar({ children }: { children: React.ReactNode }) {
+  return (
+    <View style={styles.tabBarWrapper}>
+      <ThemedView type="backgroundElement" style={styles.tabBarInner}>
+        <ThemedText type="smallBold" style={styles.brandText}>
+          Band With Me
+        </ThemedText>
+        <View style={styles.tabButtons}>{children}</View>
+      </ThemedView>
+    </View>
   );
 }
 
@@ -50,47 +65,43 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
 }
 
 export function CustomTabList(props: TabListProps) {
-  return (
-    <View {...props} style={styles.tabListContainer}>
-      <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <ThemedText type="smallBold" style={styles.brandText}>
-          Band With Me
-        </ThemedText>
-        {props.children}
-      </ThemedView>
-    </View>
-  );
+  return <View {...props} />;
 }
 
-const TAB_BAR_HEIGHT = 60;
+const TAB_BAR_HEIGHT = 56;
 
 const styles = StyleSheet.create({
-  tabSlot: {
-    height: "100%",
-    paddingBottom: TAB_BAR_HEIGHT + Spacing.three * 2,
+  root: {
+    flex: 1,
   },
-  tabListContainer: {
+  tabSlot: {
+    flex: 1,
+    paddingBottom: TAB_BAR_HEIGHT + Spacing.three * 2 + Spacing.one,
+  },
+  tabBarWrapper: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     padding: Spacing.three,
-    justifyContent: "center",
     alignItems: "center",
-    flexDirection: "row",
   },
-  innerContainer: {
+  tabBarInner: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.five,
     borderRadius: Spacing.five,
-    flexDirection: "row",
-    alignItems: "center",
-    flexGrow: 1,
-    gap: Spacing.two,
+    width: "100%",
     maxWidth: MaxContentWidth,
+    gap: Spacing.two,
   },
   brandText: {
     marginRight: "auto",
+  },
+  tabButtons: {
+    flexDirection: "row",
+    gap: Spacing.two,
   },
   pressed: {
     opacity: 0.7,
