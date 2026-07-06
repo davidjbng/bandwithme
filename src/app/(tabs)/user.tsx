@@ -55,7 +55,7 @@ export default function UserScreen() {
   };
 
   useEffect(() => {
-    if (Platform.OS === "web" || !code) {
+    if (!code) {
       return;
     }
 
