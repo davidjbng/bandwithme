@@ -1,0 +1,16 @@
+{
+  "buildCommand": "pnpm web:export",
+  "outputDirectory": "dist",
+  "framework": "expo",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/_expo/routes"
+    }
+  ],
+  "env": {
+    "EXPO_PUBLIC_CONVEX_URL": "https://blissful-spaniel-445.eu-west-1.convex.cloud",
+    "EXPO_PUBLIC_CONVEX_SITE_URL": "https://blissful-spaniel-445.eu-west-1.convex.site"
+  }
+}
