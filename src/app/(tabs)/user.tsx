@@ -257,7 +257,7 @@ export default function UserScreen() {
             )}
 
             <ThemedView type="backgroundElement" style={styles.card}>
-              {isLoading ? (
+              {isLoading || (isAuthenticated && user === undefined) ? (
                 <ActivityIndicator color={theme.text} />
               ) : isAuthenticated ? (
                 <>
@@ -265,7 +265,7 @@ export default function UserScreen() {
                     Angemeldet als
                   </ThemedText>
                   <ThemedText type="smallBold">
-                    {user?.email ?? user?.name ?? "Loading account..."}
+                    {user?.email ?? user?.name ?? "Kein Name"}
                   </ThemedText>
                   <Pressable
                     disabled={isSubmitting}
