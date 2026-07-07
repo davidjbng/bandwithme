@@ -29,7 +29,13 @@ export const updateProfile = mutation({
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Nicht eingeloggt.");
+    if (userId === null) {
+      console.error(
+        "updateProfile: getAuthUserId returned null. Auth identity:",
+        await ctx.auth.getUserIdentity(),
+      );
+      throw new Error("Nicht eingeloggt. Bitte melde dich erneut an.");
+    }
 
     const trimmed = args.name.trim();
     if (!trimmed) throw new Error("Name darf nicht leer sein.");
