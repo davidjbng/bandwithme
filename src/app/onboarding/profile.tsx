@@ -1,7 +1,7 @@
 import { useConvexAuth } from "@convex-dev/auth/react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -15,12 +15,31 @@ export default function ProfileOnboardingScreen() {
   const theme = useTheme();
   const router = useRouter();
   const safeAreaInsets = useSafeAreaInsets();
-  const { isAuthenticated } = useConvexAuth();
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
   const updateProfile = useMutation(api.user.updateProfile);
 
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Redirect if already has a name
+  useEffect(() => {
+    if (user?.name) {
+      router.replace("/");
+    }
+  }, [user?.name, router]);
+
+  // Show spinner while auth is loading
+  if (isLoading || user === undefined) {
+    return (
+      <ThemedView style={styles.root}>
+        <ThemedText type="small" themeColor="textSecondary">
+          Lädt…
+        </ThemedText>
+      </ThemedView>
+    );
+  }
 
   if (!isAuthenticated) {
     router.replace("/");

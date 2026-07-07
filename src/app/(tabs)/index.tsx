@@ -4,6 +4,7 @@ import { SymbolView } from "expo-symbols";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useEffect } from "react";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -16,7 +17,15 @@ export default function HomeScreen() {
   const router = useRouter();
   const safeAreaInsets = useSafeAreaInsets();
   const { isAuthenticated, isLoading: authLoading } = useConvexAuth();
+  const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
   const band = useQuery(api.bands.myBand);
+
+  // Redirect to onboarding if authenticated but no name set
+  useEffect(() => {
+    if (isAuthenticated && user && !user.name) {
+      router.replace("/onboarding/profile");
+    }
+  }, [isAuthenticated, user, router]);
 
   const insets = {
     ...safeAreaInsets,
