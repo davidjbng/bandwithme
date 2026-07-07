@@ -53,9 +53,9 @@ const AhaSend = Email({
         },
         body: JSON.stringify({
           from: { email: "auth@bandwithme.de", name: "Band With Me" },
-          to: identifier,
+          recipients: [{ email: identifier }],
           subject: "Sign in to Band With Me",
-          text: `Sign in to Band With Me: ${url}`,
+          text_content: `Sign in to Band With Me: ${url}`,
         }),
       },
     );
