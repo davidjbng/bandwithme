@@ -1,5 +1,5 @@
 import { useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Image } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { api } from "../../../convex/_generated/api";
@@ -39,11 +39,12 @@ export default function UserScreen() {
   const router = useRouter();
   const { code, email: callbackEmail } = useLocalSearchParams<{ code?: string; email?: string }>();
   const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
+  const updateProfile = useMutation(api.user.updateProfile);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [profileName, setProfileName] = useState(devProfile.name);
+  const [profileName, setProfileName] = useState(user?.name ?? devProfile.name);
   const [pictureUrl, setPictureUrl] = useState(devProfile.pictureUrl);
   const [selectedInstruments, setSelectedInstruments] = useState(devProfile.instruments);
   const theme = useTheme();
@@ -53,6 +54,10 @@ export default function UserScreen() {
     top: safeAreaInsets.top,
     bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
   };
+
+  useEffect(() => {
+    if (user?.name) setProfileName(user.name);
+  }, [user?.name]);
 
   useEffect(() => {
     if (!code) {
@@ -101,6 +106,20 @@ export default function UserScreen() {
       setStatus("Magic link sent. Check your email to finish signing in.");
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "Could not send magic link.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleSaveName() {
+    setError(null);
+    if (!profileName.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await updateProfile({ name: profileName.trim() });
+      setStatus("Name gespeichert.");
+    } catch (e: any) {
+      setError(e?.message ?? "Fehler beim Speichern.");
     } finally {
       setIsSubmitting(false);
     }
@@ -262,11 +281,35 @@ export default function UserScreen() {
               ) : isAuthenticated ? (
                 <>
                   <ThemedText type="small" themeColor="textSecondary">
-                    Angemeldet als
+                    Angemeldet als {user?.email}
                   </ThemedText>
-                  <ThemedText type="smallBold">
-                    {user?.email ?? user?.name ?? "Kein Name"}
-                  </ThemedText>
+                  <View style={styles.fieldGroup}>
+                    <ThemedText type="smallBold">Name</ThemedText>
+                    <TextInput
+                      onChangeText={setProfileName}
+                      placeholder="Dein Name"
+                      placeholderTextColor={theme.textSecondary}
+                      style={[
+                        styles.input,
+                        { borderColor: theme.backgroundSelected, color: theme.text },
+                      ]}
+                      value={profileName}
+                    />
+                  </View>
+                  <Pressable
+                    onPress={handleSaveName}
+                    disabled={isSubmitting || !profileName.trim()}
+                    style={({ pressed }) => [
+                      styles.button,
+                      { backgroundColor: theme.text },
+                      pressed && styles.pressed,
+                      !profileName.trim() && styles.disabled,
+                    ]}
+                  >
+                    <ThemedText style={[styles.buttonText, { color: theme.background }]}>
+                      Name speichern
+                    </ThemedText>
+                  </Pressable>
                   <Pressable
                     disabled={isSubmitting}
                     onPress={handleSignOut}
