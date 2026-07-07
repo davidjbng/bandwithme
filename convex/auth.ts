@@ -1,23 +1,18 @@
 import { Email } from "@convex-dev/auth/providers/Email";
 import { convexAuth } from "@convex-dev/auth/server";
 
+function getSiteUrl() {
+  return process.env.SITE_URL?.replace(/\/$/, "") ?? "https://bandwithme.de";
+}
+
 function redirectUrl(redirectTo: string) {
-  const siteUrl = process.env.SITE_URL?.replace(/\/$/, "");
+  const siteUrl = getSiteUrl();
 
-  if (siteUrl) {
-    if (redirectTo.startsWith("?") || redirectTo.startsWith("/")) {
-      return `${siteUrl}${redirectTo}`;
-    }
-    if (redirectTo.startsWith(siteUrl)) {
-      return redirectTo;
-    }
+  if (redirectTo.startsWith("?") || redirectTo.startsWith("/")) {
+    return `${siteUrl}${redirectTo}`;
   }
-
-  if (redirectTo.startsWith("/")) {
-    return `bandwithme://${redirectTo.slice(1)}`;
-  }
-  if (redirectTo.startsWith("?")) {
-    return `bandwithme://user${redirectTo}`;
+  if (redirectTo.startsWith(siteUrl)) {
+    return redirectTo;
   }
   if (redirectTo.startsWith("bandwithme://")) {
     return redirectTo;
@@ -26,40 +21,36 @@ function redirectUrl(redirectTo: string) {
   throw new Error("Invalid sign-in redirect URL.");
 }
 
-function resendApiKey() {
-  return process.env.AUTH_RESEND_KEY ?? process.env.RESEND_API_KEY;
-}
-
-const Resend = Email({
-  id: "resend",
-  apiKey: resendApiKey(),
+const AhaSend = Email({
+  id: "ahasend",
+  apiKey: process.env.AHASEND_API_KEY!,
   async sendVerificationRequest({ identifier, provider, url }) {
     const apiKey = provider.apiKey;
 
     if (!apiKey) {
       console.log(
-        `Magic link for ${identifier}: ${url}. Set AUTH_RESEND_KEY or RESEND_API_KEY in Convex to send email.`,
+        `Magic link for ${identifier}: ${url}. Set AHASEND_API_KEY in Convex to send email.`,
       );
       return;
     }
 
     if (apiKey === "dev" || apiKey === "local") {
       console.log(
-        `Magic link for ${identifier}: ${url}. AUTH_RESEND_KEY is set to local log mode.`,
+        `Magic link for ${identifier}: ${url}. AHASEND_API_KEY is set to local log mode.`,
       );
       return;
     }
 
-    console.log(`Sending magic link to ${identifier} with Resend.`);
+    console.log(`Sending magic link to ${identifier} with AhaSend.`);
 
-    const res = await fetch("https://api.resend.com/emails", {
+    const res = await fetch("https://api.ahasend.com/v1/email/send", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        "X-Api-Key": apiKey,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Band With Me <onboarding@resend.dev>",
+        from: "Band With Me <auth@bandwithme.de>",
         to: identifier,
         subject: "Sign in to Band With Me",
         text: `Sign in to Band With Me: ${url}`,
@@ -67,13 +58,14 @@ const Resend = Email({
     });
 
     if (!res.ok) {
-      throw new Error(`Resend error: ${JSON.stringify(await res.json())}`);
+      const body = await res.text();
+      throw new Error(`AhaSend error ${res.status}: ${body}`);
     }
   },
 });
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [Resend],
+  providers: [AhaSend],
   callbacks: {
     async redirect({ redirectTo }) {
       return redirectUrl(redirectTo);

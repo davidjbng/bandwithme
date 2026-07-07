@@ -68,7 +68,7 @@ export default function UserScreen() {
         if (!callbackEmail) {
           throw new Error("Missing email for magic link sign in.");
         }
-        await signIn("resend", { code, email: callbackEmail });
+        await signIn("ahasend", { code, email: callbackEmail });
         router.replace("/user");
         setStatus(null);
       } catch (caughtError) {
@@ -94,7 +94,7 @@ export default function UserScreen() {
     setStatus(null);
 
     try {
-      await signIn("resend", {
+      await signIn("ahasend", {
         email: trimmedEmail,
         redirectTo: `/user?email=${encodeURIComponent(trimmedEmail)}`,
       });
