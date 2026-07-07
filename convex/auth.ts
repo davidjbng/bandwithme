@@ -52,7 +52,7 @@ const AhaSend = Email({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          from: "Band With Me <auth@bandwithme.de>",
+          from: { email: "auth@bandwithme.de", name: "Band With Me" },
           to: identifier,
           subject: "Sign in to Band With Me",
           text: `Sign in to Band With Me: ${url}`,
