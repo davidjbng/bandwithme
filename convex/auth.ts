@@ -43,19 +43,22 @@ const AhaSend = Email({
 
     console.log(`Sending magic link to ${identifier} with AhaSend.`);
 
-    const res = await fetch("https://api.ahasend.com/v1/email/send", {
-      method: "POST",
-      headers: {
-        "X-Api-Key": apiKey,
-        "Content-Type": "application/json",
+    const res = await fetch(
+      "https://api.ahasend.com/v2/accounts/8979e7cc-daa5-484e-97c6-cb096ff295b9/messages",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Band With Me <auth@bandwithme.de>",
+          to: identifier,
+          subject: "Sign in to Band With Me",
+          text: `Sign in to Band With Me: ${url}`,
+        }),
       },
-      body: JSON.stringify({
-        from: "Band With Me <auth@bandwithme.de>",
-        to: identifier,
-        subject: "Sign in to Band With Me",
-        text: `Sign in to Band With Me: ${url}`,
-      }),
-    });
+    );
 
     if (!res.ok) {
       const body = await res.text();
