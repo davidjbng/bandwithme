@@ -30,7 +30,7 @@ export default function ProfileOnboardingScreen() {
     }
   }, [user?.name, router]);
 
-  // Show spinner while auth is loading
+  // Show spinner while auth is loading or user data not yet available
   if (isLoading || user === undefined) {
     return (
       <ThemedView style={styles.root}>
@@ -41,7 +41,7 @@ export default function ProfileOnboardingScreen() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     router.replace("/");
     return null;
   }
