@@ -20,6 +20,7 @@ export default function BandSettingsScreen() {
 
   const band = useQuery(api.bands.myBand);
   const members = useQuery(api.bands.listMembers);
+  const user = useQuery(api.user.current);
   const leaveBand = useMutation(api.bands.leave);
   const removeMember = useMutation(api.bands.removeMember);
   const deleteBand = useMutation(api.bands.deleteBand);
@@ -36,7 +37,7 @@ export default function BandSettingsScreen() {
   async function handleLeave() {
     setActionError("");
     try {
-      await leaveBand({} as never);
+      await leaveBand({ userId: user!.id as never });
       router.replace("/");
     } catch (e: any) {
       setActionError(e?.message ?? "Fehler");
@@ -46,7 +47,7 @@ export default function BandSettingsScreen() {
   async function handleRemove(membershipId: string) {
     setActionError("");
     try {
-      await removeMember({ membershipId } as never);
+      await removeMember({ userId: user!.id as never, membershipId: membershipId as never });
     } catch (e: any) {
       setActionError(e?.message ?? "Fehler");
     }
@@ -55,7 +56,7 @@ export default function BandSettingsScreen() {
   async function handleDelete() {
     setActionError("");
     try {
-      await deleteBand({ nameConfirmation: deleteName } as never);
+      await deleteBand({ userId: user!.id as never, nameConfirmation: deleteName });
       router.replace("/");
     } catch (e: any) {
       setActionError(e?.message ?? "Fehler");

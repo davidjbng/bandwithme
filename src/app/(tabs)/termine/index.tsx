@@ -62,6 +62,7 @@ export default function TermineScreen() {
   const safeAreaInsets = useSafeAreaInsets();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const events = useQuery(api.termine.list, {}) ?? [];
+  const userForMut = useQuery(api.user.current);
   const setResponse = useMutation(api.termine.setResponse);
 
   const insets = {
@@ -70,7 +71,7 @@ export default function TermineScreen() {
   };
 
   async function handleResponse(eventId: string, status: RsvpStatus) {
-    await setResponse({ eventId: eventId as never, status });
+    await setResponse({ userId: userForMut!.id as never, eventId: eventId as never, status });
   }
 
   return (

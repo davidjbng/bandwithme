@@ -1,16 +1,21 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
 export const myBand = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) return null;
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return null;
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), identity.email ?? ""))
+      .first();
+    if (!user) return null;
 
     const membership = await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .first();
 
     if (!membership) return null;
@@ -28,26 +33,24 @@ export const myBand = query({
 
 export const create = mutation({
   args: {
+    userId: v.id("users"),
     name: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Du musst eingeloggt sein.");
-
     const existing = await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
     if (existing) throw new Error("Du bist bereits in einer Band.");
 
     const bandId = await ctx.db.insert("bands", {
       name: args.name.trim(),
-      createdBy: userId,
+      createdBy: args.userId,
     });
 
     await ctx.db.insert("bandMembers", {
       bandId,
-      userId,
+      userId: args.userId,
       role: "admin",
     });
 
@@ -57,25 +60,24 @@ export const create = mutation({
 
 export const joinByInvite = mutation({
   args: {
+    userId: v.id("users"),
     bandId: v.id("bands"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Du musst eingeloggt sein.");
-
     const band = await ctx.db.get(args.bandId);
     if (!band) throw new Error("Diese Band existiert nicht.");
 
     const existing = await ctx.db
       .query("bandMembers")
-      .withIndex("by_bandId_and_userId", (q) => q.eq("bandId", args.bandId).eq("userId", userId))
+      .withIndex("by_bandId_and_userId", (q) =>
+        q.eq("bandId", args.bandId).eq("userId", args.userId),
+      )
       .first();
     if (existing) throw new Error("Du bist bereits Mitglied dieser Band.");
 
-    // Remove from any existing band first
     const otherMembership = await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
     if (otherMembership) {
       await ctx.db.delete(otherMembership._id);
@@ -83,7 +85,7 @@ export const joinByInvite = mutation({
 
     await ctx.db.insert("bandMembers", {
       bandId: args.bandId,
-      userId,
+      userId: args.userId,
       role: "member",
     });
 
@@ -94,12 +96,18 @@ export const joinByInvite = mutation({
 export const listMembers = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) return [];
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const user = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("email"), identity.email ?? ""))
+      .first();
+    if (!user) return [];
 
     const myMembership = await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .first();
     if (!myMembership) return [];
 
@@ -110,12 +118,12 @@ export const listMembers = query({
 
     return await Promise.all(
       memberships.map(async (m) => {
-        const user = await ctx.db.get(m.userId);
+        const member = await ctx.db.get(m.userId);
         return {
           id: m._id,
           userId: m.userId,
-          name: user?.name ?? user?.email?.split("@")[0] ?? "Bandmitglied",
-          email: user?.email ?? null,
+          name: member?.name ?? member?.email?.split("@")[0] ?? "Bandmitglied",
+          email: member?.email ?? null,
           role: m.role,
         };
       }),
@@ -124,23 +132,21 @@ export const listMembers = query({
 });
 
 export const leave = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Du musst eingeloggt sein.");
-
+  args: {
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
     const membership = await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
     if (!membership) throw new Error("Du bist in keiner Band.");
 
-    // Check: if this user is the last admin, block
     if (membership.role === "admin") {
       const otherAdmins = await ctx.db
         .query("bandMembers")
         .withIndex("by_bandId", (q) => q.eq("bandId", membership.bandId))
-        .filter((q) => q.and(q.eq(q.field("role"), "admin"), q.neq(q.field("userId"), userId)))
+        .filter((q) => q.and(q.eq(q.field("role"), "admin"), q.neq(q.field("userId"), args.userId)))
         .first();
       if (!otherAdmins) {
         throw new Error("Du bist der letzte Admin. Ernennne zuerst jemand anderen zum Admin.");
@@ -153,15 +159,13 @@ export const leave = mutation({
 
 export const removeMember = mutation({
   args: {
+    userId: v.id("users"),
     membershipId: v.id("bandMembers"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Du musst eingeloggt sein.");
-
     const myMembership = await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
     if (!myMembership || myMembership.role !== "admin") {
       throw new Error("Nur Admins können Mitglieder entfernen.");
@@ -173,12 +177,10 @@ export const removeMember = mutation({
       throw new Error("Dieses Mitglied ist nicht in deiner Band.");
     }
 
-    // Cannot remove yourself
-    if (target.userId === userId) {
+    if (target.userId === args.userId) {
       throw new Error('Nutze "Band verlassen" um dich selbst zu entfernen.');
     }
 
-    // Last admin check
     if (target.role === "admin") {
       const otherAdmins = await ctx.db
         .query("bandMembers")
@@ -198,15 +200,13 @@ export const removeMember = mutation({
 
 export const deleteBand = mutation({
   args: {
+    userId: v.id("users"),
     nameConfirmation: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) throw new Error("Du musst eingeloggt sein.");
-
     const membership = await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
     if (!membership || membership.role !== "admin") {
       throw new Error("Nur Admins können die Band löschen.");
@@ -219,14 +219,12 @@ export const deleteBand = mutation({
       throw new Error("Der eingegebene Name stimmt nicht mit dem Bandnamen überein.");
     }
 
-    // Delete all memberships
     const memberships = await ctx.db
       .query("bandMembers")
       .withIndex("by_bandId", (q) => q.eq("bandId", band._id))
       .collect();
     await Promise.all(memberships.map((m) => ctx.db.delete(m._id)));
 
-    // Delete band
     await ctx.db.delete(band._id);
   },
 });

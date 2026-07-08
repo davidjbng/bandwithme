@@ -1,5 +1,5 @@
 import { useConvexAuth } from "@convex-dev/auth/react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
@@ -17,6 +17,7 @@ export default function CreateBandScreen() {
   const router = useRouter();
   const safeAreaInsets = useSafeAreaInsets();
   const { isAuthenticated, isLoading } = useConvexAuth();
+  const user = useQuery(api.user.current);
   const createBand = useMutation(api.bands.create);
 
   const [name, setName] = useState("");
@@ -36,7 +37,7 @@ export default function CreateBandScreen() {
     }
     setSubmitting(true);
     try {
-      await createBand({ name: name.trim() });
+      await createBand({ userId: user!.id as never, name: name.trim() });
       router.replace("/");
     } catch (e: any) {
       setError(e?.message ?? "Fehler beim Erstellen der Band.");

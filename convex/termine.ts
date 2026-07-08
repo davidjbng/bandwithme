@@ -1,6 +1,5 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
 const eventKind = v.union(v.literal("rehearsal"), v.literal("performance"));
 const repeat = v.union(
@@ -14,7 +13,7 @@ const rsvpStatus = v.union(v.literal("yes"), v.literal("maybe"), v.literal("no")
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const viewerId = await getAuthUserId(ctx);
+    const identity = await ctx.auth.getUserIdentity();
     const allEvents = await ctx.db.query("events").withIndex("by_dateTime").collect();
     const upcomingEvents = allEvents.filter((event) => event.dateTime >= new Date().toISOString());
     const cachedUsers = new Map();
@@ -27,13 +26,9 @@ export const list = query({
           .collect();
 
         const participants = {
-          yes: [],
-          maybe: [],
-          no: [],
-        } as {
-          yes: { id: string; name: string; email: string | null }[];
-          maybe: { id: string; name: string; email: string | null }[];
-          no: { id: string; name: string; email: string | null }[];
+          yes: [] as { id: string; name: string; email: string | null }[],
+          maybe: [] as { id: string; name: string; email: string | null }[],
+          no: [] as { id: string; name: string; email: string | null }[],
         };
 
         let viewerResponse: "yes" | "maybe" | "no" | null = null;
@@ -54,7 +49,7 @@ export const list = query({
 
           participants[response.status].push(participant);
 
-          if (viewerId && response.userId === viewerId) {
+          if (identity && user?.email === identity.email) {
             viewerResponse = response.status;
           }
         }
@@ -81,6 +76,7 @@ export const list = query({
 
 export const create = mutation({
   args: {
+    userId: v.id("users"),
     kind: eventKind,
     name: v.string(),
     dateTime: v.string(),
@@ -88,12 +84,6 @@ export const create = mutation({
     repeat,
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (userId === null) {
-      throw new Error("Du musst eingeloggt sein, um einen Termin zu erstellen.");
-    }
-
     const normalizedRepeat = args.kind === "performance" ? "none" : args.repeat;
 
     return await ctx.db.insert("events", {
@@ -102,23 +92,18 @@ export const create = mutation({
       dateTime: args.dateTime,
       location: args.location.trim(),
       repeat: normalizedRepeat,
-      createdBy: userId,
+      createdBy: args.userId,
     });
   },
 });
 
 export const setResponse = mutation({
   args: {
+    userId: v.id("users"),
     eventId: v.id("events"),
     status: rsvpStatus,
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-
-    if (userId === null) {
-      throw new Error("Du musst eingeloggt sein, um zuzusagen.");
-    }
-
     const event = await ctx.db.get(args.eventId);
     if (!event) {
       throw new Error("Dieser Termin existiert nicht mehr.");
@@ -126,7 +111,9 @@ export const setResponse = mutation({
 
     const existingResponse = await ctx.db
       .query("eventResponses")
-      .withIndex("by_eventId_and_userId", (q) => q.eq("eventId", args.eventId).eq("userId", userId))
+      .withIndex("by_eventId_and_userId", (q) =>
+        q.eq("eventId", args.eventId).eq("userId", args.userId),
+      )
       .unique();
 
     const respondedAt = new Date().toISOString();
@@ -141,7 +128,7 @@ export const setResponse = mutation({
 
     return await ctx.db.insert("eventResponses", {
       eventId: args.eventId,
-      userId,
+      userId: args.userId,
       status: args.status,
       respondedAt,
     });

@@ -1,6 +1,6 @@
 import DateTimePicker from "@expo/ui/community/datetime-picker";
 import { useConvexAuth } from "@convex-dev/auth/react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useMemo, useState } from "react";
@@ -68,6 +68,7 @@ export default function CreateTermineScreen() {
   const safeAreaInsets = useSafeAreaInsets();
   const initialDate = useMemo(() => getInitialEventDate(), []);
   const { isAuthenticated } = useConvexAuth();
+  const user = useQuery(api.user.current);
   const createEvent = useMutation(api.termine.create);
 
   const [kind, setKind] = useState<EventKind>("rehearsal");
@@ -131,6 +132,7 @@ export default function CreateTermineScreen() {
 
     try {
       await createEvent({
+        userId: user!.id as never,
         kind,
         name: trimmedName,
         dateTime: eventDate.toISOString(),
