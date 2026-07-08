@@ -28,18 +28,18 @@ export const updateProfile = mutation({
     name: v.string(),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) {
-      console.error(
-        "updateProfile: getAuthUserId returned null. Auth identity:",
-        await ctx.auth.getUserIdentity(),
-      );
-      throw new Error("Nicht eingeloggt. Bitte melde dich erneut an.");
-    }
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity?.email) throw new Error("Nicht eingeloggt.");
+
+    // Find user by email
+    const users = await ctx.db.query("users").collect();
+    const user = users.find((u) => u.email === identity.email);
+
+    if (!user) throw new Error("Benutzer nicht gefunden.");
 
     const trimmed = args.name.trim();
     if (!trimmed) throw new Error("Name darf nicht leer sein.");
 
-    await ctx.db.patch(userId, { name: trimmed });
+    await ctx.db.patch(user._id, { name: trimmed });
   },
 });
