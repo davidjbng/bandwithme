@@ -25,21 +25,13 @@ export const current = query({
 
 export const updateProfile = mutation({
   args: {
+    userId: v.id("users"),
     name: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity?.email) throw new Error("Nicht eingeloggt.");
-
-    // Find user by email
-    const users = await ctx.db.query("users").collect();
-    const user = users.find((u) => u.email === identity.email);
-
-    if (!user) throw new Error("Benutzer nicht gefunden.");
-
     const trimmed = args.name.trim();
     if (!trimmed) throw new Error("Name darf nicht leer sein.");
 
-    await ctx.db.patch(user._id, { name: trimmed });
+    await ctx.db.patch(args.userId, { name: trimmed });
   },
 });

@@ -54,7 +54,7 @@ export default function ProfileOnboardingScreen() {
     }
     setSubmitting(true);
     try {
-      await updateProfile({ name: name.trim() });
+      await updateProfile({ userId: user!.id as never, name: name.trim() });
       router.replace("/");
     } catch (e: any) {
       setError(e?.message ?? "Fehler beim Speichern.");

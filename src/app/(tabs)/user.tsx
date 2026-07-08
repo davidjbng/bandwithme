@@ -116,7 +116,7 @@ export default function UserScreen() {
     if (!profileName.trim()) return;
     setIsSubmitting(true);
     try {
-      await updateProfile({ name: profileName.trim() });
+      await updateProfile({ userId: user!.id as never, name: profileName.trim() });
       setStatus("Name gespeichert.");
     } catch (e: any) {
       setError(e?.message ?? "Fehler beim Speichern.");
