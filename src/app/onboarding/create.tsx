@@ -17,12 +17,32 @@ export default function CreateBandScreen() {
   const router = useRouter();
   const safeAreaInsets = useSafeAreaInsets();
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const user = useQuery(api.user.current);
+  const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
   const createBand = useMutation(api.bands.create);
 
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  if (!isAuthenticated) {
+    router.replace("/");
+    return null;
+  }
+
+  if (isLoading || user === undefined) {
+    return (
+      <ThemedView style={styles.loadingContainer}>
+        <ThemedText type="small" themeColor="textSecondary">
+          Lädt…
+        </ThemedText>
+      </ThemedView>
+    );
+  }
+
+  if (!user) {
+    router.replace("/onboarding/profile");
+    return null;
+  }
 
   const insets = {
     ...safeAreaInsets,
@@ -169,4 +189,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   pressed: { opacity: 0.75 },
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: Spacing.four,
+  },
 });

@@ -20,7 +20,7 @@ export default function BandSettingsScreen() {
 
   const band = useQuery(api.bands.myBand);
   const members = useQuery(api.bands.listMembers);
-  const user = useQuery(api.user.current);
+  const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
   const leaveBand = useMutation(api.bands.leave);
   const removeMember = useMutation(api.bands.removeMember);
   const deleteBand = useMutation(api.bands.deleteBand);
