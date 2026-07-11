@@ -1,21 +1,16 @@
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 export const myBand = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
-
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("email"), identity.email ?? ""))
-      .first();
-    if (!user) return null;
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return null;
 
     const membership = await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
     if (!membership) return null;

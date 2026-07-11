@@ -19,6 +19,8 @@ test.describe("Band creation", () => {
     await page.getByPlaceholder("z. B. Die Kellerkinder").fill(name);
     await page.getByText("Band erstellen").click();
 
+    await expect(page.getByText("Aktive Band")).toBeVisible();
     await expect(page.getByText(name)).toBeVisible();
+    await expect(page.getByText("Band-Einstellungen")).toBeVisible();
   });
 });
