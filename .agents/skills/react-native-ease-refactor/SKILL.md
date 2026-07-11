@@ -38,11 +38,11 @@ Scan the user's project for animation code:
    - Pattern: `from ['"]react-native['"]` that also use `Animated`
    - Pattern: `Animated\.View|Animated\.Text|Animated\.Image|Animated\.Value|Animated\.timing|Animated\.spring`
 
-5. Use Grep to find files already using `react-native-ease` (to avoid re-migrating):
+3. Use Grep to find files already using `react-native-ease` (to avoid re-migrating):
 
    - Pattern: `from ['"]react-native-ease['"]`
 
-6. Read each file that contains animation code. Build a list of components with their animation patterns.
+4. Read each file that contains animation code. Build a list of components with their animation patterns.
 
 **Exclude** from scanning:
 
@@ -65,8 +65,8 @@ Apply these checks in order. The first match determines the result:
 3. **Uses shared element transitions?** (`sharedTransitionTag`) → NOT migratable — "Shared element transition"
 4. **Uses `runOnUI` or worklet directives?** → NOT migratable — "Requires worklet runtime"
 5. **Uses `withSequence`?** → NOT migratable — "Animation sequencing not supported"
-   5b. **Uses `withDelay` wrapping a single animation (`withTiming`/`withSpring`)?** → MIGRATABLE — map to `delay` on the transition
-   5c. **Uses `withDelay` wrapping `withSequence` or nested `withDelay`?** → NOT migratable — "Complex delay/sequencing not supported"
+5b. **Uses `withDelay` wrapping a single animation (`withTiming`/`withSpring`)?** → MIGRATABLE — map to `delay` on the transition
+5c. **Uses `withDelay` wrapping `withSequence` or nested `withDelay`?** → NOT migratable — "Complex delay/sequencing not supported"
 6. **Uses complex `interpolate()`?** (more than 2 input/output values) → NOT migratable — "Complex interpolation"
 7. **Uses `layout={...}` prop?** → NOT migratable — "Layout animation"
 8. **Animates unsupported properties?** (anything besides: opacity, translateX, translateY, scale, scaleX, scaleY, rotate, rotateX, rotateY, borderRadius, backgroundColor, borderWidth, borderColor, shadowOpacity, shadowRadius, shadowColor, shadowOffset, elevation) → NOT migratable — "Animates unsupported property: `<prop>`"
@@ -98,7 +98,7 @@ Use this table to convert Reanimated/Animated patterns to EaseView:
 | `Animated.Value` + `Animated.timing`                                                                                      | Same `animate` + `transition` pattern — convert to state-driven                                              |
 | `Animated.Value` + `Animated.spring`                                                                                      | `animate` + `transition={{ type: 'spring' }}` — convert to state-driven                                      |
 | `withDelay(ms, withTiming(...))` or `withDelay(ms, withSpring(...))`                                                      | `transition={{ ..., delay: ms }}` — add `delay` to the transition config                                     |
-| `entering={FadeIn.delay(ms)}` / any entering preset with `.delay()`                                                       | `initialAnimate` + `animate` + `transition={{ ..., delay: ms }}`                                             |
+| `entering={FadeIn.delay(ms)}` / any entering preset with `.delay()`                                                      | `initialAnimate` + `animate` + `transition={{ ..., delay: ms }}`                                             |
 | Different `withTiming`/`withSpring` per property in `useAnimatedStyle`                                                    | `transition={{ opacity: { type: 'timing', ... }, transform: { type: 'spring', ... } }}` (per-property map)   |
 
 ### Default Value Mapping
@@ -111,26 +111,25 @@ Use this table to convert Reanimated/Animated patterns to EaseView:
 
 **Reanimated v2/v3 defaults:**
 
-| Parameter   | Reanimated v2/v3 | EaseView default | Action                        |
-| ----------- | ---------------- | ---------------- | ----------------------------- |
-| `damping`   | `10`             | `15`             | **Must set `damping: 10`**    |
-| `stiffness` | `100`            | `120`            | **Must set `stiffness: 100`** |
-| `mass`      | `1`              | `1`              | Same — omit                   |
+| Parameter | Reanimated v2/v3 | EaseView default | Action |
+|---|---|---|---|
+| `damping` | `10` | `15` | **Must set `damping: 10`** |
+| `stiffness` | `100` | `120` | **Must set `stiffness: 100`** |
+| `mass` | `1` | `1` | Same — omit |
 
 **Reanimated v4 defaults:**
 
-| Parameter   | Reanimated v4 | EaseView default | Action                        |
-| ----------- | ------------- | ---------------- | ----------------------------- |
-| `damping`   | `120`         | `15`             | **Must set `damping: 120`**   |
-| `stiffness` | `900`         | `120`            | **Must set `stiffness: 900`** |
-| `mass`      | `4`           | `1`              | **Must set `mass: 4`**        |
+| Parameter | Reanimated v4 | EaseView default | Action |
+|---|---|---|---|
+| `damping` | `120` | `15` | **Must set `damping: 120`** |
+| `stiffness` | `900` | `120` | **Must set `stiffness: 900`** |
+| `mass` | `4` | `1` | **Must set `mass: 4`** |
 
 Reanimated v4 changed to a critically damped, snappy spring (no bounce) as the default. The rationale was that the old physics-based defaults were too sensitive to start/end conditions. v4 recommends using `duration` + `dampingRatio` instead of raw physics params.
 
 If the source code explicitly sets any of these values, carry them over as-is. If the source relies on Reanimated defaults (no explicit value), set the Reanimated default explicitly on the EaseView transition.
 
 Example — bare `withSpring(1)` with no config:
-
 ```typescript
 // Before (Reanimated)
 scale.value = withSpring(1);
@@ -146,15 +145,14 @@ transition={{ type: 'spring', damping: 120, stiffness: 900, mass: 4 }}
 
 #### `withTiming` → EaseView timing
 
-| Parameter  | Reanimated default          | EaseView default      | Action                                             |
-| ---------- | --------------------------- | --------------------- | -------------------------------------------------- |
-| `duration` | `300`                       | `300`                 | Same — omit                                        |
-| `easing`   | `Easing.inOut(Easing.quad)` | `'easeInOut'` (cubic) | **Must set `easing: [0.455, 0.03, 0.515, 0.955]`** |
+| Parameter | Reanimated default | EaseView default | Action |
+|---|---|---|---|
+| `duration` | `300` | `300` | Same — omit |
+| `easing` | `Easing.inOut(Easing.quad)` | `'easeInOut'` (cubic) | **Must set `easing: [0.455, 0.03, 0.515, 0.955]`** |
 
 The easing curves are different! Reanimated's default is quadratic ease-in-out, EaseView's is cubic. Always set the easing explicitly when the source doesn't specify one.
 
 Example — bare `withTiming(1)` with no config:
-
 ```typescript
 // Before (Reanimated)
 opacity.value = withTiming(1);
@@ -167,20 +165,20 @@ If the source explicitly sets an easing, map it using the easing table above.
 
 #### `Animated.timing` (old RN API) → EaseView timing
 
-| Parameter  | RN Animated default         | EaseView default | Action                       |
-| ---------- | --------------------------- | ---------------- | ---------------------------- |
-| `duration` | `500`                       | `300`            | **Must set `duration: 500`** |
-| `easing`   | `Easing.inOut(Easing.ease)` | `'easeInOut'`    | Same curve — omit            |
+| Parameter | RN Animated default | EaseView default | Action |
+|---|---|---|---|
+| `duration` | `500` | `300` | **Must set `duration: 500`** |
+| `easing` | `Easing.inOut(Easing.ease)` | `'easeInOut'` | Same curve — omit |
 
 #### `Animated.spring` (old RN API) → EaseView spring
 
 RN Animated uses `friction`/`tension` by default: `friction: 7, tension: 40`. These map to: `stiffness = tension`, `damping = friction`.
 
-| Parameter           | RN Animated default | EaseView default | Action                       |
-| ------------------- | ------------------- | ---------------- | ---------------------------- |
-| stiffness (tension) | `40`                | `120`            | **Must set `stiffness: 40`** |
-| damping (friction)  | `7`                 | `15`             | **Must set `damping: 7`**    |
-| mass                | `1`                 | `1`              | Same — omit                  |
+| Parameter | RN Animated default | EaseView default | Action |
+|---|---|---|---|
+| stiffness (tension) | `40` | `120` | **Must set `stiffness: 40`** |
+| damping (friction) | `7` | `15` | **Must set `damping: 7`** |
+| mass | `1` | `1` | Same — omit |
 
 ### Unit Conversions
 
@@ -229,7 +227,6 @@ This report MUST be printed as text output in the conversation — not inside a 
 **CRITICAL: You MUST use the `AskUserQuestion` tool here. Do NOT use plan mode, do NOT use text prompts, do NOT ask inline. Call the `AskUserQuestion` tool directly.**
 
 Call `AskUserQuestion` with these exact parameters:
-
 - `multiSelect`: `true`
 - `questions`: a single question object with:
   - `header`: `"Migrate"`
@@ -280,7 +277,7 @@ For each confirmed component, apply the migration:
 1. **Add EaseView import** if not already present:
 
    ```typescript
-   import { EaseView } from "react-native-ease";
+   import { EaseView } from 'react-native-ease';
    ```
 
 1b. **If `usesNativeWind` is true**, check if `import 'react-native-ease/nativewind'` already exists in the project (search all files). If not, add it to the app's root entry point (e.g., `_layout.tsx`, `App.tsx`, or `index.tsx` — whichever is the earliest entry). This only needs to be done once across all migrations, not per component.
@@ -376,26 +373,26 @@ After all migrations are applied, print:
 
 All properties in the `animate` prop:
 
-| Property          | Type         | Default              | Notes                                |
-| ----------------- | ------------ | -------------------- | ------------------------------------ |
-| `opacity`         | `number`     | `1`                  | 0–1 range                            |
-| `translateX`      | `number`     | `0`                  | In DIPs (density-independent pixels) |
-| `translateY`      | `number`     | `0`                  | In DIPs                              |
-| `scale`           | `number`     | `1`                  | Shorthand for scaleX + scaleY        |
-| `scaleX`          | `number`     | `1`                  | Overrides scale for X axis           |
-| `scaleY`          | `number`     | `1`                  | Overrides scale for Y axis           |
-| `rotate`          | `number`     | `0`                  | Z-axis rotation in degrees           |
-| `rotateX`         | `number`     | `0`                  | X-axis rotation in degrees (3D)      |
-| `rotateY`         | `number`     | `0`                  | Y-axis rotation in degrees (3D)      |
-| `borderRadius`    | `number`     | `0`                  | In pixels                            |
-| `backgroundColor` | `ColorValue` | `'transparent'`      | Any RN color value                   |
-| `borderWidth`     | `number`     | `0`                  | In pixels                            |
-| `borderColor`     | `ColorValue` | `'black'`            | Any RN color value                   |
-| `shadowOpacity`   | `number`     | `0`                  | 0–1 (iOS only)                       |
-| `shadowRadius`    | `number`     | `0`                  | In pixels (iOS only)                 |
-| `shadowColor`     | `ColorValue` | `'black'`            | Any RN color value (iOS only)        |
-| `shadowOffset`    | `object`     | `{width:0,height:0}` | `{ width, height }` (iOS only)       |
-| `elevation`       | `number`     | `0`                  | Android material shadow              |
+| Property          | Type         | Default         | Notes                                |
+| ----------------- | ------------ | --------------- | ------------------------------------ |
+| `opacity`         | `number`     | `1`             | 0–1 range                            |
+| `translateX`      | `number`     | `0`             | In DIPs (density-independent pixels) |
+| `translateY`      | `number`     | `0`             | In DIPs                              |
+| `scale`           | `number`     | `1`             | Shorthand for scaleX + scaleY        |
+| `scaleX`          | `number`     | `1`             | Overrides scale for X axis           |
+| `scaleY`          | `number`     | `1`             | Overrides scale for Y axis           |
+| `rotate`          | `number`     | `0`             | Z-axis rotation in degrees           |
+| `rotateX`         | `number`     | `0`             | X-axis rotation in degrees (3D)      |
+| `rotateY`         | `number`     | `0`             | Y-axis rotation in degrees (3D)      |
+| `borderRadius`    | `number`     | `0`             | In pixels                            |
+| `backgroundColor` | `ColorValue` | `'transparent'` | Any RN color value                   |
+| `borderWidth`     | `number`     | `0`             | In pixels                            |
+| `borderColor`     | `ColorValue` | `'black'`       | Any RN color value                   |
+| `shadowOpacity`   | `number`     | `0`             | 0–1 (iOS only)                       |
+| `shadowRadius`    | `number`     | `0`             | In pixels (iOS only)                 |
+| `shadowColor`     | `ColorValue` | `'black'`       | Any RN color value (iOS only)        |
+| `shadowOffset`    | `object`     | `{width:0,height:0}` | `{ width, height }` (iOS only) |
+| `elevation`       | `number`     | `0`             | Android material shadow              |
 
 ### Transition Types
 
