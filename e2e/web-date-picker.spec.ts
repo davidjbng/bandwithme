@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Web event date and time inputs", () => {
-  test("uses native browser date and time controls", async ({ page, isMobile }) => {
+  test("uses native browser controls styled like app inputs", async ({ page }) => {
     await page.goto("/termine/create");
 
     const dateInput = page.locator('input[type="date"]');
@@ -10,12 +10,11 @@ test.describe("Web event date and time inputs", () => {
     await expect(dateInput).toBeVisible();
     await expect(timeInput).toBeVisible();
 
-    if (!isMobile) {
-      await dateInput.fill("2026-12-24");
-      await timeInput.fill("18:30");
-
-      await expect(dateInput).toHaveValue("2026-12-24");
-      await expect(timeInput).toHaveValue("18:30");
-    }
+    await expect(dateInput).toHaveCSS("font-size", "16px");
+    await expect(dateInput).toHaveCSS("font-weight", "600");
+    await expect(dateInput).toHaveCSS("height", "46px");
+    await expect(timeInput).toHaveCSS("font-size", "16px");
+    await expect(timeInput).toHaveCSS("font-weight", "600");
+    await expect(timeInput).toHaveCSS("height", "46px");
   });
 });
