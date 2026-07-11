@@ -1,3 +1,4 @@
+import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
 import { Email } from "@convex-dev/auth/providers/Email";
 import { convexAuth } from "@convex-dev/auth/server";
 
@@ -67,8 +68,19 @@ const AhaSend = Email({
   },
 });
 
+const isDevelopmentAuthEnabled = process.env.DEVELOPMENT_AUTH_ENABLED === "true";
+
+const DevelopmentAuth = Anonymous({
+  id: "development",
+  profile: (params) => ({
+    email: typeof params.email === "string" ? params.email : "dev@bandwithme.local",
+    isAnonymous: true,
+    name: typeof params.name === "string" ? params.name : "Entwicklungstest",
+  }),
+});
+
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: [AhaSend],
+  providers: isDevelopmentAuthEnabled ? [AhaSend, DevelopmentAuth] : [AhaSend],
   callbacks: {
     async redirect({ redirectTo }) {
       return redirectUrl(redirectTo);

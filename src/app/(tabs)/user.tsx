@@ -36,6 +36,7 @@ const availableInstruments = [
 export default function UserScreen() {
   const { isAuthenticated, isLoading } = useConvexAuth();
   const { signIn, signOut } = useAuthActions();
+  const isDevelopmentAuthEnabled = process.env.EXPO_PUBLIC_ENABLE_DEVELOPMENT_AUTH === "true";
   const router = useRouter();
   const { code, email: callbackEmail } = useLocalSearchParams<{ code?: string; email?: string }>();
   const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
@@ -85,6 +86,24 @@ export default function UserScreen() {
       }
     })();
   }, [callbackEmail, code, router, signIn]);
+
+  async function startDevelopmentSession() {
+    setIsSubmitting(true);
+    setError(null);
+    setStatus(null);
+
+    try {
+      await signIn("development");
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Entwicklungszugang konnte nicht gestartet werden.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   async function sendMagicLink() {
     const trimmedEmail = email.trim();
@@ -361,6 +380,21 @@ export default function UserScreen() {
                       Send magic link
                     </ThemedText>
                   </Pressable>
+                  {isDevelopmentAuthEnabled ? (
+                    <Pressable
+                      accessibilityLabel="Entwicklungszugang starten"
+                      disabled={isSubmitting}
+                      onPress={startDevelopmentSession}
+                      style={({ pressed }) => [
+                        styles.button,
+                        { borderColor: theme.backgroundSelected, borderWidth: 1 },
+                        pressed && styles.pressed,
+                        isSubmitting && styles.disabled,
+                      ]}
+                    >
+                      <ThemedText style={styles.buttonText}>Entwicklungszugang starten</ThemedText>
+                    </Pressable>
+                  ) : null}
                 </>
               )}
 
