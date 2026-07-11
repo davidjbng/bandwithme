@@ -38,6 +38,7 @@ export function ConvexProvider({ children }: PropsWithChildren) {
       client={convex}
       storage={Platform.OS === "web" ? undefined : secureStore}
       replaceURL={(relativeUrl) => router.replace(relativeUrl as Href)}
+      shouldHandleCode={false}
     >
       {children}
     </ConvexAuthProvider>
