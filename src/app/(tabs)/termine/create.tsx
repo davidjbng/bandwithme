@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { WebNativeDateInput } from "@/components/web-native-date-input";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import {
   eventKindLabels,
@@ -45,6 +46,7 @@ function updateDatePart(currentDate: Date, dateValue: string) {
 
   const nextDate = new Date(currentDate);
   nextDate.setFullYear(year, month - 1, day);
+  nextDate.setHours(12, 0, 0, 0);
 
   return Number.isNaN(nextDate.getTime()) ? currentDate : nextDate;
 }
@@ -74,6 +76,8 @@ export default function CreateTermineScreen() {
   const [kind, setKind] = useState<EventKind>("rehearsal");
   const [name, setName] = useState("");
   const [eventDate, setEventDate] = useState(initialDate);
+  const [eventDateValue, setEventDateValue] = useState(() => formatDateInput(initialDate));
+  const [eventTimeValue, setEventTimeValue] = useState(() => formatTimeInput(initialDate));
   const [location, setLocation] = useState("");
   const [repeat, setRepeat] = useState<RepeatOption>("weekly");
   const [androidPickerMode, setAndroidPickerMode] = useState<"date" | "time" | null>(null);
@@ -94,13 +98,25 @@ export default function CreateTermineScreen() {
           selectedDate.getMonth(),
           selectedDate.getDate(),
         );
+        setEventDateValue(formatDateInput(nextDate));
         return nextDate;
       }
 
       const nextDate = new Date(currentDate);
       nextDate.setHours(selectedDate.getHours(), selectedDate.getMinutes(), 0, 0);
+      setEventTimeValue(formatTimeInput(nextDate));
       return nextDate;
     });
+  }
+
+  function handleWebDateChange(value: string) {
+    setEventDateValue(value);
+    setEventDate((currentDate) => updateDatePart(currentDate, value));
+  }
+
+  function handleWebTimeChange(value: string) {
+    setEventTimeValue(value);
+    setEventDate((currentDate) => updateTimePart(currentDate, value));
   }
 
   async function handleCreateEvent() {
@@ -284,20 +300,22 @@ export default function CreateTermineScreen() {
                   </ThemedView>
                 </Pressable>
               ) : (
-                <TextInput
-                  value={formatDateInput(eventDate)}
-                  onChangeText={(value) =>
-                    setEventDate((currentDate) => updateDatePart(currentDate, value))
-                  }
+                <View
                   style={[
                     styles.input,
                     {
                       backgroundColor: theme.background,
-                      color: theme.text,
                       borderColor: theme.backgroundSelected,
                     },
                   ]}
-                />
+                >
+                  <WebNativeDateInput
+                    ariaLabel="Datum"
+                    type="date"
+                    value={eventDateValue}
+                    onChange={handleWebDateChange}
+                  />
+                </View>
               )}
             </View>
             <View style={[styles.inputGroup, styles.rowItem]}>
@@ -328,20 +346,22 @@ export default function CreateTermineScreen() {
                   </ThemedView>
                 </Pressable>
               ) : (
-                <TextInput
-                  value={formatTimeInput(eventDate)}
-                  onChangeText={(value) =>
-                    setEventDate((currentDate) => updateTimePart(currentDate, value))
-                  }
+                <View
                   style={[
                     styles.input,
                     {
                       backgroundColor: theme.background,
-                      color: theme.text,
                       borderColor: theme.backgroundSelected,
                     },
                   ]}
-                />
+                >
+                  <WebNativeDateInput
+                    ariaLabel="Uhrzeit"
+                    type="time"
+                    value={eventTimeValue}
+                    onChange={handleWebTimeChange}
+                  />
+                </View>
               )}
             </View>
           </View>
