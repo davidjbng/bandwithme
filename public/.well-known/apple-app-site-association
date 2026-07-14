@@ -3,8 +3,8 @@
     "apps": [],
     "details": [
       {
-        "appID": "com.anonymous.bandwithme",
-        "paths": ["/user/*"]
+        "appID": "DY6QC7DS48.com.anonymous.bandwithme",
+        "paths": ["*"]
       }
     ]
   }

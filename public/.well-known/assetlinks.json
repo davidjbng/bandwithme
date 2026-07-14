@@ -4,7 +4,9 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.anonymous.bandwithme",
-      "sha256_cert_fingerprints": []
+      "sha256_cert_fingerprints": [
+        "8D:CF:22:C3:33:F8:44:2B:C8:A9:AF:45:7B:DC:CF:C6:C7:6B:71:B3:74:24:ED:31:61:6B:2F:AD:A6:B8:03:DC"
+      ]
     }
   }
 ]
