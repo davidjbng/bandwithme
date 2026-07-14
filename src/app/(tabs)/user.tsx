@@ -42,6 +42,7 @@ export default function UserScreen() {
   const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
   const updateProfile = useMutation(api.user.updateProfile);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,6 +100,34 @@ export default function UserScreen() {
         caughtError instanceof Error
           ? caughtError.message
           : "Entwicklungszugang konnte nicht gestartet werden.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function authenticateWithPassword(flow: "signIn" | "signUp") {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail || !password) {
+      setError("Bitte gib E-Mail-Adresse und Passwort ein.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+    setStatus(null);
+
+    try {
+      await signIn("password", { email: trimmedEmail, flow, password });
+      setStatus(
+        flow === "signUp" ? "Account erstellt. Du wirst angemeldet." : "Du wirst angemeldet.",
+      );
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Anmeldung mit Passwort fehlgeschlagen.",
       );
     } finally {
       setIsSubmitting(false);
@@ -366,6 +395,55 @@ export default function UserScreen() {
                     ]}
                     value={email}
                   />
+                  <ThemedText type="smallBold">Passwort</ThemedText>
+                  <TextInput
+                    accessibilityLabel="Passwort"
+                    autoCapitalize="none"
+                    autoComplete="current-password"
+                    autoCorrect={false}
+                    editable={!isSubmitting}
+                    onChangeText={setPassword}
+                    onSubmitEditing={() => authenticateWithPassword("signIn")}
+                    placeholder="Mindestens 8 Zeichen"
+                    placeholderTextColor={theme.textSecondary}
+                    secureTextEntry
+                    style={[
+                      styles.input,
+                      { borderColor: theme.backgroundSelected, color: theme.text },
+                    ]}
+                    value={password}
+                  />
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={isSubmitting}
+                    onPress={() => authenticateWithPassword("signIn")}
+                    style={({ pressed }) => [
+                      styles.button,
+                      { backgroundColor: theme.text },
+                      pressed && styles.pressed,
+                      isSubmitting && styles.disabled,
+                    ]}
+                  >
+                    <ThemedText style={[styles.buttonText, { color: theme.background }]}>
+                      Anmelden
+                    </ThemedText>
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    disabled={isSubmitting}
+                    onPress={() => authenticateWithPassword("signUp")}
+                    style={({ pressed }) => [
+                      styles.button,
+                      { borderColor: theme.backgroundSelected, borderWidth: 1 },
+                      pressed && styles.pressed,
+                      isSubmitting && styles.disabled,
+                    ]}
+                  >
+                    <ThemedText style={styles.buttonText}>Account erstellen</ThemedText>
+                  </Pressable>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Alternativ kannst du dich mit einem einmaligen Link per E-Mail anmelden.
+                  </ThemedText>
                   <Pressable
                     disabled={isSubmitting}
                     onPress={sendMagicLink}

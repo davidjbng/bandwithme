@@ -21,6 +21,13 @@ test.describe("Auth flow", () => {
     await expect(page.getByPlaceholder("you@example.com")).toBeVisible();
   });
 
+  test("shows password sign-in and sign-up controls", async ({ page }) => {
+    await page.goto("/user");
+    await expect(page.getByLabel("Passwort")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anmelden" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Account erstellen" })).toBeVisible();
+  });
+
   test("shows magic link button", async ({ page }) => {
     await page.goto("/user");
     await expect(page.getByText("Send magic link")).toBeVisible();
