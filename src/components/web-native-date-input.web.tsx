@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { Fonts } from "@/constants/theme";
+
 export type NativeDateInputProps = {
   ariaLabel: string;
   onChange: (value: string) => void;
@@ -24,7 +26,9 @@ export function WebNativeDateInput({ ariaLabel, onChange, type, value }: NativeD
         border: 0,
         boxSizing: "border-box",
         color: "inherit",
-        fontFamily: "inherit",
+        // A DOM input does not inherit React Native Web's Text font from the surrounding View.
+        // Set the app's sans stack explicitly so Safari does not fall back to its serif control font.
+        fontFamily: Fonts.sans,
         fontSize: 16,
         fontWeight: 600,
         height: 46,
