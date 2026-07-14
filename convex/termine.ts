@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { requireCurrentUserId } from "./authorization";
 import { mutation, query } from "./_generated/server";
 
 const eventKind = v.union(v.literal("rehearsal"), v.literal("performance"));
@@ -14,9 +15,25 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
+    const email = identity?.email?.trim().toLowerCase();
+    if (!email) return [];
 
-    const allEvents = await ctx.db.query("events").withIndex("by_dateTime").collect();
+    const user = await ctx.db
+      .query("users")
+      .withIndex("email", (q) => q.eq("email", email))
+      .unique();
+    if (!user) return [];
+
+    const membership = await ctx.db
+      .query("bandMembers")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .unique();
+    if (!membership) return [];
+
+    const allEvents = await ctx.db
+      .query("events")
+      .withIndex("by_bandId_and_dateTime", (q) => q.eq("bandId", membership.bandId))
+      .collect();
     const upcomingEvents = allEvents.filter((event) => event.dateTime >= new Date().toISOString());
     const cachedUsers = new Map();
 
@@ -36,22 +53,22 @@ export const list = query({
         let viewerResponse: "yes" | "maybe" | "no" | null = null;
 
         for (const response of responses) {
-          let user = cachedUsers.get(response.userId);
-          if (!user) {
-            user = await ctx.db.get(response.userId);
-            cachedUsers.set(response.userId, user);
+          let responseUser = cachedUsers.get(response.userId);
+          if (!responseUser) {
+            responseUser = await ctx.db.get(response.userId);
+            cachedUsers.set(response.userId, responseUser);
           }
 
-          const fallbackName = user?.email?.split("@")[0] ?? "Bandmitglied";
+          const fallbackName = responseUser?.email?.split("@")[0] ?? "Bandmitglied";
           const participant = {
             id: response.userId,
-            name: user?.name ?? fallbackName,
-            email: user?.email ?? null,
+            name: responseUser?.name ?? fallbackName,
+            email: responseUser?.email ?? null,
           };
 
           participants[response.status].push(participant);
 
-          if (identity && user?.email === identity.email) {
+          if (response.userId === user._id) {
             viewerResponse = response.status;
           }
         }
@@ -86,6 +103,15 @@ export const create = mutation({
     repeat,
   },
   handler: async (ctx, args) => {
+    const user = await requireCurrentUserId(ctx, args.userId);
+    const membership = await ctx.db
+      .query("bandMembers")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .unique();
+    if (!membership) {
+      throw new Error("Du musst Mitglied einer Band sein, um einen Termin zu erstellen.");
+    }
+
     const normalizedRepeat = args.kind === "performance" ? "none" : args.repeat;
 
     return await ctx.db.insert("events", {
@@ -94,7 +120,8 @@ export const create = mutation({
       dateTime: args.dateTime,
       location: args.location.trim(),
       repeat: normalizedRepeat,
-      createdBy: args.userId,
+      createdBy: user._id,
+      bandId: membership.bandId,
     });
   },
 });
@@ -106,15 +133,24 @@ export const setResponse = mutation({
     status: rsvpStatus,
   },
   handler: async (ctx, args) => {
+    const user = await requireCurrentUserId(ctx, args.userId);
+    const membership = await ctx.db
+      .query("bandMembers")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .unique();
+    if (!membership) {
+      throw new Error("Du musst Mitglied einer Band sein, um zuzusagen.");
+    }
+
     const event = await ctx.db.get(args.eventId);
-    if (!event) {
-      throw new Error("Dieser Termin existiert nicht mehr.");
+    if (!event || event.bandId !== membership.bandId) {
+      throw new Error("Dieser Termin existiert nicht oder gehört nicht zu deiner Band.");
     }
 
     const existingResponse = await ctx.db
       .query("eventResponses")
       .withIndex("by_eventId_and_userId", (q) =>
-        q.eq("eventId", args.eventId).eq("userId", args.userId),
+        q.eq("eventId", args.eventId).eq("userId", user._id),
       )
       .unique();
 
@@ -130,7 +166,7 @@ export const setResponse = mutation({
 
     return await ctx.db.insert("eventResponses", {
       eventId: args.eventId,
-      userId: args.userId,
+      userId: user._id,
       status: args.status,
       respondedAt,
     });

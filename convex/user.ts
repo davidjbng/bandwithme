@@ -1,4 +1,5 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { requireCurrentUserId } from "./authorization";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -29,6 +30,8 @@ export const updateProfile = mutation({
     name: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireCurrentUserId(ctx, args.userId);
+
     const trimmed = args.name.trim();
     if (!trimmed) throw new Error("Name darf nicht leer sein.");
 

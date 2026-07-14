@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as authorization from "../authorization.js";
 import type * as bands from "../bands.js";
 import type * as http from "../http.js";
 import type * as termine from "../termine.js";
@@ -22,6 +23,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  authorization: typeof authorization;
   bands: typeof bands;
   http: typeof http;
   termine: typeof termine;

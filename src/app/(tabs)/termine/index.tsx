@@ -103,8 +103,7 @@ export default function TermineScreen() {
                 <View style={styles.signInCopy}>
                   <ThemedText type="smallBold">Login für Zusagen</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
-                    Du kannst die Termine schon sehen. Für echte Zusagen und neue Termine loggst du
-                    dich im Profil ein.
+                    Melde dich an, um die Termine deiner Band zu sehen und zu verwalten.
                   </ThemedText>
                 </View>
                 <Pressable

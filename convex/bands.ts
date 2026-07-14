@@ -1,5 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
+import { requireCurrentUserId } from "./authorization";
 import { mutation, query } from "./_generated/server";
 
 export const myBand = query({
@@ -32,6 +33,8 @@ export const create = mutation({
     name: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireCurrentUserId(ctx, args.userId);
+
     const existing = await ctx.db
       .query("bandMembers")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
@@ -53,56 +56,15 @@ export const create = mutation({
   },
 });
 
-export const joinByInvite = mutation({
-  args: {
-    userId: v.id("users"),
-    bandId: v.id("bands"),
-  },
-  handler: async (ctx, args) => {
-    const band = await ctx.db.get(args.bandId);
-    if (!band) throw new Error("Diese Band existiert nicht.");
-
-    const existing = await ctx.db
-      .query("bandMembers")
-      .withIndex("by_bandId_and_userId", (q) =>
-        q.eq("bandId", args.bandId).eq("userId", args.userId),
-      )
-      .first();
-    if (existing) throw new Error("Du bist bereits Mitglied dieser Band.");
-
-    const otherMembership = await ctx.db
-      .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
-      .first();
-    if (otherMembership) {
-      await ctx.db.delete(otherMembership._id);
-    }
-
-    await ctx.db.insert("bandMembers", {
-      bandId: args.bandId,
-      userId: args.userId,
-      role: "member",
-    });
-
-    return args.bandId;
-  },
-});
-
 export const listMembers = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return [];
-
-    const user = await ctx.db
-      .query("users")
-      .filter((q) => q.eq(q.field("email"), identity.email ?? ""))
-      .first();
-    if (!user) return [];
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return [];
 
     const myMembership = await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
     if (!myMembership) return [];
 
@@ -131,6 +93,8 @@ export const leave = mutation({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    await requireCurrentUserId(ctx, args.userId);
+
     const membership = await ctx.db
       .query("bandMembers")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
@@ -158,6 +122,8 @@ export const removeMember = mutation({
     membershipId: v.id("bandMembers"),
   },
   handler: async (ctx, args) => {
+    await requireCurrentUserId(ctx, args.userId);
+
     const myMembership = await ctx.db
       .query("bandMembers")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
@@ -199,6 +165,8 @@ export const deleteBand = mutation({
     nameConfirmation: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireCurrentUserId(ctx, args.userId);
+
     const membership = await ctx.db
       .query("bandMembers")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))

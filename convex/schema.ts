@@ -36,6 +36,7 @@ export default defineSchema({
     bandId: v.optional(v.id("bands")),
   })
     .index("by_dateTime", ["dateTime"])
+    .index("by_bandId_and_dateTime", ["bandId", "dateTime"])
     .index("by_createdBy_and_dateTime", ["createdBy", "dateTime"]),
   eventResponses: defineTable({
     eventId: v.id("events"),
