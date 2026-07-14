@@ -25,7 +25,7 @@ jobs:
       EXPO_PUBLIC_CONVEX_SITE_URL: https://blissful-spaniel-445.eu-west-1.convex.site
       CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
