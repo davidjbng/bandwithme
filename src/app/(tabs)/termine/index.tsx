@@ -2,7 +2,7 @@ import { useConvexAuth } from "@convex-dev/auth/react";
 import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
@@ -80,7 +80,10 @@ export default function TermineScreen() {
         style={[styles.scrollView, { backgroundColor: theme.background }]}
         contentInset={insets}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[
+          styles.contentContainer,
+          Platform.OS === "web" && styles.webContentContainer,
+        ]}
       >
         <ThemedView style={styles.container}>
           <ThemedView style={styles.listSection}>
@@ -287,6 +290,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.five,
     paddingBottom: Spacing.five,
+  },
+  webContentContainer: {
+    paddingTop: 64,
   },
   container: {
     width: "100%",
