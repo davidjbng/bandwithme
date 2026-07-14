@@ -1,5 +1,6 @@
 import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
 import { Email } from "@convex-dev/auth/providers/Email";
+import { Password } from "@convex-dev/auth/providers/Password";
 import { convexAuth } from "@convex-dev/auth/server";
 
 function getSiteUrl() {
@@ -68,6 +69,18 @@ const AhaSend = Email({
   },
 });
 
+const PasswordAuth = Password({
+  profile: (params) => {
+    const email = typeof params.email === "string" ? params.email.trim().toLowerCase() : "";
+
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      throw new Error("Bitte gib eine gültige E-Mail-Adresse ein.");
+    }
+
+    return { email };
+  },
+});
+
 const isDevelopmentAuthEnabled = process.env.DEVELOPMENT_AUTH_ENABLED === "true";
 
 const DevelopmentAuth = Anonymous({
@@ -80,7 +93,9 @@ const DevelopmentAuth = Anonymous({
 });
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: isDevelopmentAuthEnabled ? [AhaSend, DevelopmentAuth] : [AhaSend],
+  providers: isDevelopmentAuthEnabled
+    ? [AhaSend, PasswordAuth, DevelopmentAuth]
+    : [AhaSend, PasswordAuth],
   callbacks: {
     async redirect({ redirectTo }) {
       return redirectUrl(redirectTo);
