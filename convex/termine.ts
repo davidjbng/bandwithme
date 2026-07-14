@@ -14,6 +14,8 @@ export const list = query({
   args: {},
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
     const allEvents = await ctx.db.query("events").withIndex("by_dateTime").collect();
     const upcomingEvents = allEvents.filter((event) => event.dateTime >= new Date().toISOString());
     const cachedUsers = new Map();
