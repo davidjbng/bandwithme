@@ -26,6 +26,13 @@ export default defineSchema({
     .index("by_bandId", ["bandId"])
     .index("by_userId", ["userId"])
     .index("by_bandId_and_userId", ["bandId", "userId"]),
+  bandInvites: defineTable({
+    bandId: v.id("bands"),
+    createdBy: v.id("users"),
+    token: v.string(),
+  })
+    .index("by_token", ["token"])
+    .index("by_bandId", ["bandId"]),
   events: defineTable({
     kind: eventKind,
     name: v.string(),

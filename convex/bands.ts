@@ -1,6 +1,6 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
-import { requireCurrentUserId } from "./authorization";
+import { requireCurrentUser, requireCurrentUserId } from "./authorization";
 import { mutation, query } from "./_generated/server";
 
 export const myBand = query({
@@ -53,6 +53,79 @@ export const create = mutation({
     });
 
     return bandId;
+  },
+});
+
+function createToken() {
+  const bytes = crypto.getRandomValues(new Uint8Array(24));
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+export const createInvite = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireCurrentUser(ctx);
+    const membership = await ctx.db
+      .query("bandMembers")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .first();
+
+    if (!membership || membership.role !== "admin") {
+      throw new Error("Nur Admins können Einladungslinks erstellen.");
+    }
+
+    const token = createToken();
+    await ctx.db.insert("bandInvites", {
+      bandId: membership.bandId,
+      createdBy: user._id,
+      token,
+    });
+
+    return { token };
+  },
+});
+
+export const previewInvite = query({
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    const invite = await ctx.db
+      .query("bandInvites")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!invite) return null;
+
+    const band = await ctx.db.get(invite.bandId);
+    return band ? { bandName: band.name } : null;
+  },
+});
+
+export const acceptInvite = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    const invite = await ctx.db
+      .query("bandInvites")
+      .withIndex("by_token", (q) => q.eq("token", args.token))
+      .unique();
+    if (!invite || !(await ctx.db.get(invite.bandId))) {
+      throw new Error("Dieser Einladungslink ist ungültig.");
+    }
+
+    const existing = await ctx.db
+      .query("bandMembers")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .first();
+    if (existing) {
+      throw new Error("Du bist bereits in einer Band.");
+    }
+
+    await ctx.db.insert("bandMembers", {
+      bandId: invite.bandId,
+      userId: user._id,
+      role: "member",
+    });
+
+    return { bandId: invite.bandId };
   },
 });
 
