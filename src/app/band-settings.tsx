@@ -82,7 +82,7 @@ export default function BandSettingsScreen() {
     setCreatingInvite(true);
     try {
       const invite = await createInvite({});
-      setInviteLink(`https://bandwithme.de/invite/${invite.token}`);
+      setInviteLink(`https://bandwithme.de/invite?token=${encodeURIComponent(invite.token)}`);
     } catch (e: any) {
       setActionError(e?.message ?? "Einladungslink konnte nicht erstellt werden.");
     } finally {

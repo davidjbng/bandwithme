@@ -97,7 +97,7 @@ export default function UserScreen() {
   }, [callbackEmail, code, router, signIn]);
 
   useEffect(() => {
-    if (isAuthenticated && next?.startsWith("/invite/")) {
+    if (isAuthenticated && next?.startsWith("/invite")) {
       router.replace(next as never);
     }
   }, [isAuthenticated, next, router]);

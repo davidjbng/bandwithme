@@ -38,7 +38,7 @@ test.describe("Band creation", () => {
 
     await expect(page.getByText("Einladungslink")).toBeVisible();
     await expect(page.getByLabel("Einladungslink")).toHaveValue(
-      /https:\/\/bandwithme\.de\/invite\//,
+      /https:\/\/bandwithme\.de\/invite\?token=/,
     );
     await expect(page.getByRole("button", { name: "Link kopieren" })).toBeVisible();
   });
