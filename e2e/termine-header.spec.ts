@@ -9,10 +9,19 @@ test("keeps Termine content below the native header", async ({ page }) => {
   await expect(headerTitle).toBeVisible();
   await expect(sectionTitle).toBeVisible();
 
-  const headerBox = await headerTitle.boundingBox();
-  const sectionBox = await sectionTitle.boundingBox();
+  const layout = await page.evaluate(() => {
+    const header = Array.from(document.querySelectorAll("h1")).find(
+      (element) => element.textContent?.trim() === "Termine",
+    );
+    const section = Array.from(document.querySelectorAll("*")).find(
+      (element) =>
+        element.children.length === 0 && element.textContent?.trim() === "Nächste Termine",
+    );
+    if (!header || !section) return null;
 
-  expect(headerBox).not.toBeNull();
-  expect(sectionBox).not.toBeNull();
-  expect(sectionBox!.y).toBeGreaterThan(headerBox!.y + headerBox!.height + 16);
+    return { header: header.getBoundingClientRect(), section: section.getBoundingClientRect() };
+  });
+
+  expect(layout).not.toBeNull();
+  expect(layout!.section.y).toBeGreaterThan(layout!.header.y + layout!.header.height + 16);
 });

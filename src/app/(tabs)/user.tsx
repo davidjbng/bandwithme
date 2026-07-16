@@ -38,7 +38,15 @@ export default function UserScreen() {
   const { signIn, signOut } = useAuthActions();
   const isDevelopmentAuthEnabled = process.env.EXPO_PUBLIC_ENABLE_DEVELOPMENT_AUTH === "true";
   const router = useRouter();
-  const { code, email: callbackEmail } = useLocalSearchParams<{ code?: string; email?: string }>();
+  const {
+    code,
+    email: callbackEmail,
+    next,
+  } = useLocalSearchParams<{
+    code?: string;
+    email?: string;
+    next?: string;
+  }>();
   const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
   const updateProfile = useMutation(api.user.updateProfile);
   const [email, setEmail] = useState("");
@@ -87,6 +95,12 @@ export default function UserScreen() {
       }
     })();
   }, [callbackEmail, code, router, signIn]);
+
+  useEffect(() => {
+    if (isAuthenticated && next?.startsWith("/invite/")) {
+      router.replace(next as never);
+    }
+  }, [isAuthenticated, next, router]);
 
   async function startDevelopmentSession() {
     setIsSubmitting(true);

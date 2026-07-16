@@ -3,7 +3,16 @@ import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  TextInput,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
@@ -24,10 +33,14 @@ export default function BandSettingsScreen() {
   const leaveBand = useMutation(api.bands.leave);
   const removeMember = useMutation(api.bands.removeMember);
   const deleteBand = useMutation(api.bands.deleteBand);
+  const createInvite = useMutation(api.bands.createInvite);
 
   const [deleteName, setDeleteName] = useState("");
   const [showDelete, setShowDelete] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [inviteLink, setInviteLink] = useState("");
+  const [inviteStatus, setInviteStatus] = useState("");
+  const [creatingInvite, setCreatingInvite] = useState(false);
 
   const insets = {
     ...safeAreaInsets,
@@ -63,6 +76,37 @@ export default function BandSettingsScreen() {
     }
   }
 
+  async function handleCreateInvite() {
+    setActionError("");
+    setInviteStatus("");
+    setCreatingInvite(true);
+    try {
+      const invite = await createInvite({});
+      setInviteLink(`https://bandwithme.de/invite/${invite.token}`);
+    } catch (e: any) {
+      setActionError(e?.message ?? "Einladungslink konnte nicht erstellt werden.");
+    } finally {
+      setCreatingInvite(false);
+    }
+  }
+
+  async function handleCopyInvite() {
+    if (!inviteLink) return;
+
+    setActionError("");
+    try {
+      if (Platform.OS === "web" && typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(inviteLink);
+        setInviteStatus("Link kopiert.");
+      } else {
+        await Share.share({ message: `Tritt ${band!.name} bei: ${inviteLink}` });
+        setInviteStatus("Einladungslink geteilt.");
+      }
+    } catch (e: any) {
+      setActionError(e?.message ?? "Link konnte nicht kopiert werden.");
+    }
+  }
+
   if (!isAuthenticated || !band) {
     return (
       <ThemedView style={styles.centered}>
@@ -92,6 +136,76 @@ export default function BandSettingsScreen() {
               {isAdmin ? "Admin" : "Mitglied"}
             </ThemedText>
           </View>
+
+          {isAdmin && (
+            <View style={styles.section}>
+              <ThemedText type="smallBold" style={styles.sectionTitle}>
+                Band einladen
+              </ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                Erstelle einen Link und leite ihn an neue Bandmitglieder weiter.
+              </ThemedText>
+              <Pressable
+                accessibilityLabel="Einladungslink erstellen"
+                accessibilityRole="button"
+                disabled={creatingInvite}
+                onPress={handleCreateInvite}
+                style={({ pressed }) => [
+                  styles.inviteButton,
+                  pressed && styles.pressed,
+                  { backgroundColor: theme.text, opacity: creatingInvite ? 0.5 : 1 },
+                ]}
+              >
+                <SymbolView
+                  tintColor={theme.background}
+                  name={{ ios: "link.badge.plus", web: "add_link" }}
+                  size={18}
+                />
+                <ThemedText type="smallBold" style={{ color: theme.background }}>
+                  {creatingInvite ? "Wird erstellt…" : "Einladungslink erstellen"}
+                </ThemedText>
+              </Pressable>
+              {inviteLink ? (
+                <ThemedView type="backgroundElement" style={styles.inviteCard}>
+                  <ThemedText type="smallBold">Einladungslink</ThemedText>
+                  <TextInput
+                    accessibilityLabel="Einladungslink"
+                    editable={false}
+                    selectTextOnFocus
+                    style={[
+                      styles.inviteInput,
+                      {
+                        color: theme.text,
+                        backgroundColor: theme.background,
+                        borderColor: theme.backgroundSelected,
+                      },
+                    ]}
+                    value={inviteLink}
+                  />
+                  <Pressable
+                    accessibilityLabel="Link kopieren"
+                    accessibilityRole="button"
+                    onPress={handleCopyInvite}
+                    style={({ pressed }) => [styles.copyButton, pressed && styles.pressed]}
+                  >
+                    <SymbolView
+                      tintColor={theme.text}
+                      name={{ ios: "doc.on.doc", web: "content_copy" }}
+                      size={18}
+                    />
+                    <ThemedText type="smallBold">
+                      {Platform.OS === "web" ? "Link kopieren" : "Link teilen"}
+                    </ThemedText>
+                  </Pressable>
+                  {inviteStatus ? (
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {inviteStatus}
+                    </ThemedText>
+                  ) : null}
+                </ThemedView>
+              ) : null}
+            </View>
+          )}
 
           {/* Mitglieder */}
           <View style={styles.section}>
@@ -252,6 +366,25 @@ const styles = StyleSheet.create({
   container: { width: "100%", maxWidth: MaxContentWidth, gap: Spacing.five },
   section: { gap: Spacing.two },
   sectionTitle: { marginBottom: Spacing.one },
+  inviteButton: {
+    alignItems: "center",
+    borderRadius: Spacing.three,
+    flexDirection: "row",
+    gap: Spacing.two,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: Spacing.three,
+  },
+  inviteCard: { borderRadius: Spacing.three, gap: Spacing.two, padding: Spacing.three },
+  inviteInput: { borderRadius: Spacing.two, borderWidth: 1, fontSize: 14, padding: Spacing.two },
+  copyButton: {
+    alignItems: "center",
+    borderRadius: Spacing.two,
+    flexDirection: "row",
+    gap: Spacing.two,
+    justifyContent: "center",
+    minHeight: 44,
+  },
   memberList: { gap: Spacing.one },
   memberRow: {
     flexDirection: "row",

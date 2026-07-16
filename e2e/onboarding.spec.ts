@@ -32,4 +32,12 @@ test.describe("Band onboarding", () => {
     await page.goto("/onboarding/join");
     await expect(page.getByText(/Einladungslink/).first()).toBeVisible();
   });
+
+  test("an invalid invitation link shows a safe error state", async ({ page }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (err) => errors.push(err.message));
+    await page.goto("/invite/not-a-real-token");
+    await expect(page.getByText("Link nicht gefunden")).toBeVisible();
+    expect(filterCritical(errors)).toEqual([]);
+  });
 });
