@@ -21,7 +21,7 @@
   "dependencies": {
     "@auth/core": "0.41.2",
     "@convex-dev/auth": "^0.0.94",
-    "@expo/ui": "~57.0.4",
+    "@expo/ui": "~57.0.7",
     "convex": "^1.42.1",
     "expo": "~57.0.4",
     "expo-constants": "~57.0.3",
