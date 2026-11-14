@@ -6,6 +6,8 @@
 
 ## Agent skills
 
+Canonical skills live in `.agents/skills`; `.claude/skills` links there; `agent/skills` retains synchronized compatibility copies where already present. See `docs/agents/skills.md` for sources, updates, and repository overrides.
+
 ### Issue tracker
 
 Issues and PRDs for this repo live as GitHub issues. See `docs/agents/issue-tracker.md`.
@@ -16,7 +18,7 @@ Use the default triage vocabulary from `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
-This is a single-context repo. See `docs/agents/domain.md`.
+This is a single-context repo: `GLOSSARY.md` and `docs/adr/`. See `docs/agents/domain.md`.
 
 <!-- convex-ai-start -->
 
