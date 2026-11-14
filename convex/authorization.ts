@@ -1,18 +1,14 @@
+import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 
 export async function requireCurrentUser(ctx: MutationCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  const email = identity?.email?.trim().toLowerCase();
-
-  if (!email) {
+  const userId = await getAuthUserId(ctx);
+  if (userId === null) {
     throw new Error("Du musst eingeloggt sein.");
   }
 
-  const user = await ctx.db
-    .query("users")
-    .withIndex("email", (query) => query.eq("email", email))
-    .unique();
+  const user = await ctx.db.get(userId);
 
   if (!user) {
     throw new Error("Dein Benutzerkonto wurde nicht gefunden.");

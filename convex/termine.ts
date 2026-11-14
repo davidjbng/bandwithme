@@ -1,3 +1,4 @@
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { requireCurrentUserId } from "./authorization";
 import { mutation, query } from "./_generated/server";
@@ -14,14 +15,9 @@ const rsvpStatus = v.union(v.literal("yes"), v.literal("maybe"), v.literal("no")
 export const list = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    const email = identity?.email?.trim().toLowerCase();
-    if (!email) return [];
-
-    const user = await ctx.db
-      .query("users")
-      .withIndex("email", (q) => q.eq("email", email))
-      .unique();
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) return [];
+    const user = await ctx.db.get(userId);
     if (!user) return [];
 
     const membership = await ctx.db

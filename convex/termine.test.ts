@@ -33,19 +33,23 @@ test("does not return appointments to unauthenticated users", async () => {
 test("returns appointments only from the viewer's band", async () => {
   const t = convexTest(schema, modules);
 
-  await t.run(async (ctx) => {
-    const firstUserId = await ctx.db.insert("users", { email: "first@example.com" });
+  const firstUserId = await t.run(async (ctx) => {
+    const createdFirstUserId = await ctx.db.insert("users", { email: "first@example.com" });
     const secondUserId = await ctx.db.insert("users", { email: "second@example.com" });
     const firstBandId = await ctx.db.insert("bands", {
       name: "Die Kellerkinder",
-      createdBy: firstUserId,
+      createdBy: createdFirstUserId,
     });
     const secondBandId = await ctx.db.insert("bands", {
       name: "Die Kellerkinder",
       createdBy: secondUserId,
     });
 
-    await ctx.db.insert("bandMembers", { bandId: firstBandId, role: "admin", userId: firstUserId });
+    await ctx.db.insert("bandMembers", {
+      bandId: firstBandId,
+      role: "admin",
+      userId: createdFirstUserId,
+    });
     await ctx.db.insert("bandMembers", {
       bandId: secondBandId,
       role: "admin",
@@ -58,7 +62,7 @@ test("returns appointments only from the viewer's band", async () => {
       dateTime: "2099-01-01T20:00:00.000Z",
       location: "Proberaum A",
       repeat: "none",
-      createdBy: firstUserId,
+      createdBy: createdFirstUserId,
     });
     await ctx.db.insert("events", {
       bandId: secondBandId,
@@ -69,9 +73,10 @@ test("returns appointments only from the viewer's band", async () => {
       repeat: "none",
       createdBy: secondUserId,
     });
+    return createdFirstUserId;
   });
 
   await expect(
-    t.withIdentity({ email: "first@example.com" }).query(api.termine.list, {}),
+    t.withIdentity({ subject: `${firstUserId}|session` }).query(api.termine.list, {}),
   ).resolves.toMatchObject([{ name: "Erste Probe" }]);
 });

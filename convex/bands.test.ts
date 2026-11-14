@@ -14,10 +14,12 @@ const modules = import.meta.glob("./**/*.ts");
 test("rejects creating a band on behalf of another user", async () => {
   const t = convexTest(schema, modules);
   const victimId = await t.run((ctx) => ctx.db.insert("users", { email: "victim@example.com" }));
-  await t.run((ctx) => ctx.db.insert("users", { email: "attacker@example.com" }));
+  const attackerId = await t.run((ctx) =>
+    ctx.db.insert("users", { email: "attacker@example.com" }),
+  );
 
   await expect(
-    t.withIdentity({ email: "attacker@example.com" }).mutation(api.bands.create, {
+    t.withIdentity({ subject: `${attackerId}|session` }).mutation(api.bands.create, {
       name: "Übernommene Band",
       userId: victimId,
     }),
@@ -36,7 +38,9 @@ test("lets an admin create an invitation and a new user join with it", async () 
 
   const { acceptInvite, createInvite, previewInvite } = api.bands;
 
-  const invite = await t.withIdentity({ email: "admin@example.com" }).mutation(createInvite, {});
+  const invite = await t
+    .withIdentity({ subject: `${fixture.adminId}|session` })
+    .mutation(createInvite, {});
   expect(invite.token).toEqual(expect.any(String));
   expect(invite.token.length).toBeGreaterThan(20);
 
@@ -45,7 +49,7 @@ test("lets an admin create an invitation and a new user join with it", async () 
   });
 
   await t
-    .withIdentity({ email: "new@example.com" })
+    .withIdentity({ subject: `${fixture.newUserId}|session` })
     .mutation(acceptInvite, { token: invite.token });
 
   const memberships = await t.run((ctx) =>
@@ -65,16 +69,17 @@ test("lets an admin create an invitation and a new user join with it", async () 
 test("does not allow a band member to create invitation links", async () => {
   const t = convexTest(schema, modules);
 
-  await t.run(async (ctx) => {
+  const memberId = await t.run(async (ctx) => {
     const adminId = await ctx.db.insert("users", { email: "admin@example.com" });
-    const memberId = await ctx.db.insert("users", { email: "member@example.com" });
+    const createdMemberId = await ctx.db.insert("users", { email: "member@example.com" });
     const bandId = await ctx.db.insert("bands", { name: "Die Kellerkinder", createdBy: adminId });
     await ctx.db.insert("bandMembers", { bandId, role: "admin", userId: adminId });
-    await ctx.db.insert("bandMembers", { bandId, role: "member", userId: memberId });
+    await ctx.db.insert("bandMembers", { bandId, role: "member", userId: createdMemberId });
+    return createdMemberId;
   });
 
   const { createInvite } = api.bands;
   await expect(
-    t.withIdentity({ email: "member@example.com" }).mutation(createInvite, {}),
+    t.withIdentity({ subject: `${memberId}|session` }).mutation(createInvite, {}),
   ).rejects.toThrow("Nur Admins können Einladungslinks erstellen.");
 });

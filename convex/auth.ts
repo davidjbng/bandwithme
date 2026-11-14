@@ -10,14 +10,12 @@ function getSiteUrl() {
 function redirectUrl(redirectTo: string) {
   const siteUrl = getSiteUrl();
 
-  if (redirectTo.startsWith("?") || redirectTo.startsWith("/")) {
-    return `${siteUrl}${redirectTo}`;
-  }
-  if (redirectTo.startsWith(siteUrl)) {
-    return redirectTo;
-  }
   if (redirectTo.startsWith("bandwithme://")) {
     return redirectTo;
+  }
+  const destination = new URL(redirectTo, siteUrl);
+  if (destination.origin === new URL(siteUrl).origin) {
+    return destination.href;
   }
 
   throw new Error("Invalid sign-in redirect URL.");
