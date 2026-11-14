@@ -5,14 +5,14 @@ import { Colors } from "@/constants/theme";
 
 export default function TermineLayout() {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === "unspecified" ? "light" : scheme];
+  const colors = Colors[scheme === "dark" ? "dark" : "light"];
 
   return (
     <Stack
       screenOptions={{
         headerTransparent: true,
         headerShadowVisible: false,
-        headerLargeTitle: true,
+        headerLargeTitleEnabled: true,
         headerLargeTitleShadowVisible: false,
         headerLargeStyle: { backgroundColor: colors.background },
         headerStyle: { backgroundColor: colors.background },
@@ -22,7 +22,10 @@ export default function TermineLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: "Termine" }} />
-      <Stack.Screen name="create" options={{ title: "Neuer Termin", headerLargeTitle: false }} />
+      <Stack.Screen
+        name="create"
+        options={{ title: "Neuer Termin", headerLargeTitleEnabled: false }}
+      />
     </Stack>
   );
 }

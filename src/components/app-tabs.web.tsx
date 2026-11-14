@@ -1,11 +1,5 @@
-import {
-  Tabs,
-  TabList,
-  TabListProps,
-  TabSlot,
-  TabTrigger,
-  TabTriggerSlotProps,
-} from "expo-router/ui";
+import { Tabs, TabList, TabSlot, TabTrigger, TabTriggerSlotProps } from "expo-router/ui";
+import { type ComponentProps } from "react";
 import { Pressable, View, StyleSheet } from "react-native";
 
 import { ThemedText } from "./themed-text";
@@ -49,7 +43,11 @@ function TabBar({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
+export function TabButton({
+  children,
+  isFocused,
+  ...props
+}: Omit<TabTriggerSlotProps, "ref"> & Pick<ComponentProps<typeof Pressable>, "ref">) {
   return (
     <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
       <ThemedView
@@ -64,7 +62,7 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
   );
 }
 
-export function CustomTabList(props: TabListProps) {
+export function CustomTabList(props: ComponentProps<typeof View>) {
   return <View {...props} />;
 }
 
