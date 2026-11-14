@@ -34,6 +34,8 @@ wait stable 700 5000
 press 'id="vote-s1"'
 wait 'label="Dreams: abstimmen, 3 Stimmen"'
 wait stable 700 5000
+press 'id="song-search"'
+wait 'id="song-search" focused=true'
 fill 'id="song-search"' zzzzz
 wait 'label="Kein Treffer."'
 wait stable 700 5000
