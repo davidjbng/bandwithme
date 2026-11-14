@@ -16,13 +16,16 @@ export default function AppTabs() {
       <TabList asChild>
         <TabBar>
           <TabTrigger name="home" href="/" asChild>
-            <TabButton>Home</TabButton>
+            <TabButton>Übersicht</TabButton>
           </TabTrigger>
           <TabTrigger name="termine" href="/termine" asChild>
             <TabButton>Termine</TabButton>
           </TabTrigger>
-          <TabTrigger name="user" href="/user" asChild>
-            <TabButton>Profil</TabButton>
+          <TabTrigger name="songs" href="/songs" asChild>
+            <TabButton>Songs</TabButton>
+          </TabTrigger>
+          <TabTrigger name="band" href="/band" asChild>
+            <TabButton>Band</TabButton>
           </TabTrigger>
         </TabBar>
       </TabList>
@@ -34,9 +37,6 @@ function TabBar({ children }: { children: React.ReactNode }) {
   return (
     <View style={styles.tabBarWrapper}>
       <ThemedView type="backgroundElement" style={styles.tabBarInner}>
-        <ThemedText type="smallBold" style={styles.brandText}>
-          Band With Me
-        </ThemedText>
         <View style={styles.tabButtons}>{children}</View>
       </ThemedView>
     </View>
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.five,
+    paddingHorizontal: Spacing.two,
     borderRadius: Spacing.five,
     width: "100%",
     maxWidth: MaxContentWidth,
@@ -99,14 +99,16 @@ const styles = StyleSheet.create({
   },
   tabButtons: {
     flexDirection: "row",
-    gap: Spacing.two,
+    gap: Spacing.one,
+    flex: 1,
+    justifyContent: "space-around",
   },
   pressed: {
     opacity: 0.7,
   },
   tabButtonView: {
-    paddingVertical: Spacing.one,
-    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
+    paddingHorizontal: Spacing.two,
     borderRadius: Spacing.three,
   },
 });

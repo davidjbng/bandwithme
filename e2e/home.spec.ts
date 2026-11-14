@@ -28,15 +28,15 @@ test.describe("Home page", () => {
 
   test("shows welcome card for unauthenticated users", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("Willkommen!")).toBeVisible();
-    await expect(page.getByText("Zum Login")).toBeVisible();
+    await expect(page.getByText("Zusammen klingt’s besser.", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anmelden oder registrieren" })).toBeVisible();
   });
 
   test("has working tab navigation", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: "Home" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Übersicht" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Termine" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Profil" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Band" })).toBeVisible();
   });
 });
 
@@ -47,7 +47,7 @@ test.describe("Navigation", () => {
     await page.goto("/termine");
     await page.waitForLoadState("networkidle");
     expect(filterCritical(errors)).toEqual([]);
-    await expect(page.getByText("Nächste Termine")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anmelden oder registrieren" })).toBeVisible();
   });
 
   test("navigates to Profil", async ({ page }) => {

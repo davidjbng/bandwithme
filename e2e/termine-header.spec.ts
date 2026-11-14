@@ -4,7 +4,7 @@ test("keeps Termine content below the native header", async ({ page }) => {
   await page.goto("/termine");
 
   const headerTitle = page.locator("h1", { hasText: "Termine" });
-  const sectionTitle = page.getByText("Nächste Termine");
+  const sectionTitle = page.getByText("Zusammen klingt’s besser.");
 
   await expect(headerTitle).toBeVisible();
   await expect(sectionTitle).toBeVisible();
@@ -15,7 +15,8 @@ test("keeps Termine content below the native header", async ({ page }) => {
     );
     const section = Array.from(document.querySelectorAll("*")).find(
       (element) =>
-        element.children.length === 0 && element.textContent?.trim() === "Nächste Termine",
+        element.children.length === 0 &&
+        element.textContent?.trim() === "Zusammen klingt’s besser.",
     );
     if (!header || !section) return null;
 

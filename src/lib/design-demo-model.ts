@@ -174,6 +174,4 @@ export function demoReducer(state: DemoState, action: DemoAction): DemoState {
   }
 }
 
-export function durationLabel(seconds: number) {
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
-}
+export { durationLabel } from "./tour-format";

@@ -39,5 +39,23 @@ test("the design prototype is not exposed in production exports", async ({ page 
   await page.goto("/prototype/songs");
   await expect(page).toHaveURL("/");
   await expect(page.getByTestId("vote-s1")).toHaveCount(0);
-  await expect(page.getByRole("link", { name: "Profil", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Band", exact: true })).toBeVisible();
+});
+
+test("active Tour Notes navigation is accessible without demo records", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText("Guter Takt.", { exact: false })).toBeVisible();
+  for (const [name, path] of [
+    ["Übersicht", "/"],
+    ["Termine", "/termine"],
+    ["Songs", "/songs"],
+    ["Band", "/band"],
+  ]) {
+    await page.getByRole("link", { name, exact: true }).click();
+    await expect(page).toHaveURL(path);
+    await expect(page.getByRole("button", { name: "Anmelden oder registrieren" })).toBeVisible();
+  }
+  await expect(page.getByText("The Sunday Club", { exact: false })).toHaveCount(0);
+  await page.getByRole("button", { name: "Anmelden oder registrieren" }).click();
+  await expect(page.getByRole("textbox", { name: "E-Mail-Adresse" })).toBeVisible();
 });

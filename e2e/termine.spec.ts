@@ -17,15 +17,14 @@ test.describe("Termine page", () => {
 
   test("shows empty state for unauthenticated users", async ({ page }) => {
     await page.goto("/termine");
-    await expect(
-      page.getByText("Noch keine Probe und noch kein Auftritt", { exact: true }),
-    ).toBeVisible();
-    await expect(page.getByText("Login für Zusagen", { exact: true })).toBeVisible();
+    await expect(page.getByText("Zusammen klingt’s besser.", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anmelden oder registrieren" })).toBeVisible();
   });
 
   test("shows login prompt card", async ({ page }) => {
     await page.goto("/termine");
-    await expect(page.getByText(/Login für Zusagen/)).toBeVisible();
-    await expect(page.getByText(/Zum Profil/)).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anmelden oder registrieren" })).toBeVisible();
+    await page.getByRole("button", { name: "Anmelden oder registrieren" }).click();
+    await expect(page.getByRole("button", { name: "Anmelden", exact: true })).toBeVisible();
   });
 });

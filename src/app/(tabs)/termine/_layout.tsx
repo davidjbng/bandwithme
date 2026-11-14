@@ -10,7 +10,7 @@ export default function TermineLayout() {
   return (
     <Stack
       screenOptions={{
-        headerTransparent: true,
+        headerTransparent: false,
         headerShadowVisible: false,
         headerLargeTitleEnabled: true,
         headerLargeTitleShadowVisible: false,

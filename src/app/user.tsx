@@ -1,3 +1,4 @@
+import { Action } from "@/components/tour-ui";
 import { Button, Column, Host } from "@expo/ui";
 import { useAuthActions } from "@convex-dev/auth/react";
 import {
@@ -10,8 +11,8 @@ import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import { api } from "../../../convex/_generated/api";
-import type { Id } from "../../../convex/_generated/dataModel";
+import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 import { ThemedText } from "@/components/themed-text";
 import IdeaForm from "@/components/idea-form";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
@@ -151,8 +152,13 @@ function SignInForm({ next }: { next?: string }) {
   );
 }
 
-function Profile({ user }: { user: { id: Id<"users">; name: string | null } }) {
+function Profile({
+  user,
+}: {
+  user: { id: Id<"users">; name: string | null; instrument?: string };
+}) {
   const [name, setName] = useState(user.name ?? "");
+  const [instrument, setInstrument] = useState(user.instrument ?? "");
   const theme = useTheme();
   const updateProfile = useMutation(api.user.updateProfile);
   const { signOut } = useAuthActions();
@@ -169,8 +175,8 @@ function Profile({ user }: { user: { id: Id<"users">; name: string | null } }) {
           setMessage("Bitte gib einen Namen ein.");
           return;
         }
-        await updateProfile({ userId: user.id, name: trimmed });
-        setMessage("Name gespeichert.");
+        await updateProfile({ userId: user.id, name: trimmed, instrument });
+        setMessage("Profil gespeichert.");
       } else await signOut();
     } catch {
       setMessage("Das hat nicht geklappt. Bitte versuche es erneut.");
@@ -199,12 +205,30 @@ function Profile({ user }: { user: { id: Id<"users">; name: string | null } }) {
             fontSize: 17,
           }}
         />
+        <ThemedText type="smallBold">Instrument / Rolle in der Band</ThemedText>
+        <TextInput
+          accessibilityLabel="Instrument"
+          value={instrument}
+          onChangeText={setInstrument}
+          maxLength={100}
+          editable={!busy}
+          placeholder="z. B. Gitarre & Gesang"
+          placeholderTextColor={theme.textSecondary}
+          style={{
+            padding: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.backgroundSelected,
+            color: theme.text,
+            fontSize: 17,
+          }}
+        />
         <Host matchContents>
           <Column spacing={12} style={{ width: "100%" }}>
             <Button
               disabled={busy}
               onPress={() => void saveOrSignOut(true)}
-              label="Name speichern"
+              label="Profil speichern"
             />
             <Button
               disabled={busy}
@@ -263,7 +287,10 @@ export default function UserScreen() {
         {isLoading || (isAuthenticated && user === undefined) ? (
           <ActivityIndicator />
         ) : isAuthenticated && user ? (
-          <Profile key={user.id} user={user} />
+          <View style={{ gap: 20 }}>
+            <Action label="Zur Bandübersicht" onPress={() => router.replace("/")} secondary />
+            <Profile key={user.id} user={user} />
+          </View>
         ) : (
           <SignInForm next={next} />
         )}

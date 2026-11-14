@@ -80,6 +80,7 @@ export default function CreateTermineScreen() {
   const [eventDateValue, setEventDateValue] = useState(() => formatDateInput(initialDate));
   const [eventTimeValue, setEventTimeValue] = useState(() => formatTimeInput(initialDate));
   const [location, setLocation] = useState("");
+  const [note, setNote] = useState("");
   const [repeat, setRepeat] = useState<RepeatOption>("weekly");
   const [androidPickerMode, setAndroidPickerMode] = useState<"date" | "time" | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -154,6 +155,7 @@ export default function CreateTermineScreen() {
         name: trimmedName,
         dateTime: eventDate.toISOString(),
         location: trimmedLocation,
+        note,
         repeat: kind === "performance" ? "none" : repeat,
       });
       router.back();
@@ -388,6 +390,27 @@ export default function CreateTermineScreen() {
             />
           </View>
 
+          <View style={styles.inputGroup}>
+            <ThemedText type="smallBold">Gut zu wissen</ThemedText>
+            <TextInput
+              accessibilityLabel="Notiz zum Termin"
+              value={note}
+              onChangeText={setNote}
+              multiline
+              maxLength={4000}
+              placeholder="Soundcheck, Treffpunkt oder was ihr sonst wissen solltet"
+              placeholderTextColor={theme.textSecondary}
+              style={[
+                styles.input,
+                {
+                  minHeight: 100,
+                  paddingVertical: 14,
+                  color: theme.text,
+                  borderColor: theme.backgroundSelected,
+                },
+              ]}
+            />
+          </View>
           {kind === "rehearsal" ? (
             <View style={styles.inputGroup}>
               <ThemedText type="smallBold">Wiederholung</ThemedText>
