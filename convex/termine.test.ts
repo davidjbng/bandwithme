@@ -71,3 +71,25 @@ test("returns appointments only from the viewer's band", async () => {
     { name: "Erste Probe" },
   ]);
 });
+
+test("rejects event overflow before a new event can break the band's lists", async () => {
+  const t = backendTest();
+  const userId = await t.run((ctx) => ctx.db.insert("users", { name: "Mira" }));
+  const member = await asUser(t, userId);
+  const bandId = await member.mutation(api.bands.create, { userId, name: "Band" });
+  const event = {
+    kind: "rehearsal" as const,
+    name: "Probe",
+    dateTime: "2099-01-01T20:00:00.000Z",
+    location: "Room",
+    repeat: "none" as const,
+  };
+  await t.run(async (ctx) => {
+    for (let i = 0; i < 200; i++)
+      await ctx.db.insert("events", { ...event, bandId, createdBy: userId });
+  });
+  await expect(member.mutation(api.termine.create, { ...event, userId })).rejects.toThrow(
+    "200 Terminen",
+  );
+  expect(await member.query(api.termine.list, {})).toHaveLength(200);
+});

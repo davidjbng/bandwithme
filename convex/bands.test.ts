@@ -70,3 +70,24 @@ test("does not allow a band member to create invitation links", async () => {
     "Nur Admins können Einladungslinks erstellen.",
   );
 });
+
+test("rejects joining a full band before member-dependent screens become unreadable", async () => {
+  const t = backendTest();
+  const [adminId, joiningId] = await t.run(async (ctx) =>
+    Promise.all(["Admin", "Neu"].map((name) => ctx.db.insert("users", { name }))),
+  );
+  const admin = await asUser(t, adminId);
+  const bandId = await admin.mutation(api.bands.create, { userId: adminId, name: "Große Band" });
+  const { token } = await admin.mutation(api.bands.createInvite, {});
+  await t.run(async (ctx) => {
+    for (let i = 1; i < 200; i++) {
+      const userId = await ctx.db.insert("users", { name: `Mitglied ${i}` });
+      await ctx.db.insert("bandMembers", { userId, bandId, role: "member" });
+    }
+  });
+  const joining = await asUser(t, joiningId);
+  await expect(joining.mutation(api.bands.acceptInvite, { token })).rejects.toThrow(
+    "200 Mitgliedern",
+  );
+  expect(await joining.query(api.bands.myBand, {})).toBeNull();
+});

@@ -1,5 +1,5 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { requireCurrentUser, requireCurrentUserId } from "./authorization";
 import { mutation, query } from "./_generated/server";
 
@@ -119,6 +119,13 @@ export const acceptInvite = mutation({
       throw new Error("Du bist bereits in einer Band.");
     }
 
+    const members = await ctx.db
+      .query("bandMembers")
+      .withIndex("by_bandId", (q) => q.eq("bandId", invite.bandId))
+      .take(200);
+    if (members.length >= 200)
+      throw new ConvexError("Diese Band hat die Grenze von 200 Mitgliedern erreicht.");
+
     await ctx.db.insert("bandMembers", {
       bandId: invite.bandId,
       userId: user._id,
@@ -153,6 +160,7 @@ export const listMembers = query({
           id: m._id,
           userId: m.userId,
           name: member?.name ?? member?.email?.split("@")[0] ?? "Bandmitglied",
+          instrument: member?.instrument ?? "",
           email: member?.email ?? null,
           role: m.role,
         };

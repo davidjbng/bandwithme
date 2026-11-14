@@ -1,6 +1,8 @@
-import { getAuthUserId } from "@convex-dev/auth/server";
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { requireCurrentUserId } from "./authorization";
+import { bounded, findMembership } from "./bandAccess";
+import type { Doc, Id } from "./_generated/dataModel";
+import type { QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
 
 const eventKind = v.union(v.literal("rehearsal"), v.literal("performance"));
@@ -12,80 +14,95 @@ const repeat = v.union(
 );
 const rsvpStatus = v.union(v.literal("yes"), v.literal("maybe"), v.literal("no"));
 
-export const list = query({
-  args: {},
-  handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (userId === null) return [];
-    const user = await ctx.db.get(userId);
-    if (!user) return [];
-
-    const membership = await ctx.db
+async function eventMembers(ctx: QueryCtx, bandId: Id<"bands">) {
+  const memberships = bounded(
+    await ctx.db
       .query("bandMembers")
-      .withIndex("by_userId", (q) => q.eq("userId", user._id))
-      .unique();
+      .withIndex("by_bandId", (q) => q.eq("bandId", bandId))
+      .take(201),
+    200,
+    "Mitglieder",
+  );
+  return Promise.all(
+    memberships.map(async (member) => ({
+      id: member.userId,
+      name: (await ctx.db.get(member.userId))?.name ?? "Bandmitglied",
+    })),
+  );
+}
+async function eventDetails(
+  ctx: QueryCtx,
+  event: Doc<"events">,
+  viewerId: string,
+  members: Awaited<ReturnType<typeof eventMembers>>,
+) {
+  const responses = bounded(
+    await ctx.db
+      .query("eventResponses")
+      .withIndex("by_eventId", (q) => q.eq("eventId", event._id))
+      .take(501),
+    500,
+    "Antworten",
+  );
+  const participants: Record<"yes" | "no" | "open", { id: string; name: string }[]> = {
+    yes: [],
+    no: [],
+    open: [],
+  };
+  let viewerResponse: "yes" | "no" | null = null;
+  for (const member of members) {
+    const response = responses.find((item) => item.userId === member.id)?.status;
+    const status = response === "yes" || response === "no" ? response : "open";
+    participants[status].push(member);
+    if (member.id === viewerId && status !== "open") viewerResponse = status;
+  }
+  return {
+    id: event._id,
+    kind: event.kind,
+    name: event.name,
+    dateTime: event.dateTime,
+    location: event.location,
+    repeat: event.repeat,
+    note: event.note ?? "",
+    viewerResponse,
+    responseCounts: {
+      yes: participants.yes.length,
+      no: participants.no.length,
+      open: participants.open.length,
+    },
+    participants,
+  };
+}
+
+export const list = query({
+  args: { from: v.optional(v.string()) },
+  handler: async (ctx, { from }) => {
+    const membership = await findMembership(ctx);
     if (!membership) return [];
-
-    const allEvents = await ctx.db
+    const events = await ctx.db
       .query("events")
-      .withIndex("by_bandId_and_dateTime", (q) => q.eq("bandId", membership.bandId))
-      .collect();
-    const upcomingEvents = allEvents.filter((event) => event.dateTime >= new Date().toISOString());
-    const cachedUsers = new Map();
-
-    return await Promise.all(
-      upcomingEvents.map(async (event) => {
-        const responses = await ctx.db
-          .query("eventResponses")
-          .withIndex("by_eventId", (q) => q.eq("eventId", event._id))
-          .collect();
-
-        const participants = {
-          yes: [] as { id: string; name: string; email: string | null }[],
-          maybe: [] as { id: string; name: string; email: string | null }[],
-          no: [] as { id: string; name: string; email: string | null }[],
-        };
-
-        let viewerResponse: "yes" | "maybe" | "no" | null = null;
-
-        for (const response of responses) {
-          let responseUser = cachedUsers.get(response.userId);
-          if (!responseUser) {
-            responseUser = await ctx.db.get(response.userId);
-            cachedUsers.set(response.userId, responseUser);
-          }
-
-          const fallbackName = responseUser?.email?.split("@")[0] ?? "Bandmitglied";
-          const participant = {
-            id: response.userId,
-            name: responseUser?.name ?? fallbackName,
-            email: responseUser?.email ?? null,
-          };
-
-          participants[response.status].push(participant);
-
-          if (response.userId === user._id) {
-            viewerResponse = response.status;
-          }
-        }
-
-        return {
-          id: event._id,
-          kind: event.kind,
-          name: event.name,
-          dateTime: event.dateTime,
-          location: event.location,
-          repeat: event.repeat,
-          viewerResponse,
-          responseCounts: {
-            yes: participants.yes.length,
-            maybe: participants.maybe.length,
-            no: participants.no.length,
-          },
-          participants,
-        };
-      }),
+      .withIndex("by_bandId_and_dateTime", (q) =>
+        q.eq("bandId", membership.bandId).gte("dateTime", from ?? ""),
+      )
+      .take(201);
+    const members = await eventMembers(ctx, membership.bandId);
+    return Promise.all(
+      bounded(events, 200, "Termine").map((event) =>
+        eventDetails(ctx, event, membership.userId, members),
+      ),
     );
+  },
+});
+
+export const detail = query({
+  args: { eventId: v.string() },
+  handler: async (ctx, { eventId }) => {
+    const membership = await findMembership(ctx);
+    if (!membership) return null;
+    const id = ctx.db.normalizeId("events", eventId);
+    const event = id ? await ctx.db.get(id) : null;
+    if (!event || event.bandId !== membership.bandId) return null;
+    return eventDetails(ctx, event, membership.userId, await eventMembers(ctx, membership.bandId));
   },
 });
 
@@ -96,6 +113,7 @@ export const create = mutation({
     name: v.string(),
     dateTime: v.string(),
     location: v.string(),
+    note: v.optional(v.string()),
     repeat,
   },
   handler: async (ctx, args) => {
@@ -108,13 +126,35 @@ export const create = mutation({
       throw new Error("Du musst Mitglied einer Band sein, um einen Termin zu erstellen.");
     }
 
+    if (
+      !args.name.trim() ||
+      args.name.trim().length > 160 ||
+      !args.location.trim() ||
+      args.location.trim().length > 300 ||
+      (args.note?.length ?? 0) > 4000
+    ) {
+      throw new ConvexError(
+        "Bitte prüfe Name (max. 160), Ort (max. 300) und Notiz (max. 4000 Zeichen).",
+      );
+    }
+    if (!Number.isFinite(Date.parse(args.dateTime)))
+      throw new ConvexError("Bitte wähle ein gültiges Datum.");
+    const existing = await ctx.db
+      .query("events")
+      .withIndex("by_bandId_and_dateTime", (q) => q.eq("bandId", membership.bandId))
+      .take(200);
+    if (existing.length >= 200)
+      throw new ConvexError(
+        "Eure Band hat die Grenze von 200 Terminen erreicht. Bitte kontaktiere den Support.",
+      );
     const normalizedRepeat = args.kind === "performance" ? "none" : args.repeat;
 
     return await ctx.db.insert("events", {
       kind: args.kind,
       name: args.name.trim(),
-      dateTime: args.dateTime,
+      dateTime: new Date(args.dateTime).toISOString(),
       location: args.location.trim(),
+      note: args.note?.trim(),
       repeat: normalizedRepeat,
       createdBy: user._id,
       bandId: membership.bandId,
@@ -126,7 +166,7 @@ export const setResponse = mutation({
   args: {
     userId: v.id("users"),
     eventId: v.id("events"),
-    status: rsvpStatus,
+    status: v.union(rsvpStatus, v.literal("open")),
   },
   handler: async (ctx, args) => {
     const user = await requireCurrentUserId(ctx, args.userId);
@@ -150,6 +190,10 @@ export const setResponse = mutation({
       )
       .unique();
 
+    if (args.status === "open") {
+      if (existingResponse) await ctx.db.delete(existingResponse._id);
+      return null;
+    }
     const respondedAt = new Date().toISOString();
 
     if (existingResponse) {

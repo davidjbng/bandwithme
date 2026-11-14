@@ -10,9 +10,11 @@
 
 import type * as auth from "../auth.js";
 import type * as authorization from "../authorization.js";
+import type * as bandAccess from "../bandAccess.js";
 import type * as bands from "../bands.js";
 import type * as http from "../http.js";
 import type * as ideas from "../ideas.js";
+import type * as songs from "../songs.js";
 import type * as termine from "../termine.js";
 import type * as user from "../user.js";
 
@@ -25,9 +27,11 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   authorization: typeof authorization;
+  bandAccess: typeof bandAccess;
   bands: typeof bands;
   http: typeof http;
   ideas: typeof ideas;
+  songs: typeof songs;
   termine: typeof termine;
   user: typeof user;
 }>;

@@ -28,6 +28,7 @@ export const current = query({
           id: user._id,
           email: user.email ?? null,
           name: user.name ?? null,
+          instrument: user.instrument ?? "",
         };
   },
 });
@@ -36,13 +37,19 @@ export const updateProfile = mutation({
   args: {
     userId: v.id("users"),
     name: v.string(),
+    instrument: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     await requireCurrentUserId(ctx, args.userId);
 
     const trimmed = args.name.trim();
-    if (!trimmed) throw new Error("Name darf nicht leer sein.");
+    if (!trimmed || trimmed.length > 100) throw new Error("Name darf nicht leer sein.");
 
-    await ctx.db.patch(args.userId, { name: trimmed });
+    if ((args.instrument?.length ?? 0) > 100)
+      throw new Error("Instrument darf höchstens 100 Zeichen lang sein.");
+    await ctx.db.patch(args.userId, {
+      name: trimmed,
+      ...(args.instrument !== undefined ? { instrument: args.instrument.trim() } : {}),
+    });
   },
 });

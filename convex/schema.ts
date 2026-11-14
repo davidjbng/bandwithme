@@ -12,7 +12,11 @@ const rsvpStatus = v.union(v.literal("yes"), v.literal("maybe"), v.literal("no")
 const bandRole = v.union(v.literal("admin"), v.literal("member"));
 
 export default defineSchema({
-  users: defineTable({ name: v.optional(v.string()), email: v.optional(v.string()) }),
+  users: defineTable({
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    instrument: v.optional(v.string()),
+  }),
   ideas: defineTable({
     userId: v.id("users"),
     text: v.string(),
@@ -45,12 +49,34 @@ export default defineSchema({
     dateTime: v.string(),
     location: v.string(),
     repeat,
+    note: v.optional(v.string()),
     createdBy: v.id("users"),
     bandId: v.optional(v.id("bands")),
   })
     .index("by_dateTime", ["dateTime"])
     .index("by_bandId_and_dateTime", ["bandId", "dateTime"])
     .index("by_createdBy_and_dateTime", ["createdBy", "dateTime"]),
+  songs: defineTable({
+    bandId: v.id("bands"),
+    title: v.string(),
+    artist: v.string(),
+    duration: v.number(),
+    reference: v.optional(v.string()),
+    archived: v.boolean(),
+    createdBy: v.id("users"),
+  }).index("by_bandId", ["bandId"]),
+  songVotes: defineTable({
+    bandId: v.id("bands"),
+    songId: v.id("songs"),
+    userId: v.id("users"),
+  })
+    .index("by_bandId", ["bandId"])
+    .index("by_songId_and_userId", ["songId", "userId"]),
+  setlistEntries: defineTable({
+    eventId: v.id("events"),
+    songId: v.id("songs"),
+    position: v.number(),
+  }).index("by_eventId_and_position", ["eventId", "position"]),
   eventResponses: defineTable({
     eventId: v.id("events"),
     userId: v.id("users"),
