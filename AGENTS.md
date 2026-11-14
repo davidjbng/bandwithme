@@ -1,3 +1,10 @@
+# Version control
+
+- Work directly on `main`. Use GitButler (`but`) for status, diffs, commits, pulls, merges, and pushes. Do not create task branches or pull requests for routine work.
+- Commit only changes for the current task. Preserve other agents' uncommitted work.
+- Before pushing `main`, run `but pull` (including linked worktrees), resolve conflicts while preserving all involved work, and run the relevant checks. Then push `main` directly.
+- Do not merge or publish unrelated work as part of a task. Deployments triggered by a `main` push follow the configured workflows.
+
 # Expo HAS CHANGED
 
 Read the exact versioned docs at https://docs.expo.dev/versions/v58.0.0/ before writing any code.
