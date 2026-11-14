@@ -42,6 +42,15 @@ export default function HomeScreen() {
       contentContainerStyle={styles.contentContainer}
     >
       <ThemedView style={styles.container}>
+        {__DEV__ && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push("/prototype")}
+            style={[styles.loginButton, { backgroundColor: theme.backgroundSelected }]}
+          >
+            <ThemedText type="smallBold">Design-Prototyp öffnen</ThemedText>
+          </Pressable>
+        )}
         {/* Hero */}
         <View style={styles.hero}>
           <ThemedView style={[styles.heroIcon, { backgroundColor: theme.backgroundSelected }]}>

@@ -1,0 +1,59 @@
+open com.anonymous.bandwithme
+wait stable 700 5000
+press 'label="Band" role=button'
+scroll down --until 'id="reset-demo"'
+wait stable 700 5000
+press 'id="reset-demo"'
+wait stable 700 5000
+press 'label="Übersicht" role=button'
+scroll top
+wait 'label="4 dabei · 0 abgesagt · 1 offen"'
+wait stable 700 5000
+press 'id="yes-rehearsal"'
+wait 'label="5 dabei · 0 abgesagt · 0 offen"'
+wait stable 700 5000
+press 'id="no-rehearsal"'
+wait 'label="4 dabei · 1 abgesagt · 0 offen"'
+wait stable 700 5000
+press 'label="Antwort zurücksetzen" role=button'
+wait 'label="4 dabei · 0 abgesagt · 1 offen"'
+wait stable 700 5000
+press 'label="Termine" role=button'
+wait 'label="November 2026"'
+wait stable 700 5000
+press 'label="Auftritte" role=button'
+wait absent 'id="event-rehearsal"' 5000
+wait 'id="event-gig"'
+wait stable 700 5000
+press 'label="Songs" role=button'
+wait 'id="vote-s1"'
+wait stable 700 5000
+press 'id="vote-s1"'
+wait 'label="Dreams: Stimme zurücknehmen, 4 Stimmen"'
+wait stable 700 5000
+press 'id="vote-s1"'
+wait 'label="Dreams: abstimmen, 3 Stimmen"'
+wait stable 700 5000
+fill 'id="song-search"' zzzzz
+wait 'label="Kein Treffer."'
+wait stable 700 5000
+press 'label="Suche leeren" role=button'
+wait 'label="Dreams" role=text'
+wait stable 700 5000
+press 'id="select-s1"'
+wait absent 'label="Dreams" role=text' 5000
+wait stable 700 5000
+press 'label="Archiv" role=button'
+wait 'label="Dreams" role=text'
+wait stable 700 5000
+press 'id="select-s1"'
+wait stable 700 5000
+press 'label="Im Voting" role=button'
+wait 'label="Dreams" role=text'
+scroll down --until 'label="Stadtgarten-Setlist öffnen" role=button'
+wait stable 700 5000
+press 'label="Stadtgarten-Setlist öffnen" role=button'
+scroll down --until 'id="move-s1--1"'
+wait stable 700 5000
+press 'id="move-s1--1"'
+wait 'id="setlist-s1"'

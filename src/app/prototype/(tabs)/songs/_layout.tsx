@@ -1,0 +1,4 @@
+import { DemoSection } from "@/components/design-demo";
+export default function Layout() {
+  return <DemoSection title="Songs" large={true} />;
+}
