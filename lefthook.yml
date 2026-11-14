@@ -1,39 +1,7 @@
-# Lefthook Git hooks for BandWithMe
-# Runs automatically on git commit
-#
-# Install: pnpm exec lefthook install
-# Manual:   pnpm exec lefthook run pre-commit
-
+# Read-only checks preserve other agents' work and GitButler's selected hunks.
+# Install once with pnpm exec lefthook install.
 pre-commit:
-  parallel: false
   commands:
-    # 1. Auto-format — runs first, re-adds formatted files to commit
-    format:
-      glob: "*.{ts,tsx,js,jsx,json,yaml,yml,md}"
-      run: pnpm format && git update-index --again
-      fail_text: "Formatting failed. Fix manually with: pnpm format"
-
-    # 2. Lint — blocks if errors found (deny-warnings active)
-    lint:
-      glob: "*.{ts,tsx,js,jsx}"
-      run: pnpm lint
-      fail_text: "Lint errors found. Fix before committing."
-
-    # 3. TypeScript — blocks if type errors
-    typecheck:
-      glob: "*.{ts,tsx}"
-      run: pnpm typecheck
-      fail_text: "TypeScript errors found. Fix before committing."
-
-post-commit:
-  commands:
-    # Ensure deps are still current after any changes
-    install-check:
-      run: pnpm install --frozen-lockfile
-      fail_text: "Dependencies may have changed. Run 'pnpm install'."
-
-post-merge:
-  commands:
-    install-deps:
-      run: pnpm install --frozen-lockfile
-      fail_text: "Dependencies may have changed. Run 'pnpm install'."
+    check:
+      run: pnpm check
+      fail_text: "Run pnpm check, fix the reported files, then commit again."

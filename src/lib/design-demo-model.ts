@@ -66,7 +66,7 @@ export type DemoState = {
 };
 
 export const initialDemo: DemoState = {
-  attendance: {} as Record<string, Attendance>,
+  attendance: {},
   setlist: ["s4", "s5"],
   songs: [
     {
@@ -126,6 +126,7 @@ export type DemoAction =
   | { type: "reset" };
 
 // shortcut: demo state lasts for this session only; replace with authorized Convex flows after design approval.
+// oxlint-disable-next-line typescript/consistent-return -- The action union is exhaustively handled below.
 export function demoReducer(state: DemoState, action: DemoAction): DemoState {
   switch (action.type) {
     case "reset":

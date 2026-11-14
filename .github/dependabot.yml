@@ -1,77 +1,26 @@
 version: 2
+
+# One monthly version-update PR covers application dependencies and CI actions.
+# Security updates remain eligible as soon as GitHub detects a vulnerability.
+multi-ecosystem-groups:
+  monthly-dependencies:
+    schedule:
+      interval: monthly
+      time: "09:00"
+      timezone: Europe/Berlin
+    labels: [dependencies]
+
 updates:
-  # pnpm dependencies
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Berlin"
-    versioning-strategy: "increase"
-    open-pull-requests-limit: 15
-    labels:
-      - "dependencies"
-      - "security"
-    commit-message:
-      prefix: "chore"
-      prefix-development: "chore"
-      include: "scope"
-    insecure-external-code-execution: allow
+  - package-ecosystem: npm
+    directory: /
+    patterns: ["*"]
+    multi-ecosystem-group: monthly-dependencies
+    versioning-strategy: increase
     groups:
-      # Expo/React Native core — alle Updates zusammen (minor+patch+major)
-      expo-core:
-        applies-to: version-updates
-        patterns:
-          - "expo"
-          - "expo-*"
-          - "react-native"
-          - "react-native-*"
-          - "@expo/*"
-          - "react"
-          - "react-dom"
-          - "@react-native/*"
-          - "typescript"
-        update-types:
-          - "minor"
-          - "patch"
-          - "major"
-        labels:
-          - "dependencies"
-          - "expo"
-      # Alles andere: Minor + Patch zusammen, Major einzeln
-      minor-patch:
-        applies-to: version-updates
-        patterns:
-          - "*"
-        exclude-patterns:
-          - "expo"
-          - "expo-*"
-          - "react-native"
-          - "react-native-*"
-          - "@expo/*"
-          - "react"
-          - "react-dom"
-          - "@react-native/*"
-          - "typescript"
-        update-types:
-          - "minor"
-          - "patch"
-        labels:
-          - "dependencies"
-          - "minor"
-  # GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Europe/Berlin"
-    groups:
-      actions:
-        patterns:
-          - "*"
-    labels:
-      - "dependencies"
-      - "ci"
+      security:
+        applies-to: security-updates
+        patterns: ["*"]
+  - package-ecosystem: github-actions
+    directory: /
+    patterns: ["*"]
+    multi-ecosystem-group: monthly-dependencies

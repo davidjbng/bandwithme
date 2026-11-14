@@ -1,0 +1,6 @@
+interface:
+  display_name: "Review dependency updates"
+  short_description: "Review, repair and merge a dependency PR"
+  default_prompt: "Use $review-dependency-updates to review, fix and merge the selected dependency update PR."
+policy:
+  allow_implicit_invocation: false

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { test } from "vite-plus/test";
 import { demoReducer, initialDemo, durationLabel } from "../src/lib/design-demo-model.ts";
 
 test("attendance can change independently for each event", () => {

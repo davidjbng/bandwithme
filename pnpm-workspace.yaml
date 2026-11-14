@@ -1,4 +1,28 @@
 allowBuilds:
+  dtrace-provider: false
+  protobufjs: false
   esbuild: true
   lefthook: true
   msgpackr-extract: true
+minimumReleaseAgeExclude:
+  - "@expo/eas-build-job@27.10.0"
+  - "@expo/eas-json@27.10.0"
+  - "@expo/logger@27.10.0"
+  - "@expo/steps@27.10.0"
+  - "@expo/turtle-spawn@27.10.0"
+  - "@playwright/test@1.65.1"
+  - eas-cli@27.10.0
+  - playwright-core@1.65.1
+  - playwright@1.65.1
+overrides:
+  "vite@*": npm:@voidzero-dev/vite-plus-core@1.6.0
+  "vitest@*": 5.1.0
+
+peerDependencyRules:
+  allowedVersions:
+    vite: "1.6.0"
+patchedDependencies:
+  expo-speech-recognition@58.0.1: patches/expo-speech-recognition@58.0.1.patch
+permissions:
+  react-native-ease:
+    skills: false
