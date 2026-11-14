@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 16.24.0",
+    "version": ">= 27.10.0",
     "appVersionSource": "remote"
   },
   "build": {
@@ -24,6 +24,16 @@
       "env": {
         "EXPO_PUBLIC_CONVEX_URL": "https://blissful-spaniel-445.eu-west-1.convex.cloud",
         "EXPO_PUBLIC_CONVEX_SITE_URL": "https://blissful-spaniel-445.eu-west-1.convex.site"
+      },
+      "distribution": "store",
+      "channel": "production",
+      "environment": "production"
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleTeamId": "DY6QC7DS48"
       }
     }
   }

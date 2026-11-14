@@ -1,0 +1,64 @@
+name: Deploy release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-release
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Deploy backend and run Expo release
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    environment: production
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - name: Verify release commit belongs to main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(gh api "repos/$GITHUB_REPOSITORY/compare/main...$GITHUB_SHA" --jq .status)
+          case "$status" in
+            identical|behind) ;;
+            *) echo "Release commit must belong to main" >&2; exit 1 ;;
+          esac
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Verify release metadata and credentials
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: |
+          node scripts/release-metadata.mjs --release "$RELEASE_TAG"
+          test -n "$EXPO_TOKEN" || { echo "Missing EXPO_TOKEN" >&2; exit 1; }
+          test -n "$CONVEX_DEPLOY_KEY" || { echo "Missing CONVEX_DEPLOY_KEY" >&2; exit 1; }
+      - name: Validate Expo release workflow
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: pnpm exec eas workflow:validate .eas/workflows/release.yml --non-interactive
+      - name: Deploy Convex backend
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+        run: pnpm exec convex deploy
+      - name: Build, submit to TestFlight and deploy web
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: pnpm exec eas workflow:run .eas/workflows/release.yml --ref "$GITHUB_SHA" --input "release_tag=$RELEASE_TAG" --wait --non-interactive
