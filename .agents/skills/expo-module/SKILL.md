@@ -1,7 +1,6 @@
 ---
 name: expo-module
-description: Framework (OSS). Guide for creating and writing Expo native modules and views using the Expo Modules API (Swift, Kotlin, TypeScript). Covers module definition DSL, native views, shared objects, config plugins, lifecycle hooks, autolinking, and type system. Use when building or modifying native modules for Expo.
-version: 1.0.0
+description: Guide for creating and writing Expo native modules and views using the Expo Modules API (Swift, Kotlin, TypeScript). Covers module definition DSL, native views, shared objects, config plugins, lifecycle hooks, autolinking, and type system. Use when building or modifying native modules for Expo. Not for migrating an existing Swift module from the definition DSL to the Expo Modules API 2.0 macros; use expo-migrate-module (from the expo-experiments plugin) for that.
 license: MIT
 ---
 
@@ -17,6 +16,8 @@ Complete reference for building native modules and views using the Expo Modules 
 - Building config plugins that modify native project files
 - Adding Android, Apple, or web support to an existing Expo module
 - Editing `expo-module.config.json`, config plugins, or lifecycle hooks
+
+To migrate an existing Swift module from the definition DSL to the Expo Modules API 2.0 macros (`@ExpoModule`, `@JS`, `@Event`), use the `expo-migrate-module` skill (from the `expo-experiments` plugin) instead.
 
 ## References
 
@@ -139,3 +140,11 @@ export function hello(name: string): string {
 ```
 
 Note: iOS uses just the class name; Android uses the fully-qualified class name (package + class). See `references/module-config.md` for all fields.
+
+## Submitting Feedback
+You can voluntarily report errors, misleading or outdated information in this skill, so Expo can improve it:
+```bash
+npx --yes @expo/agent-cli@latest feedback --category skills --subject "expo-module" --message "<actionable feedback>"
+```
+Use `--category agent-cli` for a problem with the agent CLI, and `--category evals` when an agent repeatedly fails at an Expo task. Run `feedback --help` for subjects and the data that the command sends.
+Each report goes to Expo with project and environment details. Show the user the message, and send it only if the user agrees. If you cannot ask the user, do not send it. Do not include secrets or personal data.

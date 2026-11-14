@@ -1,7 +1,6 @@
 ---
 name: eas-update-insights
-description: "EAS service (paid). Check the health of published EAS Update: crash rates, install/launch counts, unique users, payload size, and the split between embedded and OTA users per channel. Use when the user asks how an update is performing, whether a rollout is healthy, how many users are on the embedded build vs OTA, or wants to gate CI on update health."
-version: 1.0.0
+description: "Check the health of published EAS Update: crash rates, install/launch counts, unique users, payload size, and the split between embedded and OTA users per channel. Use when the user asks how an update is performing, whether a rollout is healthy, how many users are on the embedded build vs OTA, or wants to gate CI on update health."
 license: MIT
 allowed-tools: "Bash(eas *)"
 ---
@@ -228,3 +227,11 @@ Human-readable group details plus 30 days of launches/failures per platform — 
 - **Fresh publishes** may show zeros for a short period while the metrics pipeline catches up.
 - **Installs are downloads, not launches**: the `installs` / "Launches" field counts users who downloaded the manifest and launch asset. A confirmed run only registers on the user's *next* update check (typically up to 24h later, depending on the app's update policy). So metrics lag the real-world state slightly.
 - **Crashes are self-reported**: `failedInstalls` / "Crashes" counts updates that errored during install/launch and were reported on the next update check. Crashes that don't trigger an update request (e.g. process kill before recovery) won't appear.
+
+## Submitting Feedback
+You can voluntarily report errors, misleading or outdated information in this skill, so Expo can improve it:
+```bash
+npx --yes @expo/agent-cli@latest feedback --category skills --subject "eas-update-insights" --message "<actionable feedback>"
+```
+Use `--category agent-cli` for a problem with the agent CLI, and `--category evals` when an agent repeatedly fails at an Expo task. Run `feedback --help` for subjects and the data that the command sends.
+Each report goes to Expo with project and environment details. Show the user the message, and send it only if the user agrees. If you cannot ask the user, do not send it. Do not include secrets or personal data.
