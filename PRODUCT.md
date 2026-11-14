@@ -18,7 +18,7 @@ Make the next rehearsal, attendance and gig preparation clear in seconds, instea
 
 The product plan in `docs/prd/bandwithme-prd.md` defines events, rehearsal series, open/yes/no RSVPs, song voting, archiving, performance-bound ordered setlists, profiles and invitation-based membership. No chat, money management or push reminders in V1. Existing Expo 58 / React Native app with Convex backend; web, phone and tablet are product targets.
 
-This design exploration is an interactive local prototype with clearly labelled fictional band data. Prototype state is in memory, never written to Convex. The user authorized free visual exploration and core-flow prototyping on 2026-11-14. It is not a request to implement the full backend roadmap.
+Tour Notes is the active application design, approved for production implementation on 2026-11-14. Overview, events, attendance, band membership, songs, voting and performance-bound ordered setlists use authorized Convex data. The development-only /prototype remains a fictional, in-memory reference. Full recurrence series, calendar export and event editing remain separate PRD roadmap work.
 
 ## Brand Commitments
 

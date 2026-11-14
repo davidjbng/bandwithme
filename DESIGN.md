@@ -95,7 +95,7 @@ components:
 
 Purposeful band planning with precise date columns, calm green-grey surfaces and petrol panels. Coral gives performances their own emphasis. The tone is friendly and direct, with German copy and people identified by names and instruments.
 
-This documents the implemented development-only `/prototype` surface and `src/components/design-demo.tsx` on Expo SDK 58. It does not restyle the legacy authenticated app. Tokens were extracted from source and inspected in the SDK 58 development client on an iPhone Duo simulator (iOS 27.1), including light/dark appearance and large system text. Agent-device covers the core interaction flows. Physical hardware, VoiceOver and iPad are not verified.
+This is the active app design on Expo SDK 58. `src/components/tour-ui.tsx` and `src/constants/tour-theme.ts` share its presentation between the authenticated app (`tour-app.tsx`) and development-only `/prototype` (`design-demo.tsx`). Production uses real band data; the prototype retains fictional session-only fixtures. Tokens were extracted from source and inspected in the SDK 58 development client on an iPhone Duo simulator (iOS 27.1), including light/dark appearance and large system text. Agent-device covers the core interaction flows. Physical hardware, VoiceOver and iPad are not verified.
 
 **Key Characteristics:**
 
@@ -119,7 +119,7 @@ The light palette is green-grey, petrol and muted coral; dark mode preserves tho
 ### Neutral
 
 - **Green-grey ground** (`background`), **pale surface** (`surface`), **ink** (`text`), **muted ink** (`secondary`) and **divider** (`line`) establish the page and list hierarchy. Each has a corresponding `dark-` token.
-- Member initials use fixed pastel identity colours from `demoMembers`; those fixture-specific colours are not an extended semantic palette.
+- Production member initials use the quiet green identity surface. The development fixture retains its original pastel examples; those colours are not an extended semantic palette.
 
 **The Explicit State Rule.** Attendance and voting state must have text or symbols as well as colour.
 
@@ -169,7 +169,7 @@ Expo Router `NativeTabs` supplies Übersicht, Termine, Songs and Band with syste
 
 ### Do:
 
-- Do scope this system to `/prototype` until a broader redesign is authorized.
+- Do use this system across the active app, including authentication, onboarding and administration.
 - Do preserve native controls, text scaling and accessible state labels.
 - Do use the paired light/dark roles and explicit text for attendance state.
 - Do keep fictional prototype changes local to the current session.

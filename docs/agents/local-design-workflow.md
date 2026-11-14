@@ -1,3 +1,5 @@
+> Update 2026-11-14: Tour Notes is now the active app, including shared songs, voting and setlists. See [the implementation and validation record](tour-notes-production.md). The incremental roadmap below is historical; recurrence series, calendar export and event editing remain future work.
+
 # Lokaler Design- und Entwicklungsablauf
 
 Stand: 14. November 2026. Tour Notes ist die vom Nutzer gewählte und als Grundlage übernommene Designrichtung. Die interaktive Referenz bleibt unter `/prototype`; die authentifizierten Produktflächen werden in den nächsten Schritten darauf umgestellt.
