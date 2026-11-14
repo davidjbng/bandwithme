@@ -4,7 +4,7 @@ Decision date: 2026-11-14. [Convex Auth 2 clean-start migration](https://github.
 
 ## Implemented authentication
 
-`@convex-dev/auth` 2.0.0 mounts the `auth`, `authEmail` and `authPassword` components plus Resend. The application owns a separate plain `users` table. `getAuthUserId` resolves live Auth 2 sessions; app mutations keep their author and membership checks. Tests use genuine component sessions and password hashing, rather than spoofing a v1 subject.
+`@convex-dev/auth` 2.0.0 mounts the `auth`, `authEmail`, `authUsername` and `authPassword` components plus Resend. The application owns a separate plain `users` table. `getAuthUserId` resolves live Auth 2 sessions; app mutations keep their author and membership checks. Tests use genuine component sessions and password hashing, rather than spoofing a v1 subject.
 
 Email/password signup requires an email verification link and a secret retained by the requesting client. Password recovery likewise requires the link and client secret, replaces the password and revokes previous sessions. The minimum new-password length is ten characters; common passwords are rejected. Open links on the requesting device in the same app/browser. Verified universal/app links are necessary for native handoff; their real-device behavior still needs validation.
 
@@ -31,3 +31,15 @@ Verify the sender/domain in the Resend dashboard before onboarding users, and ru
 ## Validation
 
 The integration suite covers verified signup, missing/wrong client secrets, genuine session issuance, user/band creation, private idea submission, sign-out revocation, password recovery, old-session revocation, old/new passwords and link replay. Invite storage tests cover web/native storage, deployment isolation, removal and hostile redirects. Browser smoke tests cover accessible auth controls and safe invalid-link pages. Real inbox delivery, native link handoff and hardware behavior remain separate checks.
+
+## Login-first navigation and usernames
+
+The app opens `/sign-in` directly for guests. Root protected routes keep tabs, events, song creation, band settings and onboarding unavailable until authentication resolves. Public email callbacks and invitation previews stay reachable. After initial hydration the navigator stays mounted during Auth 2's transient loading state; unmounting it would destroy the one-shot verification flow. Login returns to the tabbed app, or a validated pending invitation; logout removes protected navigation history.
+
+Registration asks for a desired username, email and password. The email/password method remains authoritative: no session or usable username exists before email verification. The desired username and matching email stay in deployment-scoped local storage/SecureStore, never together with a password. After verification the user confirms the name; if another account claimed it meanwhile, they choose another. Existing users can add or change a username from Profile. Names use 3–30 ASCII letters, digits, `.`, `_` or `-`; comparisons are case-insensitive. The official Auth 2 username component atomically enforces uniqueness. Names do not replace profile display names.
+
+`auth.signInWithIdentifier` accepts either username or email, limits lookups per IP before account resolution, resolves the verified primary email only on the server and delegates password/session handling to the existing Auth 2 method. No public username-to-email lookup is exposed. Password recovery continues through the verified email, and the same new password works with the username. `user.setUsername` derives the account from the live session and requires a verified email. No existing user or app data is reset or migrated.
+
+Deploy the additional `authUsername` component and updated Convex functions before serving the updated client; code generation alone does not deploy runtime code. This change does not publish a GitHub release or an EAS deployment. Tests cover real component username collisions, normalization, invalid credentials, per-IP lookup limits, email verification, recovery, web/native preference storage and browser login/logout/refresh/verification/invitation transitions. Browser auth transitions use an isolated transport fixture, not a live inbox. Real-device link handoff and real email delivery still need verification.
+
+Local verification for the login-first update: `pnpm check`, 52 Vitest tests and all 18 production-export Playwright checks passed on 2026-11-14. Authenticated Tour Notes, event header placement and browser date/time controls also passed after switching those checks to the shared isolated band fixture. Two independent review agents found the transient-loading unmount issue; it was corrected and the successful/invalid verification paths now run in CI. No live emails or deployment resets were used for these checks.
