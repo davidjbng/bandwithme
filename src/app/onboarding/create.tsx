@@ -1,9 +1,11 @@
-import { useConvexAuth } from "@convex-dev/auth/react";
+import { Button, Host } from "@expo/ui";
+import { useConvexAuth } from "convex/react";
 import { useMutation, useQuery } from "convex/react";
-import { Stack, useRouter } from "expo-router";
+import { Redirect, Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
@@ -24,12 +26,7 @@ export default function CreateBandScreen() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  if (!isAuthenticated) {
-    router.replace("/");
-    return null;
-  }
-
-  if (isLoading || user === undefined) {
+  if (isLoading || (isAuthenticated && user === undefined)) {
     return (
       <ThemedView style={styles.loadingContainer}>
         <ThemedText type="small" themeColor="textSecondary">
@@ -39,10 +36,7 @@ export default function CreateBandScreen() {
     );
   }
 
-  if (!user) {
-    router.replace("/onboarding/profile");
-    return null;
-  }
+  if (!isAuthenticated || !user) return <Redirect href="/user" />;
 
   const insets = {
     ...safeAreaInsets,
@@ -57,7 +51,7 @@ export default function CreateBandScreen() {
     }
     setSubmitting(true);
     try {
-      await createBand({ userId: user!.id as never, name: name.trim() });
+      await createBand({ userId: user!.id, name: name.trim() });
       router.replace("/");
     } catch (e: any) {
       setError(e?.message ?? "Fehler beim Erstellen der Band.");
@@ -66,37 +60,16 @@ export default function CreateBandScreen() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <ThemedView style={styles.centered}>
-        <ThemedText type="small" themeColor="textSecondary">
-          Lädt…
-        </ThemedText>
-      </ThemedView>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <ThemedView style={styles.centered}>
-        <ThemedText type="small" themeColor="textSecondary">
-          Bitte zuerst einloggen.
-        </ThemedText>
-        <Pressable onPress={() => router.push("/user")}>
-          <ThemedText type="linkPrimary">Zum Login</ThemedText>
-        </Pressable>
-      </ThemedView>
-    );
-  }
-
   return (
     <>
       <Stack.Screen options={{ title: "Band erstellen" }} />
-      <ScrollView
+      <KeyboardAwareScrollView
         style={[styles.scrollView, { backgroundColor: theme.background }]}
         contentInset={insets}
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.contentContainer}
+        bottomOffset={Spacing.four}
+        keyboardShouldPersistTaps="handled"
       >
         <ThemedView style={styles.container}>
           <View style={styles.header}>
@@ -110,12 +83,13 @@ export default function CreateBandScreen() {
           <View style={styles.form}>
             <ThemedText type="smallBold">Bandname</ThemedText>
             <TextInput
+              accessibilityLabel="Bandname"
               style={[
                 styles.input,
                 {
-                  color: theme.text,
                   backgroundColor: theme.backgroundElement,
                   borderColor: error ? "#ef4444" : theme.backgroundSelected,
+                  color: theme.text,
                 },
               ]}
               placeholder="z. B. Die Kellerkinder"
@@ -131,34 +105,25 @@ export default function CreateBandScreen() {
               </ThemedText>
             ) : null}
 
-            <Pressable
-              onPress={handleCreate}
-              disabled={submitting}
-              style={({ pressed }) => [
-                styles.submitButton,
-                pressed && styles.pressed,
-                { backgroundColor: theme.text, opacity: submitting ? 0.5 : 1 },
-              ]}
-            >
-              <ThemedText type="smallBold" style={{ color: theme.background }}>
-                {submitting ? "Wird erstellt…" : "Band erstellen"}
-              </ThemedText>
-            </Pressable>
+            <Host matchContents>
+              <Button
+                onPress={handleCreate}
+                disabled={submitting}
+                label={submitting ? "Wird erstellt…" : "Band erstellen"}
+              />
+            </Host>
 
-            <Pressable onPress={() => router.back()} style={styles.cancelButton}>
-              <ThemedText type="small" themeColor="textSecondary">
-                Abbrechen
-              </ThemedText>
-            </Pressable>
+            <Host matchContents>
+              <Button variant="text" onPress={() => router.back()} label="Abbrechen" />
+            </Host>
           </View>
         </ThemedView>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: Spacing.two },
   scrollView: { flex: 1 },
   contentContainer: {
     alignItems: "center",
@@ -176,19 +141,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     fontSize: 16,
   },
-  submitButton: {
-    minHeight: 48,
-    borderRadius: Spacing.three,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: Spacing.two,
-  },
-  cancelButton: {
-    minHeight: 44,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  pressed: { opacity: 0.75 },
   loadingContainer: {
     flex: 1,
     alignItems: "center",

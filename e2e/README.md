@@ -1,0 +1,7 @@
+# Browser checks
+
+`pnpm e2e` runs the development-web suite against Metro on port 8081. Start it from this checkout with `npx --yes @expo/agent-cli@latest start --web --localhost --port 8081`. Auth UI and email-link error tests block backend traffic; they never request email or create accounts. Other unauthenticated screens may read the configured backend. `pnpm e2e:smoke` separately tests the production export without backend access.
+
+The authenticated band test is opt-in. Use an isolated disposable Convex deployment running the current Auth2 backend and an already email-verified account with no band. Start Metro with `EXPO_PUBLIC_CONVEX_URL` pointing at that deployment; set `E2E_DISPOSABLE_BACKEND=true`, `E2E_CONVEX_URL` to the same URL, and `E2E_EMAIL` / `E2E_PASSWORD` in the test process environment. Never commit these credentials. The test rejects the production hostname and verifies the actual WebSocket target before typing credentials. It changes the fixture profile, creates a band and invitation, and therefore consumes the fresh fixture. Restore/reset the disposable fixture before rerunning. It runs once on desktop Chromium, avoiding parallel mutation of one account. No signup emails, verification bypasses, or production mutations are part of the suite.
+
+Without that explicit fixture, only the authenticated band test is reported as skipped. Auth2 credential verification, recovery, session revocation, and access boundaries also have real component-backed Vitest coverage in `convex/auth.test.ts`.

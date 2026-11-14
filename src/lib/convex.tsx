@@ -1,9 +1,9 @@
 import { ConvexAuthProvider, type TokenStorage } from "@convex-dev/auth/react";
-import { useRouter, type Href } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { type PropsWithChildren } from "react";
 import { Platform } from "react-native";
 import { ConvexReactClient } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 const PRODUCTION_URL = "https://blissful-spaniel-445.eu-west-1.convex.cloud";
 
@@ -12,6 +12,7 @@ function getConvexUrl(): string {
 
   // EAS Hosting: always use production Convex
   if (
+    Platform.OS === "web" &&
     typeof window !== "undefined" &&
     (window.location.hostname.includes("expo.app") || window.location.hostname === "bandwithme.de")
   ) {
@@ -31,14 +32,13 @@ const secureStore: TokenStorage = {
 };
 
 export function ConvexProvider({ children }: PropsWithChildren) {
-  const router = useRouter();
-
   return (
     <ConvexAuthProvider
       client={convex}
+      api={api.auth}
+      storageNamespace={`bandwithme-auth-v2-${convex.url}`}
+      ambientSignIns={[]}
       storage={Platform.OS === "web" ? undefined : secureStore}
-      replaceURL={(relativeUrl) => router.replace(relativeUrl as Href)}
-      shouldHandleCode={false}
     >
       {children}
     </ConvexAuthProvider>

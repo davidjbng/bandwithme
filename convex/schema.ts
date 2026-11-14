@@ -1,4 +1,3 @@
-import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
@@ -13,7 +12,14 @@ const rsvpStatus = v.union(v.literal("yes"), v.literal("maybe"), v.literal("no")
 const bandRole = v.union(v.literal("admin"), v.literal("member"));
 
 export default defineSchema({
-  ...authTables,
+  users: defineTable({ name: v.optional(v.string()), email: v.optional(v.string()) }),
+  ideas: defineTable({
+    userId: v.id("users"),
+    text: v.string(),
+    requestId: v.string(),
+  })
+    .index("by_userId", ["userId"])
+    .index("by_userId_and_requestId", ["userId", "requestId"]),
   bands: defineTable({
     name: v.string(),
     createdBy: v.id("users"),

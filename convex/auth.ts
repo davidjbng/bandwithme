@@ -1,102 +1,30 @@
-import { Anonymous } from "@convex-dev/auth/providers/Anonymous";
-import { Email } from "@convex-dev/auth/providers/Email";
-import { Password } from "@convex-dev/auth/providers/Password";
-import { convexAuth } from "@convex-dev/auth/server";
+import { setupConvexAuth } from "@convex-dev/auth/server";
+import { setupEmailPassword } from "@convex-dev/auth/methods/email-password/server";
+import { components, internal } from "./_generated/api";
 
-function getSiteUrl() {
-  return process.env.SITE_URL?.replace(/\/$/, "") ?? "https://bandwithme.de";
-}
+const siteUrl = (process.env.SITE_URL ?? "https://bandwithme.de").replace(/\/$/, "");
+const auth = setupConvexAuth({ component: components.auth });
+export const { signOut, refreshSession, isAuthenticated } = auth;
 
-function redirectUrl(redirectTo: string) {
-  const siteUrl = getSiteUrl();
-
-  if (redirectTo.startsWith("bandwithme://")) {
-    return redirectTo;
-  }
-  const destination = new URL(redirectTo, siteUrl);
-  if (destination.origin === new URL(siteUrl).origin) {
-    return destination.href;
-  }
-
-  throw new Error("Invalid sign-in redirect URL.");
-}
-
-const AhaSend = Email({
-  id: "ahasend",
-  apiKey: process.env.AHASEND_API_KEY!,
-  async sendVerificationRequest({ identifier, provider, url }) {
-    const apiKey = provider.apiKey;
-
-    if (!apiKey) {
-      console.log(
-        `Magic link for ${identifier}: ${url}. Set AHASEND_API_KEY in Convex to send email.`,
-      );
-      return;
-    }
-
-    if (apiKey === "dev" || apiKey === "local") {
-      console.log(
-        `Magic link for ${identifier}: ${url}. AHASEND_API_KEY is set to local log mode.`,
-      );
-      return;
-    }
-
-    console.log(`Sending magic link to ${identifier} with AhaSend.`);
-
-    const res = await fetch(
-      "https://api.ahasend.com/v2/accounts/8979e7cc-daa5-484e-97c6-cb096ff295b9/messages",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: { email: "auth@bandwithme.de", name: "Band With Me" },
-          recipients: [{ email: identifier }],
-          subject: "Sign in to Band With Me",
-          text_content: `Sign in to Band With Me: ${url}`,
-        }),
-      },
-    );
-
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`AhaSend error ${res.status}: ${body}`);
-    }
+export const {
+  signUpWithEmailPassword,
+  completeSignUpWithEmailPassword,
+  signInWithEmailPassword,
+  startPasswordRecovery,
+  checkPasswordRecovery,
+  completePasswordRecovery,
+} = setupEmailPassword(auth, {
+  component: components.authEmail,
+  passwordComponent: components.authPassword,
+  emailSender: {
+    kind: "resend",
+    sendEmail: components.resend.lib.sendEmail,
+    apiKey: process.env.RESEND_API_KEY ?? "",
+    from: "Band With Me <auth@bandwithme.de>",
   },
-});
-
-const PasswordAuth = Password({
-  profile: (params) => {
-    const email = typeof params.email === "string" ? params.email.trim().toLowerCase() : "";
-
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      throw new Error("Bitte gib eine gültige E-Mail-Adresse ein.");
-    }
-
-    return { email };
+  urls: {
+    signUp: `${siteUrl}/validate-email`,
+    changeEmail: `${siteUrl}/user`,
+    recovery: `${siteUrl}/reset-password`,
   },
-});
-
-const isDevelopmentAuthEnabled = process.env.DEVELOPMENT_AUTH_ENABLED === "true";
-
-const DevelopmentAuth = Anonymous({
-  id: "development",
-  profile: (params) => ({
-    email: typeof params.email === "string" ? params.email : "dev@bandwithme.local",
-    isAnonymous: true,
-    name: typeof params.name === "string" ? params.name : "Entwicklungstest",
-  }),
-});
-
-export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
-  providers: isDevelopmentAuthEnabled
-    ? [AhaSend, PasswordAuth, DevelopmentAuth]
-    : [AhaSend, PasswordAuth],
-  callbacks: {
-    async redirect({ redirectTo }) {
-      return redirectUrl(redirectTo);
-    },
-  },
-});
+}).attachUserCallbacks({ createUser: internal.user.createUser });

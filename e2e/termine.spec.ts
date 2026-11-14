@@ -18,8 +18,9 @@ test.describe("Termine page", () => {
   test("shows empty state for unauthenticated users", async ({ page }) => {
     await page.goto("/termine");
     await expect(
-      page.getByText(/Noch keine Probe/).or(page.getByText(/Login für Zusagen/)),
+      page.getByText("Noch keine Probe und noch kein Auftritt", { exact: true }),
     ).toBeVisible();
+    await expect(page.getByText("Login für Zusagen", { exact: true })).toBeVisible();
   });
 
   test("shows login prompt card", async ({ page }) => {

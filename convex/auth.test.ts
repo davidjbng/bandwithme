@@ -1,101 +1,172 @@
-import { generateKeyPairSync } from "node:crypto";
-import { convexTest } from "convex-test";
-import { afterEach, expect, test, vi } from "vitest";
+import { registerPassword } from "@convex-dev/auth/components/password/test";
+import {
+  registerEmail,
+  registerResendStub,
+  sentEmails,
+} from "@convex-dev/auth/components/email/test";
+import { sessionIdentity } from "@convex-dev/auth/test";
+import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { api } from "./_generated/api";
-import schema from "./schema";
+import { backendTest } from "../test/backend";
 
-declare global {
-  interface ImportMeta {
-    glob: (pattern: string) => Record<string, () => Promise<unknown>>;
-  }
-}
-
-const modules = import.meta.glob("./**/*.ts");
-
-afterEach(() => {
-  vi.unstubAllEnvs();
-  vi.restoreAllMocks();
-});
-
-function configureAuth() {
-  const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
-  vi.stubEnv("JWT_PRIVATE_KEY", privateKey.export({ type: "pkcs8", format: "pem" }).toString());
-  vi.stubEnv("CONVEX_SITE_URL", "https://review.invalid");
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.stubEnv("RESEND_API_KEY", "re_test_key");
   vi.stubEnv("SITE_URL", "https://bandwithme.de");
-}
-
-test("a real password session can update its profile and create a band", async () => {
-  configureAuth();
-  const t = convexTest(schema, modules);
-  const credentials = {
-    email: "password-user@example.com",
-    password: "correct-horse-battery-staple",
-  };
-
-  const signUp = await t.action(api.auth.signIn, {
-    provider: "password",
-    params: { flow: "signUp", ...credentials },
-  });
-  expect(signUp.tokens?.token).toEqual(expect.any(String));
-  const signIn = await t.action(api.auth.signIn, {
-    provider: "password",
-    params: { flow: "signIn", ...credentials },
-  });
-  const claims = JSON.parse(
-    Buffer.from(signIn.tokens!.token.split(".")[1], "base64url").toString(),
-  );
-  expect(claims.email).toBeUndefined();
-  const session = t.withIdentity({ subject: claims.sub, issuer: claims.iss });
-  const user = await session.query(api.user.current, {});
-  expect(user?.email).toBe(credentials.email);
-  await session.mutation(api.user.updateProfile, { userId: user!.id, name: "Testmitglied" });
-  const bandId = await session.mutation(api.bands.create, { userId: user!.id, name: "Testband" });
-  const eventId = await session.mutation(api.termine.create, {
-    userId: user!.id,
-    kind: "rehearsal",
-    name: "Probe",
-    dateTime: "2099-01-01T20:00:00.000Z",
-    location: "Proberaum",
-    repeat: "none",
-  });
-  expect((await session.query(api.bands.myBand, {}))?.id).toBe(bandId);
-  expect(await session.query(api.termine.list, {})).toMatchObject([{ id: eventId }]);
-  await session.mutation(api.termine.setResponse, { userId: user!.id, eventId, status: "yes" });
-  expect(await session.query(api.termine.list, {})).toMatchObject([{ viewerResponse: "yes" }]);
+});
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllEnvs();
 });
 
-test("magic-link redirects only accept the configured site origin", async () => {
-  configureAuth();
-  vi.stubEnv("AHASEND_API_KEY", "local");
-  const log = vi.spyOn(console, "log").mockImplementation(() => {});
-  const t = convexTest(schema, modules);
-  for (const redirectTo of [
-    "https://bandwithme.de.attacker.invalid/user",
-    "https://bandwithme.de@attacker.invalid/user",
-    "https://bandwithme.de:444/user",
-    "http://bandwithme.de/user",
-    "//attacker.invalid/user",
-    "/\\attacker.invalid/user",
-  ]) {
-    await expect(
-      t.action(api.auth.signIn, {
-        provider: "ahasend",
-        params: { email: "victim@example.com", redirectTo },
-      }),
-    ).rejects.toThrow();
-    expect(log).not.toHaveBeenCalledWith(expect.stringContaining("Magic link for"));
-  }
+function authTest() {
+  const t = backendTest();
+  registerPassword(t);
+  registerEmail(t);
+  registerResendStub(t);
+  return t;
+}
+
+async function signUp(t: ReturnType<typeof authTest>) {
+  const credentials = { email: "member@example.com", password: "Trompete!und-Bass-2026" };
+  const result = await t
+    .withRequestMetadata({ ip: "127.0.0.1" })
+    .mutation(api.auth.signUpWithEmailPassword, credentials);
+  if (!result.success) throw new Error(result.userError.error);
+  await vi.advanceTimersByTimeAsync(100);
+  await t.finishInProgressScheduledFunctions();
+  const emails = await sentEmails(t);
+  const url = emails[0]?.text?.match(/https:\/\/bandwithme\.de\/validate-email\?[^\s]+/)?.[0];
+  if (!url) throw new Error("Verification email missing");
+  const code = new URL(url).searchParams.get("code");
+  if (!code) throw new Error("Verification code missing");
+  return { credentials, browserSecret: result.browserSecret, emailCode: code };
+}
+
+test("email must be verified with the requesting client's secret before a session is issued", async () => {
+  const t = authTest();
+  const signup = await signUp(t);
+  const premature = await t
+    .withRequestMetadata({ ip: "127.0.0.1" })
+    .mutation(api.auth.signInWithEmailPassword, signup.credentials);
+  expect(premature.status).toBe("error");
+  const stolen = await t
+    .withRequestMetadata({ ip: "127.0.0.1" })
+    .mutation(api.auth.completeSignUpWithEmailPassword, {
+      emailCode: signup.emailCode,
+      browserSecret: "wrong-secret",
+    });
+  expect(stolen.status).toBe("error");
+  const completed = await t
+    .withRequestMetadata({ ip: "127.0.0.1" })
+    .mutation(api.auth.completeSignUpWithEmailPassword, {
+      emailCode: signup.emailCode,
+      browserSecret: signup.browserSecret,
+    });
+  if (completed.status !== "complete") throw new Error("Verification failed");
+  const session = t.withIdentity(sessionIdentity(completed.tokens));
+  const user = await session.query(api.user.current, {});
+  expect(user).not.toBeNull();
+  await session.mutation(api.user.updateProfile, { userId: user!.id, name: "Testmitglied" });
+  const band = await session.mutation(api.bands.create, { userId: user!.id, name: "Testband" });
+  expect((await session.query(api.bands.myBand, {}))?.id).toBe(band);
+  await session.mutation(api.ideas.submit, {
+    text: "Mehr Platz für unsere Setlists",
+    requestId: "auth-test",
+  });
+  await t
+    .withRequestMetadata({ ip: "127.0.0.1" })
+    .mutation(api.auth.signOut, { refreshToken: completed.tokens.refreshToken });
+  expect(await session.query(api.user.current, {})).toBeNull();
   await expect(
-    t.action(api.auth.signIn, {
-      provider: "ahasend",
-      params: { email: "victim@example.com", redirectTo: "/user?email=victim%40example.com" },
+    session.mutation(api.ideas.submit, {
+      text: "Alte Sitzung soll scheitern",
+      requestId: "revoked",
     }),
-  ).resolves.toMatchObject({ started: true });
-  expect(log).toHaveBeenCalledWith(expect.stringContaining("https://bandwithme.de/user?"));
-  await expect(
-    t.action(api.auth.signIn, {
-      provider: "ahasend",
-      params: { email: "victim@example.com", redirectTo: "bandwithme://user" },
+  ).rejects.toThrow();
+});
+
+test("new accounts reject weak passwords and old v1 session identities", async () => {
+  const t = authTest();
+  expect(
+    await t.withRequestMetadata({ ip: "127.0.0.1" }).mutation(api.auth.signUpWithEmailPassword, {
+      email: "member@example.com",
+      password: "short",
     }),
-  ).resolves.toMatchObject({ started: true });
+  ).toMatchObject({ success: false });
+  const user = await t.run((ctx) => ctx.db.insert("users", {}));
+  expect(
+    await t.withIdentity({ subject: `${user}|old-session` }).query(api.user.current, {}),
+  ).toBeNull();
+});
+
+test("password recovery requires the requesting client's secret and revokes old sessions", async () => {
+  const t = authTest();
+  const signup = await signUp(t);
+  const client = t.withRequestMetadata({ ip: "127.0.0.1" });
+  const verified = await client.mutation(api.auth.completeSignUpWithEmailPassword, {
+    emailCode: signup.emailCode,
+    browserSecret: signup.browserSecret,
+  });
+  if (verified.status !== "complete") throw new Error("Verification failed");
+  const originalSession = t.withIdentity(sessionIdentity(verified.tokens));
+  const originalUser = await originalSession.query(api.user.current, {});
+  expect(originalUser).not.toBeNull();
+
+  const recovery = await client.mutation(api.auth.startPasswordRecovery, {
+    email: signup.credentials.email,
+  });
+  if (!recovery.success) throw new Error(recovery.userError.error);
+  await vi.advanceTimersByTimeAsync(100);
+  await t.finishInProgressScheduledFunctions();
+  const emails = await sentEmails(t);
+  const url = emails
+    .flatMap((email) => email.text?.match(/https:\/\/bandwithme\.de\/reset-password\?[^\s]+/) ?? [])
+    .at(-1);
+  if (!url) throw new Error("Recovery email missing");
+  const emailCode = new URL(url).searchParams.get("code");
+  if (!emailCode) throw new Error("Recovery code missing");
+  expect(url).not.toContain(recovery.browserSecret);
+  const newPassword = "Neues!Schlagzeug-und-Bass-2026";
+  expect(
+    await client.mutation(api.auth.completePasswordRecovery, {
+      emailCode,
+      browserSecret: "wrong-secret",
+      newPassword,
+    }),
+  ).toMatchObject({ status: "error" });
+  expect(
+    await t.query(api.auth.checkPasswordRecovery, {
+      emailCode,
+      browserSecret: recovery.browserSecret,
+    }),
+  ).toEqual({ success: true });
+
+  const recovered = await client.mutation(api.auth.completePasswordRecovery, {
+    emailCode,
+    browserSecret: recovery.browserSecret,
+    newPassword,
+  });
+  if (recovered.status !== "complete") throw new Error("Recovery failed");
+  const recoveredSession = t.withIdentity(sessionIdentity(recovered.tokens));
+  expect((await recoveredSession.query(api.user.current, {}))?.id).toBe(originalUser!.id);
+  expect(await originalSession.query(api.user.current, {})).toBeNull();
+  expect(await client.mutation(api.auth.signInWithEmailPassword, signup.credentials)).toMatchObject(
+    { status: "error" },
+  );
+  expect(
+    await client.mutation(api.auth.signInWithEmailPassword, {
+      email: signup.credentials.email,
+      password: newPassword,
+    }),
+  ).toMatchObject({ status: "complete" });
+  expect(
+    await client.mutation(api.auth.completePasswordRecovery, {
+      emailCode,
+      browserSecret: recovery.browserSecret,
+      newPassword,
+    }),
+  ).toMatchObject({ status: "error" });
+  await vi.advanceTimersByTimeAsync(100);
+  await t.finishInProgressScheduledFunctions();
 });

@@ -1,601 +1,273 @@
-import { useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
-import { useMutation, useQuery } from "convex/react";
-import { Image } from "expo-image";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { api } from "../../../convex/_generated/api";
-import { useEffect, useState } from "react";
+import { Button, Column, Host } from "@expo/ui";
+import { useAuthActions } from "@convex-dev/auth/react";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+  useSignInWithEmailPassword,
+  useSignUpWithEmailPassword,
+  useStartPasswordRecovery,
+} from "@convex-dev/auth/methods/email-password/react";
+import { useConvex, useConvexAuth, useMutation, useQuery } from "convex/react";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, TextInput, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { api } from "../../../convex/_generated/api";
+import type { Id } from "../../../convex/_generated/dataModel";
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import IdeaForm from "@/components/idea-form";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { devProfile, isDevProfileEnabled } from "@/lib/dev-profile";
+import { authErrorMessage } from "@/lib/auth-errors";
+import {
+  inviteDestination,
+  readInviteDestination,
+  saveInviteDestination,
+} from "@/lib/invite-destination";
 
-const availableInstruments = [
-  "Vocals",
-  "Guitar",
-  "Bass",
-  "Drums",
-  "Keys",
-  "Saxophone",
-  "Trumpet",
-  "Violin",
-];
-
-export default function UserScreen() {
-  const { isAuthenticated, isLoading } = useConvexAuth();
-  const { signIn, signOut } = useAuthActions();
-  const isDevelopmentAuthEnabled = process.env.EXPO_PUBLIC_ENABLE_DEVELOPMENT_AUTH === "true";
-  const router = useRouter();
-  const {
-    code,
-    email: callbackEmail,
-    next,
-  } = useLocalSearchParams<{
-    code?: string;
-    email?: string;
-    next?: string;
-  }>();
-  const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
-  const updateProfile = useMutation(api.user.updateProfile);
+function SignInForm({ next }: { next?: string }) {
+  const convex = useConvex();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [profileName, setProfileName] = useState(user?.name ?? devProfile.name);
-  const [pictureUrl, setPictureUrl] = useState(devProfile.pictureUrl);
-  const [selectedInstruments, setSelectedInstruments] = useState(devProfile.instruments);
   const theme = useTheme();
-  const safeAreaInsets = useSafeAreaInsets();
+  const login = useSignInWithEmailPassword(api.auth);
+  const registration = useSignUpWithEmailPassword(api.auth);
+  const recovery = useStartPasswordRecovery(api.auth);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const busy = login.pending || registration.pending || recovery.pending;
 
-  const insets = {
-    top: safeAreaInsets.top,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-
-  useEffect(() => {
-    if (user?.name) setProfileName(user.name);
-  }, [user?.name]);
-
-  useEffect(() => {
-    if (!code) {
+  async function authenticate(signUp: boolean) {
+    setError(null);
+    setMessage(null);
+    try {
+      await saveInviteDestination(next, convex.url);
+    } catch {
+      setError("Deine Einladung konnte nicht gespeichert werden. Bitte versuche es erneut.");
       return;
     }
-
-    void (async () => {
-      setIsSubmitting(true);
-      setError(null);
-      setStatus("Finishing sign in...");
-
-      try {
-        if (!callbackEmail) {
-          throw new Error("Missing email for magic link sign in.");
-        }
-        await signIn("ahasend", { code, email: callbackEmail });
-        router.replace("/user");
-        setStatus(null);
-      } catch (caughtError) {
-        setError(
-          caughtError instanceof Error ? caughtError.message : "Could not finish signing in.",
+    const credentials = { email: email.trim().toLowerCase(), password: password };
+    if (signUp) {
+      const result = await registration.signUp(credentials);
+      if (result.success) {
+        setPassword("");
+        setMessage(
+          "Prüfe dein Postfach und bestätige deine E-Mail-Adresse. Öffne den Link auf diesem Gerät in derselben App bzw. demselben Browser.",
         );
-      } finally {
-        setIsSubmitting(false);
-      }
-    })();
-  }, [callbackEmail, code, router, signIn]);
-
-  useEffect(() => {
-    if (isAuthenticated && next?.startsWith("/invite")) {
-      router.replace(next as never);
-    }
-  }, [isAuthenticated, next, router]);
-
-  async function startDevelopmentSession() {
-    setIsSubmitting(true);
-    setError(null);
-    setStatus(null);
-
-    try {
-      await signIn("development");
-    } catch (caughtError) {
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : "Entwicklungszugang konnte nicht gestartet werden.",
-      );
-    } finally {
-      setIsSubmitting(false);
+      } else setError(authErrorMessage(result.userError));
+    } else {
+      const result = await login.signIn(credentials);
+      if (result.status === "error") setError(authErrorMessage(result.userError));
+      else setPassword("");
     }
   }
 
-  async function authenticateWithPassword(flow: "signIn" | "signUp") {
-    const trimmedEmail = email.trim();
-
-    if (!trimmedEmail || !password) {
-      setError("Bitte gib E-Mail-Adresse und Passwort ein.");
+  async function recover() {
+    setError(null);
+    setMessage(null);
+    try {
+      await saveInviteDestination(next, convex.url);
+    } catch {
+      setError("Deine Einladung konnte nicht gespeichert werden. Bitte versuche es erneut.");
       return;
     }
-
-    setIsSubmitting(true);
-    setError(null);
-    setStatus(null);
-
-    try {
-      await signIn("password", { email: trimmedEmail, flow, password });
-      setStatus(
-        flow === "signUp" ? "Account erstellt. Du wirst angemeldet." : "Du wirst angemeldet.",
+    const result = await recovery.startPasswordRecovery({
+      email: email.trim().toLowerCase(),
+    });
+    if (result.success)
+      setMessage(
+        "Der Link zum Zurücksetzen ist unterwegs. Öffne ihn auf diesem Gerät in derselben App bzw. demselben Browser.",
       );
-    } catch (caughtError) {
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : "Anmeldung mit Passwort fehlgeschlagen.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function sendMagicLink() {
-    const trimmedEmail = email.trim();
-
-    if (!trimmedEmail) {
-      setError("Enter your email address.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError(null);
-    setStatus(null);
-
-    try {
-      await signIn("ahasend", {
-        email: trimmedEmail,
-        redirectTo: `/user?email=${encodeURIComponent(trimmedEmail)}`,
-      });
-      setStatus("Magic link sent. Check your email to finish signing in.");
-    } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Could not send magic link.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function handleSaveName() {
-    setError(null);
-    if (!profileName.trim()) return;
-    setIsSubmitting(true);
-    try {
-      await updateProfile({ userId: user!.id as never, name: profileName.trim() });
-      setStatus("Name gespeichert.");
-    } catch (e: any) {
-      setError(e?.message ?? "Fehler beim Speichern.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function handleSignOut() {
-    setIsSubmitting(true);
-    setError(null);
-    setStatus(null);
-
-    try {
-      await signOut();
-      setEmail("");
-    } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Could not sign out.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  function toggleInstrument(instrument: string) {
-    setSelectedInstruments((current) =>
-      current.includes(instrument)
-        ? current.filter((selectedInstrument) => selectedInstrument !== instrument)
-        : [...current, instrument],
-    );
+    else setError(authErrorMessage(result.userError));
   }
 
   return (
-    <>
-      <Stack.Screen options={{ title: "Profil" }} />
-      <ScrollView
-        style={[styles.scrollView, { backgroundColor: theme.background }]}
-        contentInset={insets}
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.scrollContent}
-      >
-        <ThemedView style={styles.container}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-            style={styles.content}
-          >
-            <ThemedView style={styles.header}>
-              <ThemedText type="subtitle">Profil</ThemedText>
-              <ThemedText style={styles.centerText} themeColor="textSecondary">
-                Verwalte dein Dev-Profil und melde dich optional mit deinem Account an.
-              </ThemedText>
-            </ThemedView>
-
-            {isDevProfileEnabled && (
-              <ThemedView type="backgroundElement" style={styles.card}>
-                <View style={styles.profileHeader}>
-                  <Image source={pictureUrl} contentFit="cover" style={styles.avatar} />
-                  <View style={styles.profileSummary}>
-                    <ThemedText type="small" themeColor="textSecondary">
-                      Dev-Profil
-                    </ThemedText>
-                    <ThemedText selectable type="smallBold">
-                      {profileName || "Unbenannt"}
-                    </ThemedText>
-                    <ThemedText selectable type="small" themeColor="textSecondary">
-                      {selectedInstruments.length === 0
-                        ? "Keine Instrumente ausgewählt"
-                        : selectedInstruments.join(", ")}
-                    </ThemedText>
-                  </View>
-                </View>
-
-                <View style={styles.fieldGroup}>
-                  <ThemedText type="smallBold">Name</ThemedText>
-                  <TextInput
-                    onChangeText={setProfileName}
-                    placeholder="Dein Name"
-                    placeholderTextColor={theme.textSecondary}
-                    style={[
-                      styles.input,
-                      { borderColor: theme.backgroundSelected, color: theme.text },
-                    ]}
-                    value={profileName}
-                  />
-                </View>
-
-                <View style={styles.fieldGroup}>
-                  <ThemedText type="smallBold">Bild-URL</ThemedText>
-                  <TextInput
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    inputMode="url"
-                    onChangeText={setPictureUrl}
-                    placeholder="https://example.com/profile.jpg"
-                    placeholderTextColor={theme.textSecondary}
-                    style={[
-                      styles.input,
-                      { borderColor: theme.backgroundSelected, color: theme.text },
-                    ]}
-                    value={pictureUrl}
-                  />
-                </View>
-
-                <View style={styles.fieldGroup}>
-                  <ThemedText type="smallBold">Instrumente</ThemedText>
-                  <View style={styles.chipList}>
-                    {availableInstruments.map((instrument) => {
-                      const isSelected = selectedInstruments.includes(instrument);
-
-                      return (
-                        <Pressable
-                          key={instrument}
-                          onPress={() => toggleInstrument(instrument)}
-                          style={({ pressed }) => [pressed && styles.pressed]}
-                        >
-                          <ThemedView
-                            type={isSelected ? undefined : "backgroundSelected"}
-                            style={[styles.chip, isSelected && { backgroundColor: theme.text }]}
-                          >
-                            <ThemedText
-                              type="smallBold"
-                              style={isSelected && { color: theme.background }}
-                            >
-                              {instrument}
-                            </ThemedText>
-                          </ThemedView>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                </View>
-
-                <View style={styles.fieldGroup}>
-                  <ThemedText type="smallBold">Aktuelle Bands</ThemedText>
-                  <View style={styles.bandList}>
-                    {devProfile.bands.map((band) => (
-                      <ThemedView
-                        key={`${band.name}-${band.role ?? "member"}`}
-                        style={styles.bandRow}
-                      >
-                        <ThemedText selectable type="smallBold">
-                          {band.name}
-                        </ThemedText>
-                        {band.role && (
-                          <ThemedText selectable type="small" themeColor="textSecondary">
-                            {band.role}
-                          </ThemedText>
-                        )}
-                      </ThemedView>
-                    ))}
-                  </View>
-                </View>
-
-                <ThemedText type="small" themeColor="textSecondary">
-                  Dev-only: Änderungen bleiben lokal bis zum nächsten Reload.
-                </ThemedText>
-              </ThemedView>
-            )}
-
-            <ThemedView type="backgroundElement" style={styles.card}>
-              {isLoading || (isAuthenticated && user === undefined) ? (
-                <ActivityIndicator color={theme.text} />
-              ) : isAuthenticated ? (
-                <>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    Angemeldet als {user?.email}
-                  </ThemedText>
-                  <View style={styles.fieldGroup}>
-                    <ThemedText type="smallBold">Name</ThemedText>
-                    <TextInput
-                      onChangeText={setProfileName}
-                      placeholder="Dein Name"
-                      placeholderTextColor={theme.textSecondary}
-                      style={[
-                        styles.input,
-                        { borderColor: theme.backgroundSelected, color: theme.text },
-                      ]}
-                      value={profileName}
-                    />
-                  </View>
-                  <Pressable
-                    onPress={handleSaveName}
-                    disabled={isSubmitting || !profileName.trim()}
-                    style={({ pressed }) => [
-                      styles.button,
-                      { backgroundColor: theme.text },
-                      pressed && styles.pressed,
-                      !profileName.trim() && styles.disabled,
-                    ]}
-                  >
-                    <ThemedText style={[styles.buttonText, { color: theme.background }]}>
-                      Name speichern
-                    </ThemedText>
-                  </Pressable>
-                  <Pressable
-                    disabled={isSubmitting}
-                    onPress={handleSignOut}
-                    style={({ pressed }) => [
-                      styles.button,
-                      { backgroundColor: theme.text },
-                      pressed && styles.pressed,
-                      isSubmitting && styles.disabled,
-                    ]}
-                  >
-                    <ThemedText style={[styles.buttonText, { color: theme.background }]}>
-                      Abmelden
-                    </ThemedText>
-                  </Pressable>
-                </>
-              ) : (
-                <>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    Sign in with a one-time link sent to your email.
-                  </ThemedText>
-                  <ThemedText type="smallBold">Email address</ThemedText>
-                  <TextInput
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    autoCorrect={false}
-                    editable={!isSubmitting}
-                    inputMode="email"
-                    onChangeText={setEmail}
-                    onSubmitEditing={sendMagicLink}
-                    placeholder="you@example.com"
-                    placeholderTextColor={theme.textSecondary}
-                    style={[
-                      styles.input,
-                      { borderColor: theme.backgroundSelected, color: theme.text },
-                    ]}
-                    value={email}
-                  />
-                  <ThemedText type="smallBold">Passwort</ThemedText>
-                  <TextInput
-                    accessibilityLabel="Passwort"
-                    autoCapitalize="none"
-                    autoComplete="current-password"
-                    autoCorrect={false}
-                    editable={!isSubmitting}
-                    onChangeText={setPassword}
-                    onSubmitEditing={() => authenticateWithPassword("signIn")}
-                    placeholder="Mindestens 8 Zeichen"
-                    placeholderTextColor={theme.textSecondary}
-                    secureTextEntry
-                    style={[
-                      styles.input,
-                      { borderColor: theme.backgroundSelected, color: theme.text },
-                    ]}
-                    value={password}
-                  />
-                  <Pressable
-                    accessibilityRole="button"
-                    disabled={isSubmitting}
-                    onPress={() => authenticateWithPassword("signIn")}
-                    style={({ pressed }) => [
-                      styles.button,
-                      { backgroundColor: theme.text },
-                      pressed && styles.pressed,
-                      isSubmitting && styles.disabled,
-                    ]}
-                  >
-                    <ThemedText style={[styles.buttonText, { color: theme.background }]}>
-                      Anmelden
-                    </ThemedText>
-                  </Pressable>
-                  <Pressable
-                    accessibilityRole="button"
-                    disabled={isSubmitting}
-                    onPress={() => authenticateWithPassword("signUp")}
-                    style={({ pressed }) => [
-                      styles.button,
-                      { borderColor: theme.backgroundSelected, borderWidth: 1 },
-                      pressed && styles.pressed,
-                      isSubmitting && styles.disabled,
-                    ]}
-                  >
-                    <ThemedText style={styles.buttonText}>Account erstellen</ThemedText>
-                  </Pressable>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    Alternativ kannst du dich mit einem einmaligen Link per E-Mail anmelden.
-                  </ThemedText>
-                  <Pressable
-                    disabled={isSubmitting}
-                    onPress={sendMagicLink}
-                    style={({ pressed }) => [
-                      styles.button,
-                      { backgroundColor: theme.text },
-                      pressed && styles.pressed,
-                      isSubmitting && styles.disabled,
-                    ]}
-                  >
-                    <ThemedText style={[styles.buttonText, { color: theme.background }]}>
-                      Send magic link
-                    </ThemedText>
-                  </Pressable>
-                  {isDevelopmentAuthEnabled ? (
-                    <Pressable
-                      accessibilityLabel="Entwicklungszugang starten"
-                      disabled={isSubmitting}
-                      onPress={startDevelopmentSession}
-                      style={({ pressed }) => [
-                        styles.button,
-                        { borderColor: theme.backgroundSelected, borderWidth: 1 },
-                        pressed && styles.pressed,
-                        isSubmitting && styles.disabled,
-                      ]}
-                    >
-                      <ThemedText style={styles.buttonText}>Entwicklungszugang starten</ThemedText>
-                    </Pressable>
-                  ) : null}
-                </>
-              )}
-
-              {isSubmitting && <ActivityIndicator color={theme.text} />}
-              {status && (
-                <ThemedText type="small" themeColor="textSecondary">
-                  {status}
-                </ThemedText>
-              )}
-              {error && (
-                <ThemedText type="small" style={styles.error}>
-                  {error}
-                </ThemedText>
-              )}
-            </ThemedView>
-          </KeyboardAvoidingView>
-        </ThemedView>
-      </ScrollView>
-    </>
+    <View style={{ gap: 16 }}>
+      <ThemedText type="subtitle">Willkommen bei deiner Band</ThemedText>
+      <ThemedText themeColor="textSecondary">
+        Melde dich an oder erstelle ein neues Konto mit bestätigter E-Mail-Adresse.
+      </ThemedText>
+      <View style={{ gap: 12 }}>
+        <TextInput
+          accessibilityLabel="E-Mail-Adresse"
+          placeholder="du@beispiel.de"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          autoComplete="username"
+          inputMode="email"
+          editable={!busy}
+          placeholderTextColor={theme.textSecondary}
+          style={{
+            width: "100%",
+            padding: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.backgroundSelected,
+            color: theme.text,
+            fontSize: 17,
+          }}
+        />
+        <TextInput
+          accessibilityLabel="Passwort"
+          placeholder="Dein Passwort"
+          value={password}
+          onChangeText={setPassword}
+          autoCapitalize="none"
+          autoComplete="current-password"
+          secureTextEntry
+          editable={!busy}
+          placeholderTextColor={theme.textSecondary}
+          style={{
+            width: "100%",
+            padding: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.backgroundSelected,
+            color: theme.text,
+            fontSize: 17,
+          }}
+        />
+        <Host matchContents>
+          <Column spacing={12} style={{ width: "100%" }}>
+            <Button disabled={busy} onPress={() => void authenticate(false)} label="Anmelden" />
+            <Button
+              disabled={busy}
+              variant="outlined"
+              onPress={() => void authenticate(true)}
+              label="Account erstellen"
+            />
+            <Button
+              disabled={busy}
+              variant="text"
+              onPress={() => void recover()}
+              label="Passwort vergessen?"
+            />
+          </Column>
+        </Host>
+      </View>
+      {busy && <ActivityIndicator />}
+      {message && <ThemedText accessibilityLiveRegion="polite">{message}</ThemedText>}
+      {error && <ThemedText accessibilityRole="alert">{error}</ThemedText>}
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    alignItems: "center",
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.five,
-  },
-  container: {
-    width: "100%",
-    maxWidth: MaxContentWidth,
-  },
-  content: {
-    gap: Spacing.five,
-  },
-  header: {
-    alignItems: "center",
-    gap: Spacing.three,
-  },
-  centerText: {
-    textAlign: "center",
-  },
-  card: {
-    borderRadius: Spacing.four,
-    gap: Spacing.three,
-    padding: Spacing.four,
-  },
-  profileHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: Spacing.three,
-  },
-  avatar: {
-    borderRadius: 40,
-    height: 80,
-    width: 80,
-  },
-  profileSummary: {
-    flex: 1,
-    gap: Spacing.half,
-  },
-  fieldGroup: {
-    gap: Spacing.two,
-  },
-  input: {
-    borderRadius: Spacing.three,
-    borderWidth: 1,
-    fontSize: 16,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-  },
-  button: {
-    alignItems: "center",
-    borderRadius: Spacing.three,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: 700,
-  },
-  chipList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Spacing.two,
-  },
-  chip: {
-    borderRadius: 999,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-  },
-  bandList: {
-    gap: Spacing.two,
-  },
-  bandRow: {
-    borderRadius: Spacing.three,
-    gap: Spacing.half,
-    padding: Spacing.three,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  error: {
-    color: "#d92d20",
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-});
+function Profile({ user }: { user: { id: Id<"users">; name: string | null } }) {
+  const [name, setName] = useState(user.name ?? "");
+  const theme = useTheme();
+  const updateProfile = useMutation(api.user.updateProfile);
+  const { signOut } = useAuthActions();
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  async function saveOrSignOut(save: boolean) {
+    if (busy) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      if (save) {
+        const trimmed = name.trim();
+        if (!trimmed) {
+          setMessage("Bitte gib einen Namen ein.");
+          return;
+        }
+        await updateProfile({ userId: user.id, name: trimmed });
+        setMessage("Name gespeichert.");
+      } else await signOut();
+    } catch {
+      setMessage("Das hat nicht geklappt. Bitte versuche es erneut.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <View style={{ gap: 20 }}>
+      <ThemedText type="subtitle">Dein Profil</ThemedText>
+      <View style={{ gap: 12 }}>
+        <TextInput
+          accessibilityLabel="Dein Name"
+          value={name}
+          onChangeText={setName}
+          placeholder="Dein Name"
+          editable={!busy}
+          placeholderTextColor={theme.textSecondary}
+          style={{
+            width: "100%",
+            padding: 14,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: theme.backgroundSelected,
+            color: theme.text,
+            fontSize: 17,
+          }}
+        />
+        <Host matchContents>
+          <Column spacing={12} style={{ width: "100%" }}>
+            <Button
+              disabled={busy}
+              onPress={() => void saveOrSignOut(true)}
+              label="Name speichern"
+            />
+            <Button
+              disabled={busy}
+              variant="outlined"
+              onPress={() => void saveOrSignOut(false)}
+              label="Abmelden"
+            />
+          </Column>
+        </Host>
+      </View>
+      {message && <ThemedText accessibilityLiveRegion="polite">{message}</ThemedText>}
+      <IdeaForm />
+    </View>
+  );
+}
+
+export default function UserScreen() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const convex = useConvex();
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
+  const { next } = useLocalSearchParams<{ next?: string }>();
+  const router = useRouter();
+  const theme = useTheme();
+  useEffect(() => {
+    if (!isAuthenticated) return undefined;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const destination = inviteDestination(next) ?? (await readInviteDestination(convex.url));
+        if (cancelled || !destination) return;
+        await saveInviteDestination(null, convex.url);
+        if (!cancelled) router.replace(destination);
+      } catch {
+        if (!cancelled) setInviteError("Bitte öffne deine Bandeinladung erneut, um beizutreten.");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, next, router, convex]);
+  return (
+    <KeyboardAwareScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      keyboardShouldPersistTaps="handled"
+      style={{ backgroundColor: theme.background }}
+      contentContainerStyle={{
+        padding: Spacing.four,
+        paddingBottom: BottomTabInset + Spacing.five,
+        alignItems: "center",
+      }}
+    >
+      <Stack.Screen options={{ title: "Profil" }} />
+      <View style={{ width: "100%", maxWidth: MaxContentWidth }}>
+        {inviteError && <ThemedText accessibilityRole="alert">{inviteError}</ThemedText>}
+        {isLoading || (isAuthenticated && user === undefined) ? (
+          <ActivityIndicator />
+        ) : isAuthenticated && user ? (
+          <Profile key={user.id} user={user} />
+        ) : (
+          <SignInForm next={next} />
+        )}
+      </View>
+    </KeyboardAwareScrollView>
+  );
+}

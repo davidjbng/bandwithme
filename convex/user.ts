@@ -1,7 +1,15 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { requireCurrentUserId } from "./authorization";
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+
+export const createUser = internalMutation({
+  args: {
+    method: v.object({ name: v.literal("emailPassword"), profile: v.object({}) }),
+  },
+  returns: v.id("users"),
+  handler: async (ctx) => await ctx.db.insert("users", {}),
+});
 
 export const current = query({
   args: {},

@@ -1,5 +1,6 @@
+import { Button, Host } from "@expo/ui";
 import DateTimePicker from "@expo/ui/community/datetime-picker";
-import { useConvexAuth } from "@convex-dev/auth/react";
+import { useConvexAuth } from "convex/react";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
@@ -148,7 +149,7 @@ export default function CreateTermineScreen() {
 
     try {
       await createEvent({
-        userId: user!.id as never,
+        userId: user!.id,
         kind,
         name: trimmedName,
         dateTime: eventDate.toISOString(),
@@ -253,6 +254,7 @@ export default function CreateTermineScreen() {
           <View style={styles.inputGroup}>
             <ThemedText type="smallBold">Name *</ThemedText>
             <TextInput
+              accessibilityLabel="Terminname"
               value={name}
               onChangeText={setName}
               placeholder={
@@ -263,8 +265,8 @@ export default function CreateTermineScreen() {
                 styles.input,
                 {
                   backgroundColor: theme.background,
-                  color: theme.text,
                   borderColor: theme.backgroundSelected,
+                  color: theme.text,
                 },
               ]}
               returnKeyType="next"
@@ -369,6 +371,7 @@ export default function CreateTermineScreen() {
           <View style={styles.inputGroup}>
             <ThemedText type="smallBold">Ort</ThemedText>
             <TextInput
+              accessibilityLabel="Ort"
               value={location}
               onChangeText={setLocation}
               placeholder={kind === "performance" ? "Venue, Bühne, Stadt" : "Proberaum, Studio 2"}
@@ -377,8 +380,8 @@ export default function CreateTermineScreen() {
                 styles.input,
                 {
                   backgroundColor: theme.background,
-                  color: theme.text,
                   borderColor: theme.backgroundSelected,
+                  color: theme.text,
                 },
               ]}
               returnKeyType="done"
@@ -431,29 +434,17 @@ export default function CreateTermineScreen() {
             </ThemedText>
           ) : null}
 
-          <Pressable onPress={handleCreateEvent} style={({ pressed }) => pressed && styles.pressed}>
-            <ThemedView
-              style={[
-                styles.createButton,
-                { backgroundColor: theme.text, opacity: isSubmitting ? 0.6 : 1 },
-              ]}
-            >
-              <SymbolView
-                tintColor={theme.background}
-                name={{
-                  ios: "checkmark.circle.fill",
-                  android: "check_circle",
-                  web: "check_circle",
-                }}
-                size={18}
-              />
-              <ThemedText type="smallBold" style={{ color: theme.background }}>
-                {isSubmitting
+          <Host matchContents>
+            <Button
+              onPress={handleCreateEvent}
+              disabled={isSubmitting}
+              label={
+                isSubmitting
                   ? `${eventKindLabels[kind]} wird gespeichert...`
-                  : `${eventKindLabels[kind]} speichern`}
-              </ThemedText>
-            </ThemedView>
-          </Pressable>
+                  : `${eventKindLabels[kind]} speichern`
+              }
+            />
+          </Host>
         </ThemedView>
       </ThemedView>
 
@@ -581,13 +572,5 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.75,
-  },
-  createButton: {
-    minHeight: 52,
-    borderRadius: Spacing.three,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: Spacing.two,
   },
 });

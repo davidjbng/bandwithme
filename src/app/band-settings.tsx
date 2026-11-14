@@ -1,18 +1,11 @@
-import { useConvexAuth } from "@convex-dev/auth/react";
+import { Button, Host } from "@expo/ui";
+import { useConvexAuth } from "convex/react";
 import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import { useState } from "react";
-import {
-  Alert,
-  Platform,
-  Pressable,
-  ScrollView,
-  Share,
-  StyleSheet,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, Platform, Pressable, Share, StyleSheet, TextInput, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
@@ -50,7 +43,7 @@ export default function BandSettingsScreen() {
   async function handleLeave() {
     setActionError("");
     try {
-      await leaveBand({ userId: user!.id as never });
+      await leaveBand({ userId: user!.id });
       router.replace("/");
     } catch (e: any) {
       setActionError(e?.message ?? "Fehler");
@@ -60,7 +53,7 @@ export default function BandSettingsScreen() {
   async function handleRemove(membershipId: string) {
     setActionError("");
     try {
-      await removeMember({ userId: user!.id as never, membershipId: membershipId as never });
+      await removeMember({ userId: user!.id, membershipId: membershipId as never });
     } catch (e: any) {
       setActionError(e?.message ?? "Fehler");
     }
@@ -69,7 +62,7 @@ export default function BandSettingsScreen() {
   async function handleDelete() {
     setActionError("");
     try {
-      await deleteBand({ userId: user!.id as never, nameConfirmation: deleteName });
+      await deleteBand({ userId: user!.id, nameConfirmation: deleteName });
       router.replace("/");
     } catch (e: any) {
       setActionError(e?.message ?? "Fehler");
@@ -82,7 +75,8 @@ export default function BandSettingsScreen() {
     setCreatingInvite(true);
     try {
       const invite = await createInvite({});
-      setInviteLink(`https://bandwithme.de/invite?token=${encodeURIComponent(invite.token)}`);
+      const link = `https://bandwithme.de/invite?token=${encodeURIComponent(invite.token)}`;
+      setInviteLink(link);
     } catch (e: any) {
       setActionError(e?.message ?? "Einladungslink konnte nicht erstellt werden.");
     } finally {
@@ -122,11 +116,13 @@ export default function BandSettingsScreen() {
   return (
     <>
       <Stack.Screen options={{ title: "Band-Einstellungen" }} />
-      <ScrollView
+      <KeyboardAwareScrollView
         style={[styles.scrollView, { backgroundColor: theme.background }]}
         contentInset={insets}
         contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.contentContainer}
+        bottomOffset={Spacing.four}
+        keyboardShouldPersistTaps="handled"
       >
         <ThemedView style={styles.container}>
           {/* Band Info */}
@@ -145,26 +141,13 @@ export default function BandSettingsScreen() {
               <ThemedText type="small" themeColor="textSecondary">
                 Erstelle einen Link und leite ihn an neue Bandmitglieder weiter.
               </ThemedText>
-              <Pressable
-                accessibilityLabel="Einladungslink erstellen"
-                accessibilityRole="button"
-                disabled={creatingInvite}
-                onPress={handleCreateInvite}
-                style={({ pressed }) => [
-                  styles.inviteButton,
-                  pressed && styles.pressed,
-                  { backgroundColor: theme.text, opacity: creatingInvite ? 0.5 : 1 },
-                ]}
-              >
-                <SymbolView
-                  tintColor={theme.background}
-                  name={{ ios: "link.badge.plus", web: "add_link" }}
-                  size={18}
+              <Host matchContents>
+                <Button
+                  disabled={creatingInvite}
+                  onPress={handleCreateInvite}
+                  label={creatingInvite ? "Wird erstellt…" : "Einladungslink erstellen"}
                 />
-                <ThemedText type="smallBold" style={{ color: theme.background }}>
-                  {creatingInvite ? "Wird erstellt…" : "Einladungslink erstellen"}
-                </ThemedText>
-              </Pressable>
+              </Host>
               {inviteLink ? (
                 <ThemedView type="backgroundElement" style={styles.inviteCard}>
                   <ThemedText type="smallBold">Einladungslink</ThemedText>
@@ -175,28 +158,20 @@ export default function BandSettingsScreen() {
                     style={[
                       styles.inviteInput,
                       {
-                        color: theme.text,
                         backgroundColor: theme.background,
                         borderColor: theme.backgroundSelected,
+                        color: theme.text,
                       },
                     ]}
                     value={inviteLink}
                   />
-                  <Pressable
-                    accessibilityLabel="Link kopieren"
-                    accessibilityRole="button"
-                    onPress={handleCopyInvite}
-                    style={({ pressed }) => [styles.copyButton, pressed && styles.pressed]}
-                  >
-                    <SymbolView
-                      tintColor={theme.text}
-                      name={{ ios: "doc.on.doc", web: "content_copy" }}
-                      size={18}
+                  <Host matchContents>
+                    <Button
+                      variant="outlined"
+                      onPress={handleCopyInvite}
+                      label={Platform.OS === "web" ? "Link kopieren" : "Link teilen"}
                     />
-                    <ThemedText type="smallBold">
-                      {Platform.OS === "web" ? "Link kopieren" : "Link teilen"}
-                    </ThemedText>
-                  </Pressable>
+                  </Host>
                   {inviteStatus ? (
                     <ThemedText type="small" themeColor="textSecondary">
                       {inviteStatus}
@@ -295,12 +270,13 @@ export default function BandSettingsScreen() {
                   Gib den Namen der Band ein um zu bestätigen:
                 </ThemedText>
                 <TextInput
+                  accessibilityLabel="Bandname zur Löschbestätigung"
                   style={[
                     styles.input,
                     {
-                      color: theme.text,
                       backgroundColor: theme.background,
                       borderColor: theme.backgroundSelected,
+                      color: theme.text,
                     },
                   ]}
                   placeholder={band.name}
@@ -349,7 +325,7 @@ export default function BandSettingsScreen() {
             )}
           </View>
         </ThemedView>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </>
   );
 }
@@ -366,25 +342,8 @@ const styles = StyleSheet.create({
   container: { width: "100%", maxWidth: MaxContentWidth, gap: Spacing.five },
   section: { gap: Spacing.two },
   sectionTitle: { marginBottom: Spacing.one },
-  inviteButton: {
-    alignItems: "center",
-    borderRadius: Spacing.three,
-    flexDirection: "row",
-    gap: Spacing.two,
-    justifyContent: "center",
-    minHeight: 48,
-    paddingHorizontal: Spacing.three,
-  },
   inviteCard: { borderRadius: Spacing.three, gap: Spacing.two, padding: Spacing.three },
   inviteInput: { borderRadius: Spacing.two, borderWidth: 1, fontSize: 14, padding: Spacing.two },
-  copyButton: {
-    alignItems: "center",
-    borderRadius: Spacing.two,
-    flexDirection: "row",
-    gap: Spacing.two,
-    justifyContent: "center",
-    minHeight: 44,
-  },
   memberList: { gap: Spacing.one },
   memberRow: {
     flexDirection: "row",

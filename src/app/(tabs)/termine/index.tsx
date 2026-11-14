@@ -1,4 +1,4 @@
-import { useConvexAuth } from "@convex-dev/auth/react";
+import { useConvexAuth } from "convex/react";
 import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
@@ -71,7 +71,7 @@ export default function TermineScreen() {
   };
 
   async function handleResponse(eventId: string, status: RsvpStatus) {
-    await setResponse({ userId: userForMut!.id as never, eventId: eventId as never, status });
+    await setResponse({ userId: userForMut!.id, eventId: eventId as never, status });
   }
 
   return (

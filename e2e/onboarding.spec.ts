@@ -7,7 +7,7 @@ function filterCritical(errors: string[]): string[] {
 }
 
 test.describe("Band onboarding", () => {
-  test("/onboarding/create redirects unauthenticated users home without critical errors", async ({
+  test("/onboarding/create redirects unauthenticated users to sign-in without critical errors", async ({
     page,
   }) => {
     const errors: string[] = [];
@@ -15,8 +15,14 @@ test.describe("Band onboarding", () => {
     await page.goto("/onboarding/create");
     await page.waitForLoadState("networkidle");
     expect(filterCritical(errors)).toEqual([]);
-    await expect(page).toHaveURL("/");
-    await expect(page.getByText("Willkommen!")).toBeVisible();
+    await expect(page).toHaveURL("/user");
+    await expect(page.getByRole("button", { name: "Anmelden", exact: true })).toBeVisible();
+  });
+
+  test("/onboarding/profile redirects unauthenticated users to sign-in", async ({ page }) => {
+    await page.goto("/onboarding/profile");
+    await expect(page).toHaveURL("/user");
+    await expect(page.getByRole("textbox", { name: "E-Mail-Adresse" })).toBeVisible();
   });
 
   test("/onboarding/join loads without critical errors", async ({ page }) => {

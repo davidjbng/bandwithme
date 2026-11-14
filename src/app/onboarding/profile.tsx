@@ -1,8 +1,10 @@
-import { useConvexAuth } from "@convex-dev/auth/react";
+import { Button, Host } from "@expo/ui";
+import { useConvexAuth } from "convex/react";
 import { useMutation, useQuery } from "convex/react";
-import { Stack, useRouter } from "expo-router";
+import { Redirect, Stack, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/themed-text";
@@ -31,7 +33,7 @@ export default function ProfileOnboardingScreen() {
   }, [user?.name, router]);
 
   // Show spinner while auth is loading or user data not yet available
-  if (isLoading || user === undefined) {
+  if (isLoading || (isAuthenticated && user === undefined)) {
     return (
       <ThemedView style={styles.root}>
         <ThemedText type="small" themeColor="textSecondary">
@@ -42,8 +44,7 @@ export default function ProfileOnboardingScreen() {
   }
 
   if (!isAuthenticated || !user) {
-    router.replace("/");
-    return null;
+    return <Redirect href="/user" />;
   }
 
   async function handleSave() {
@@ -54,7 +55,7 @@ export default function ProfileOnboardingScreen() {
     }
     setSubmitting(true);
     try {
-      await updateProfile({ userId: user!.id as never, name: name.trim() });
+      await updateProfile({ userId: user!.id, name: name.trim() });
       router.replace("/");
     } catch (e: any) {
       setError(e?.message ?? "Fehler beim Speichern.");
@@ -66,8 +67,11 @@ export default function ProfileOnboardingScreen() {
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
-      <ThemedView
-        style={[
+      <KeyboardAwareScrollView
+        style={{ flex: 1, backgroundColor: theme.background }}
+        keyboardShouldPersistTaps="handled"
+        bottomOffset={Spacing.four}
+        contentContainerStyle={[
           styles.root,
           {
             paddingTop: safeAreaInsets.top + Spacing.six,
@@ -84,12 +88,13 @@ export default function ProfileOnboardingScreen() {
           </ThemedText>
 
           <TextInput
+            accessibilityLabel="Dein Name"
             style={[
               styles.input,
               {
-                color: theme.text,
                 backgroundColor: theme.backgroundElement,
                 borderColor: error ? "#ef4444" : theme.backgroundSelected,
+                color: theme.text,
               },
             ]}
             placeholder="Dein Name"
@@ -107,28 +112,22 @@ export default function ProfileOnboardingScreen() {
             </ThemedText>
           ) : null}
 
-          <Pressable
-            onPress={handleSave}
-            disabled={submitting}
-            style={({ pressed }) => [
-              styles.button,
-              pressed && styles.pressed,
-              { backgroundColor: theme.text, opacity: submitting ? 0.5 : 1 },
-            ]}
-          >
-            <ThemedText type="smallBold" style={{ color: theme.background }}>
-              {submitting ? "Wird gespeichert…" : "Weiter"}
-            </ThemedText>
-          </Pressable>
+          <Host matchContents>
+            <Button
+              onPress={handleSave}
+              disabled={submitting}
+              label={submitting ? "Wird gespeichert…" : "Weiter"}
+            />
+          </Host>
         </View>
-      </ThemedView>
+      </KeyboardAwareScrollView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: "center",
     paddingHorizontal: Spacing.four,
   },
@@ -149,14 +148,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
     fontSize: 18,
-  },
-  button: {
-    minHeight: 52,
-    borderRadius: Spacing.three,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  pressed: {
-    opacity: 0.75,
   },
 });
