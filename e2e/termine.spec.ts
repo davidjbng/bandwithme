@@ -15,16 +15,16 @@ test.describe("Termine page", () => {
     expect(filterCritical(errors)).toEqual([]);
   });
 
-  test("shows empty state for unauthenticated users", async ({ page }) => {
+  test("shows login for unauthenticated users", async ({ page }) => {
     await page.goto("/termine");
-    await expect(page.getByText("Zusammen klingt’s besser.", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Anmelden oder registrieren" })).toBeVisible();
+    await expect(page.getByLabel("Benutzername oder E-Mail-Adresse")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anmelden", exact: true })).toBeVisible();
   });
 
-  test("shows login prompt card", async ({ page }) => {
+  test("requires no extra click to reach the form", async ({ page }) => {
     await page.goto("/termine");
-    await expect(page.getByRole("button", { name: "Anmelden oder registrieren" })).toBeVisible();
-    await page.getByRole("button", { name: "Anmelden oder registrieren" }).click();
+    await expect(page.getByRole("button", { name: "Anmelden", exact: true })).toBeVisible();
+    await expect(page.getByLabel("Passwort", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Anmelden", exact: true })).toBeVisible();
   });
 });

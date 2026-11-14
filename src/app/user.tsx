@@ -1,13 +1,8 @@
 import { Action } from "@/components/tour-ui";
 import { Button, Column, Host } from "@expo/ui";
 import { useAuthActions } from "@convex-dev/auth/react";
-import {
-  useSignInWithEmailPassword,
-  useSignUpWithEmailPassword,
-  useStartPasswordRecovery,
-} from "@convex-dev/auth/methods/email-password/react";
 import { useConvex, useConvexAuth, useMutation, useQuery } from "convex/react";
-import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Redirect, Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
@@ -17,145 +12,17 @@ import { ThemedText } from "@/components/themed-text";
 import IdeaForm from "@/components/idea-form";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
-import { authErrorMessage } from "@/lib/auth-errors";
+import { UsernameForm } from "@/components/username-form";
 import {
   inviteDestination,
   readInviteDestination,
   saveInviteDestination,
 } from "@/lib/invite-destination";
 
-function SignInForm({ next }: { next?: string }) {
-  const convex = useConvex();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const theme = useTheme();
-  const login = useSignInWithEmailPassword(api.auth);
-  const registration = useSignUpWithEmailPassword(api.auth);
-  const recovery = useStartPasswordRecovery(api.auth);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const busy = login.pending || registration.pending || recovery.pending;
-
-  async function authenticate(signUp: boolean) {
-    setError(null);
-    setMessage(null);
-    try {
-      await saveInviteDestination(next, convex.url);
-    } catch {
-      setError("Deine Einladung konnte nicht gespeichert werden. Bitte versuche es erneut.");
-      return;
-    }
-    const credentials = { email: email.trim().toLowerCase(), password: password };
-    if (signUp) {
-      const result = await registration.signUp(credentials);
-      if (result.success) {
-        setPassword("");
-        setMessage(
-          "Prüfe dein Postfach und bestätige deine E-Mail-Adresse. Öffne den Link auf diesem Gerät in derselben App bzw. demselben Browser.",
-        );
-      } else setError(authErrorMessage(result.userError));
-    } else {
-      const result = await login.signIn(credentials);
-      if (result.status === "error") setError(authErrorMessage(result.userError));
-      else setPassword("");
-    }
-  }
-
-  async function recover() {
-    setError(null);
-    setMessage(null);
-    try {
-      await saveInviteDestination(next, convex.url);
-    } catch {
-      setError("Deine Einladung konnte nicht gespeichert werden. Bitte versuche es erneut.");
-      return;
-    }
-    const result = await recovery.startPasswordRecovery({
-      email: email.trim().toLowerCase(),
-    });
-    if (result.success)
-      setMessage(
-        "Der Link zum Zurücksetzen ist unterwegs. Öffne ihn auf diesem Gerät in derselben App bzw. demselben Browser.",
-      );
-    else setError(authErrorMessage(result.userError));
-  }
-
-  return (
-    <View style={{ gap: 16 }}>
-      <ThemedText type="subtitle">Willkommen bei deiner Band</ThemedText>
-      <ThemedText themeColor="textSecondary">
-        Melde dich an oder erstelle ein neues Konto mit bestätigter E-Mail-Adresse.
-      </ThemedText>
-      <View style={{ gap: 12 }}>
-        <TextInput
-          accessibilityLabel="E-Mail-Adresse"
-          placeholder="du@beispiel.de"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          autoComplete="username"
-          inputMode="email"
-          editable={!busy}
-          placeholderTextColor={theme.textSecondary}
-          style={{
-            width: "100%",
-            padding: 14,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: theme.backgroundSelected,
-            color: theme.text,
-            fontSize: 17,
-          }}
-        />
-        <TextInput
-          accessibilityLabel="Passwort"
-          placeholder="Dein Passwort"
-          value={password}
-          onChangeText={setPassword}
-          autoCapitalize="none"
-          autoComplete="current-password"
-          secureTextEntry
-          editable={!busy}
-          placeholderTextColor={theme.textSecondary}
-          style={{
-            width: "100%",
-            padding: 14,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: theme.backgroundSelected,
-            color: theme.text,
-            fontSize: 17,
-          }}
-        />
-        <Host matchContents>
-          <Column spacing={12} style={{ width: "100%" }}>
-            <Button disabled={busy} onPress={() => void authenticate(false)} label="Anmelden" />
-            <Button
-              disabled={busy}
-              variant="outlined"
-              onPress={() => void authenticate(true)}
-              label="Account erstellen"
-            />
-            <Button
-              disabled={busy}
-              variant="text"
-              onPress={() => void recover()}
-              label="Passwort vergessen?"
-            />
-          </Column>
-        </Host>
-      </View>
-      {busy && <ActivityIndicator />}
-      {message && <ThemedText accessibilityLiveRegion="polite">{message}</ThemedText>}
-      {error && <ThemedText accessibilityRole="alert">{error}</ThemedText>}
-    </View>
-  );
-}
-
 function Profile({
   user,
 }: {
-  user: { id: Id<"users">; name: string | null; instrument?: string };
+  user: { id: Id<"users">; name: string | null; instrument?: string; username?: string | null };
 }) {
   const [name, setName] = useState(user.name ?? "");
   const [instrument, setInstrument] = useState(user.instrument ?? "");
@@ -240,6 +107,7 @@ function Profile({
         </Host>
       </View>
       {message && <ThemedText accessibilityLiveRegion="polite">{message}</ThemedText>}
+      <UsernameForm initialValue={user.username ?? ""} />
       <IdeaForm />
     </View>
   );
@@ -292,7 +160,7 @@ export default function UserScreen() {
             <Profile key={user.id} user={user} />
           </View>
         ) : (
-          <SignInForm next={next} />
+          <Redirect href={next ? { pathname: "/sign-in", params: { next } } : "/sign-in"} />
         )}
       </View>
     </KeyboardAwareScrollView>

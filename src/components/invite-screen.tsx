@@ -1,11 +1,12 @@
-import { useConvexAuth } from "convex/react";
+import { useConvex, useConvexAuth } from "convex/react";
 import { useMutation, useQuery } from "convex/react";
 import { Stack, useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { saveInviteDestination } from "@/lib/invite-destination";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { BottomTabInset, MaxContentWidth, Spacing } from "@/constants/theme";
@@ -19,6 +20,10 @@ export function InviteScreen({ token }: InviteScreenProps) {
   const router = useRouter();
   const safeAreaInsets = useSafeAreaInsets();
   const { isAuthenticated } = useConvexAuth();
+  const convex = useConvex();
+  useEffect(() => {
+    if (isAuthenticated) void saveInviteDestination(null, convex.url).catch(() => undefined);
+  }, [isAuthenticated, convex]);
   const invite = useQuery(api.bands.previewInvite, token ? { token } : "skip");
   const acceptInvite = useMutation(api.bands.acceptInvite);
   const [error, setError] = useState("");
@@ -47,7 +52,7 @@ export function InviteScreen({ token }: InviteScreenProps) {
   function handleLogin() {
     if (!token) return;
     router.push(
-      `/user?next=${encodeURIComponent(`/invite?token=${encodeURIComponent(token)}`)}` as never,
+      `/sign-in?next=${encodeURIComponent(`/invite?token=${encodeURIComponent(token)}`)}` as never,
     );
   }
 

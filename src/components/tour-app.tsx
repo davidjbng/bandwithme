@@ -71,25 +71,9 @@ function BandGate({ children }: PropsWithChildren) {
   const user = useQuery(api.user.current, isAuthenticated ? {} : "skip");
   const band = useQuery(api.bands.myBand, isAuthenticated ? {} : "skip");
   const router = useRouter();
-  const { colors } = useTourTheme();
   if (isLoading || (isAuthenticated && (user === undefined || band === undefined)))
     return <Loading />;
-  if (!isAuthenticated || !user)
-    return (
-      <Page>
-        <Copy accessibilityRole="header" style={s.display}>
-          Guter Takt.{"\n"}Gute Leute.
-        </Copy>
-        <View style={[s.hero, { backgroundColor: colors.hero }]}>
-          <Copy style={[s.heroTitle, { color: colors.onHero }]}>Zusammen klingt’s besser.</Copy>
-          <Copy style={{ color: colors.heroMuted }}>
-            Proben planen, Songs abstimmen, eure nächste Bühne vorbereiten.
-          </Copy>
-          <Action hero label="Anmelden oder registrieren" onPress={() => router.push("/user")} />
-        </View>
-        <Meta>Band With Me · Dein gemeinsamer Probenplan.</Meta>
-      </Page>
-    );
+  if (!isAuthenticated || !user) return <Redirect href="/sign-in" />;
   if (!user.name) return <Redirect href="/onboarding/profile" />;
   if (!band)
     return (

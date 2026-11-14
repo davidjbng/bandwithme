@@ -1,3 +1,5 @@
+import { registerUsername } from "@convex-dev/auth/components/username/test";
+import { registerEmail } from "@convex-dev/auth/components/email/test";
 import { registerCore, sessionIdentity } from "@convex-dev/auth/test";
 import { register as registerRateLimiter } from "@convex-dev/rate-limiter/test";
 import { vi } from "vitest";
@@ -11,6 +13,8 @@ export function backendTest() {
   vi.stubEnv("CONVEX_CLOUD_URL", "https://test.convex.cloud");
   const t = convexTest(schema, modules);
   registerCore(t);
+  registerEmail(t);
+  registerUsername(t);
   registerRateLimiter(t);
   return t;
 }

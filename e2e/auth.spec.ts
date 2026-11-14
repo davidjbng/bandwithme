@@ -19,7 +19,7 @@ test("Auth2 sign-in renders without runtime errors", async ({ page }) => {
 
 test("email and password inputs are labeled and keep the password obscured", async ({ page }) => {
   await page.goto("/user");
-  const email = page.getByRole("textbox", { name: "E-Mail-Adresse" });
+  const email = page.getByRole("textbox", { name: "Benutzername oder E-Mail-Adresse" });
   const password = page.getByLabel("Passwort", { exact: true });
   await email.fill("mitglied@example.com");
   await password.fill("Kein-echtes-Passwort-2026");
@@ -29,7 +29,7 @@ test("email and password inputs are labeled and keep the password obscured", asy
 
 test("offers sign-in, verified registration and password recovery", async ({ page }) => {
   await page.goto("/user");
-  for (const name of ["Anmelden", "Account erstellen", "Passwort vergessen?"]) {
+  for (const name of ["Anmelden", "Registrieren", "Passwort vergessen?"]) {
     await expect(page.getByRole("button", { name, exact: true })).toBeEnabled();
   }
   await expect(page.getByText("Send magic link", { exact: true })).toHaveCount(0);

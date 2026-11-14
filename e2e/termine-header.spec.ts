@@ -1,10 +1,12 @@
 import { expect, test } from "@playwright/test";
+import { bandFixture } from "./fixtures/band";
 
 test("keeps Termine content below the native header", async ({ page }) => {
+  await bandFixture(page);
   await page.goto("/termine");
 
   const headerTitle = page.locator("h1", { hasText: "Termine" });
-  const sectionTitle = page.getByText("Zusammen klingt’s besser.");
+  const sectionTitle = page.getByText("Live im Stadtgarten");
 
   await expect(headerTitle).toBeVisible();
   await expect(sectionTitle).toBeVisible();
@@ -15,8 +17,7 @@ test("keeps Termine content below the native header", async ({ page }) => {
     );
     const section = Array.from(document.querySelectorAll("*")).find(
       (element) =>
-        element.children.length === 0 &&
-        element.textContent?.trim() === "Zusammen klingt’s besser.",
+        element.children.length === 0 && element.textContent?.trim() === "Live im Stadtgarten",
     );
     if (!header || !section) return null;
 

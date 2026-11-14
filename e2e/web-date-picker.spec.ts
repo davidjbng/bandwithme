@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { bandFixture } from "./fixtures/band";
 
 test.describe("Web event date and time inputs", () => {
   test("uses native browser controls styled like app inputs", async ({ page }) => {
+    await bandFixture(page);
     await page.goto("/termine/create");
 
     const dateInput = page.locator('input[type="date"]');

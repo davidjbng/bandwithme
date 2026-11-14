@@ -19,7 +19,7 @@ for (const path of ["/validate-email", "/reset-password"]) {
     ).toBeVisible();
     await expect(page.getByLabel("Neues Passwort", { exact: true })).toHaveCount(0);
     expect(textWarnings).toEqual([]);
-    await page.getByRole("button", { name: "Zum Profil", exact: true }).click();
+    await page.getByRole("button", { name: "Zur Anmeldung", exact: true }).click();
     await expect(page.getByRole("button", { name: "Anmelden", exact: true })).toBeVisible();
   });
 }

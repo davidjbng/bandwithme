@@ -1,9 +1,5 @@
 import { registerPassword } from "@convex-dev/auth/components/password/test";
-import {
-  registerEmail,
-  registerResendStub,
-  sentEmails,
-} from "@convex-dev/auth/components/email/test";
+import { registerResendStub, sentEmails } from "@convex-dev/auth/components/email/test";
 import { sessionIdentity } from "@convex-dev/auth/test";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { api } from "./_generated/api";
@@ -22,7 +18,6 @@ afterEach(() => {
 function authTest() {
   const t = backendTest();
   registerPassword(t);
-  registerEmail(t);
   registerResendStub(t);
   return t;
 }
@@ -113,6 +108,7 @@ test("password recovery requires the requesting client's secret and revokes old 
   const originalUser = await originalSession.query(api.user.current, {});
   expect(originalUser).not.toBeNull();
 
+  await originalSession.mutation(api.user.setUsername, { username: "Recovery.Bass" });
   const recovery = await client.mutation(api.auth.startPasswordRecovery, {
     email: signup.credentials.email,
   });
@@ -151,6 +147,12 @@ test("password recovery requires the requesting client's secret and revokes old 
   const recoveredSession = t.withIdentity(sessionIdentity(recovered.tokens));
   expect((await recoveredSession.query(api.user.current, {}))?.id).toBe(originalUser!.id);
   expect(await originalSession.query(api.user.current, {})).toBeNull();
+  expect(
+    await client.mutation(api.auth.signInWithIdentifier, {
+      email: "recovery.bass",
+      password: newPassword,
+    }),
+  ).toMatchObject({ status: "complete" });
   expect(await client.mutation(api.auth.signInWithEmailPassword, signup.credentials)).toMatchObject(
     { status: "error" },
   );
@@ -169,4 +171,95 @@ test("password recovery requires the requesting client's secret and revokes old 
   ).toMatchObject({ status: "error" });
   await vi.advanceTimersByTimeAsync(100);
   await t.finishInProgressScheduledFunctions();
+});
+
+test("verified accounts add a unique username and sign in through the same password account", async () => {
+  const t = authTest();
+  const signup = await signUp(t);
+  const client = t.withRequestMetadata({ ip: "127.0.0.2" });
+  await expect(t.mutation(api.user.setUsername, { username: "Bass.David" })).rejects.toThrow();
+  const verified = await client.mutation(api.auth.completeSignUpWithEmailPassword, {
+    emailCode: signup.emailCode,
+    browserSecret: signup.browserSecret,
+  });
+  if (verified.status !== "complete") throw new Error("Verification failed");
+  const session = t.withIdentity(sessionIdentity(verified.tokens));
+  await session.mutation(api.user.setUsername, { username: "Bass.David" });
+  const user = await session.query(api.user.current, {});
+  expect(user).toMatchObject({ email: signup.credentials.email, username: "Bass.David" });
+  for (const email of [" BASS.david ", signup.credentials.email]) {
+    const result = await client.mutation(api.auth.signInWithIdentifier, {
+      email,
+      password: signup.credentials.password,
+    });
+    if (result.status !== "complete") throw new Error("Sign in failed");
+    expect(
+      (await t.withIdentity(sessionIdentity(result.tokens)).query(api.user.current, {}))?.id,
+    ).toBe(user!.id);
+  }
+  for (const email of ["Bass.David", "nobody", "nobody@example.com"]) {
+    expect(
+      await client.mutation(api.auth.signInWithIdentifier, {
+        email,
+        password: "Incorrect-password-2026",
+      }),
+    ).toMatchObject({ status: "error", userError: { error: "INVALID_CREDENTIALS" } });
+  }
+  await expect(
+    session.mutation(api.user.setUsername, { username: "looks@like.email" }),
+  ).rejects.toThrow("3–30");
+  await session.mutation(api.user.setUsername, { username: "New.David" });
+  expect(
+    await client.mutation(api.auth.signInWithIdentifier, {
+      email: "bass.david",
+      password: signup.credentials.password,
+    }),
+  ).toMatchObject({ status: "error" });
+});
+
+test("username claims require verified email and reject case-insensitive collisions", async () => {
+  const t = authTest();
+  const { components } = await import("./_generated/api");
+  const { asUser } = await import("../test/backend");
+  const id = await t.run((ctx) => ctx.db.insert("users", {}));
+  const unverified = await asUser(t, id);
+  await expect(unverified.mutation(api.user.setUsername, { username: "Reserved" })).rejects.toThrow(
+    "bestätige",
+  );
+  const signup = await signUp(t);
+  const verified = await t
+    .withRequestMetadata({ ip: "127.0.0.2" })
+    .mutation(api.auth.completeSignUpWithEmailPassword, {
+      emailCode: signup.emailCode,
+      browserSecret: signup.browserSecret,
+    });
+  if (verified.status !== "complete") throw new Error("Verification failed");
+  await t.mutation(components.authUsername.public.setUsername, {
+    userId: id,
+    username: "Reserved",
+  });
+  const session = t.withIdentity(sessionIdentity(verified.tokens));
+  await expect(session.mutation(api.user.setUsername, { username: "RESERVED" })).rejects.toThrow(
+    "vergeben",
+  );
+  expect((await session.query(api.user.current, {}))?.username).toBeNull();
+});
+
+test("unknown usernames consume the same per-IP lookup budget before account lookup", async () => {
+  const t = authTest();
+  const client = t.withRequestMetadata({ ip: "127.0.0.3" });
+  for (let i = 0; i < 60; i++) {
+    expect(
+      await client.mutation(api.auth.signInWithIdentifier, {
+        email: `unknown${i}`,
+        password: "Incorrect-password-2026",
+      }),
+    ).toMatchObject({ status: "error", userError: { error: "INVALID_CREDENTIALS" } });
+  }
+  expect(
+    await client.mutation(api.auth.signInWithIdentifier, {
+      email: "unknown",
+      password: "Incorrect-password-2026",
+    }),
+  ).toMatchObject({ status: "error", userError: { error: "RATE_LIMITED" } });
 });

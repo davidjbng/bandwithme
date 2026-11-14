@@ -26,17 +26,17 @@ test.describe("Home page", () => {
     await expect(page.getByText("Band With Me").first()).toBeVisible();
   });
 
-  test("shows welcome card for unauthenticated users", async ({ page }) => {
+  test("shows the login form for unauthenticated users", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByText("Zusammen klingt’s besser.", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Anmelden oder registrieren" })).toBeVisible();
+    await expect(page.getByLabel("Benutzername oder E-Mail-Adresse")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anmelden", exact: true })).toBeVisible();
   });
 
-  test("has working tab navigation", async ({ page }) => {
+  test("hides tab navigation before login", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: "Übersicht" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Termine" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Band" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Übersicht" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Termine" })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Band" })).toHaveCount(0);
   });
 });
 
@@ -47,7 +47,7 @@ test.describe("Navigation", () => {
     await page.goto("/termine");
     await page.waitForLoadState("networkidle");
     expect(filterCritical(errors)).toEqual([]);
-    await expect(page.getByRole("button", { name: "Anmelden oder registrieren" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Anmelden", exact: true })).toBeVisible();
   });
 
   test("navigates to Profil", async ({ page }) => {

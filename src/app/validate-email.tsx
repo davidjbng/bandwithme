@@ -20,7 +20,9 @@ function Verification({
   const router = useRouter();
   useEffect(() => {
     if (state.status === "complete")
-      router.replace(destination ? { pathname: "/user", params: { next: destination } } : "/user");
+      router.replace(
+        destination ? { pathname: "/sign-in", params: { next: destination } } : "/sign-in",
+      );
   }, [state.status, router, destination]);
   return state.status === "loading" ? (
     <ActivityIndicator />
@@ -66,7 +68,7 @@ export default function ValidateEmailScreen() {
         <ThemedText>Dieser Link enthält keinen Bestätigungscode.</ThemedText>
       )}
       <Host matchContents>
-        <Button onPress={() => router.replace("/user")} label="Zum Profil" />
+        <Button onPress={() => router.replace("/sign-in")} label="Zur Anmeldung" />
       </Host>
     </ScrollView>
   );

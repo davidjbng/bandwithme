@@ -1,7 +1,8 @@
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { requireCurrentUserId } from "./authorization";
+import { requireCurrentUser, requireCurrentUserId } from "./authorization";
 import { internalMutation, mutation, query } from "./_generated/server";
-import { v } from "convex/values";
+import { components } from "./_generated/api";
+import { ConvexError, v } from "convex/values";
 
 export const createUser = internalMutation({
   args: {
@@ -26,7 +27,10 @@ export const current = query({
       ? null
       : {
           id: user._id,
-          email: user.email ?? null,
+          email: await ctx.runQuery(components.authEmail.verifiedEmails.getPrimaryEmail, {
+            userId,
+          }),
+          username: await ctx.runQuery(components.authUsername.public.getUsername, { userId }),
           name: user.name ?? null,
           instrument: user.instrument ?? "",
         };
@@ -51,5 +55,31 @@ export const updateProfile = mutation({
       name: trimmed,
       ...(args.instrument !== undefined ? { instrument: args.instrument.trim() } : {}),
     });
+  },
+});
+
+export const setUsername = mutation({
+  args: { username: v.string() },
+  handler: async (ctx, { username }) => {
+    const user = await requireCurrentUser(ctx);
+    const email = await ctx.runQuery(components.authEmail.verifiedEmails.getPrimaryEmail, {
+      userId: user._id,
+    });
+    if (!email) throw new ConvexError("Bitte bestätige zuerst deine E-Mail-Adresse.");
+    const value = username.trim();
+    if (!/^[a-zA-Z0-9_.-]{3,30}$/.test(value))
+      throw new ConvexError(
+        "Nutze 3–30 Zeichen: Buchstaben a–z, Zahlen, Punkt, Bindestrich oder Unterstrich.",
+      );
+    const result = await ctx.runMutation(components.authUsername.public.setUsername, {
+      userId: user._id,
+      username: value,
+    });
+    if (!result.success)
+      throw new ConvexError(
+        result.userError.error === "USERNAME_TAKEN"
+          ? "Dieser Benutzername ist schon vergeben. Wähle bitte einen anderen."
+          : "Dieser Benutzername ist ungültig.",
+      );
   },
 });

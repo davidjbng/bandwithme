@@ -1,7 +1,7 @@
 export function authErrorMessage(error: { error: string }) {
   const messages: Record<string, string> = {
     INVALID_EMAIL: "Bitte gib eine gültige E-Mail-Adresse ein.",
-    INVALID_CREDENTIALS: "E-Mail-Adresse oder Passwort stimmen nicht.",
+    INVALID_CREDENTIALS: "Benutzername, E-Mail-Adresse oder Passwort stimmen nicht.",
     EMAIL_TAKEN: "Für diese E-Mail-Adresse gibt es bereits ein Konto.",
     EMAIL_NOT_FOUND: "Für diese E-Mail-Adresse wurde kein Konto gefunden.",
     EMAIL_NOT_VERIFIED: "Bitte bestätige zuerst deine E-Mail-Adresse.",

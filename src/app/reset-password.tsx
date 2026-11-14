@@ -1,6 +1,6 @@
 import { Button, Host } from "@expo/ui";
 import { useCompletePasswordRecovery } from "@convex-dev/auth/methods/email-password/react";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, TextInput, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
@@ -15,8 +15,7 @@ function Recovery({ code }: { code: string }) {
   const theme = useTheme();
   const [error, setError] = useState<string | null>(null);
   if (state.status === "loading") return <ActivityIndicator />;
-  if (state.status === "complete")
-    return <ThemedText>Passwort geändert. Du bist wieder angemeldet.</ThemedText>;
+  if (state.status === "complete") return <Redirect href="/sign-in" />;
   if (state.status === "error")
     return <ThemedText accessibilityRole="alert">{authErrorMessage(state.userError)}</ThemedText>;
   async function complete() {
@@ -72,10 +71,10 @@ export default function ResetPasswordScreen() {
       {code ? (
         <Recovery key={code} code={code} />
       ) : (
-        <ThemedText>Bitte fordere im Profil einen neuen Link an.</ThemedText>
+        <ThemedText>Bitte fordere bei der Anmeldung einen neuen Link an.</ThemedText>
       )}
       <Host matchContents>
-        <Button variant="text" onPress={() => router.replace("/user")} label="Zum Profil" />
+        <Button variant="text" onPress={() => router.replace("/sign-in")} label="Zur Anmeldung" />
       </Host>
     </KeyboardAwareScrollView>
   );

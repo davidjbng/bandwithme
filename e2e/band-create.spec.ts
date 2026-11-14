@@ -39,7 +39,7 @@ test("a verified member saves their profile, creates a band and an invitation", 
   await expect.poll(() => connectedHosts).toContain(target.hostname);
   expect(connectedHosts.every((hostname) => hostname === target.hostname)).toBe(true);
   await page.goto("/user");
-  await page.getByRole("textbox", { name: "E-Mail-Adresse" }).fill(email!);
+  await page.getByRole("textbox", { name: "Benutzername oder E-Mail-Adresse" }).fill(email!);
   await page.getByLabel("Passwort", { exact: true }).fill(password!);
   await page.getByRole("button", { name: "Anmelden", exact: true }).click();
   await expect(page.getByText("Dein Profil", { exact: true })).toBeVisible();

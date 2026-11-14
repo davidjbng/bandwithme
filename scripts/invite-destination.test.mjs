@@ -78,3 +78,24 @@ test("invalid stored data never becomes a redirect", async () => {
   secure.set("bandwithme_pending_invite_deployment", "https://evil.test");
   expect(await readInviteDestination("deployment")).toBeNull();
 });
+
+// Registration preferences are local and deployment-scoped, never credentials.
+const { readPendingSignup, savePendingSignup } = await import("../src/lib/pending-signup.ts");
+for (const os of ["web", "ios", "android"]) {
+  test(`${os} retains and clears the desired signup username without crossing deployments`, async () => {
+    platform.OS = os;
+    const pending = { email: "member@example.test", username: "band.bass" };
+    await savePendingSignup(pending, "deployment-a");
+    expect(await readPendingSignup("deployment-a")).toEqual(pending);
+    expect(await readPendingSignup("deployment-b")).toBeNull();
+    await savePendingSignup(null, "deployment-a");
+    expect(await readPendingSignup("deployment-a")).toBeNull();
+  });
+}
+test("malformed signup preferences cannot prevent an existing account from signing in", async () => {
+  platform.OS = "ios";
+  for (const value of ["not-json", '"text"', '{"email":42,"username":"test"}']) {
+    secure.set("bandwithme_signup_deployment", value);
+    expect(await readPendingSignup("deployment")).toBeNull();
+  }
+});

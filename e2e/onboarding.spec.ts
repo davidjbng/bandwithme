@@ -15,14 +15,16 @@ test.describe("Band onboarding", () => {
     await page.goto("/onboarding/create");
     await page.waitForLoadState("networkidle");
     expect(filterCritical(errors)).toEqual([]);
-    await expect(page).toHaveURL("/user");
+    await expect(page).toHaveURL("/sign-in");
     await expect(page.getByRole("button", { name: "Anmelden", exact: true })).toBeVisible();
   });
 
   test("/onboarding/profile redirects unauthenticated users to sign-in", async ({ page }) => {
     await page.goto("/onboarding/profile");
-    await expect(page).toHaveURL("/user");
-    await expect(page.getByRole("textbox", { name: "E-Mail-Adresse" })).toBeVisible();
+    await expect(page).toHaveURL("/sign-in");
+    await expect(
+      page.getByRole("textbox", { name: "Benutzername oder E-Mail-Adresse" }),
+    ).toBeVisible();
   });
 
   test("/onboarding/join loads without critical errors", async ({ page }) => {
@@ -31,12 +33,12 @@ test.describe("Band onboarding", () => {
     await page.goto("/onboarding/join");
     await page.waitForLoadState("networkidle");
     expect(filterCritical(errors)).toEqual([]);
-    await expect(page.getByText(/Band beitreten|Einladungslink/).first()).toBeVisible();
+    await expect(page.getByLabel("Benutzername oder E-Mail-Adresse")).toBeVisible();
   });
 
-  test("/onboarding/join shows invite link info", async ({ page }) => {
+  test("/onboarding/join is protected", async ({ page }) => {
     await page.goto("/onboarding/join");
-    await expect(page.getByText(/Einladungslink/).first()).toBeVisible();
+    await expect(page.getByLabel("Benutzername oder E-Mail-Adresse")).toBeVisible();
   });
 
   test("an invalid invitation link shows a safe error state", async ({ page }) => {
