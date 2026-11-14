@@ -1,9 +1,9 @@
 # Version control
 
-- Work directly on `main`. Use GitButler (`but`) for status, diffs, commits, pulls, merges, and pushes. Do not create task branches or pull requests for routine work.
-- Commit only changes for the current task. Preserve other agents' uncommitted work.
-- Before pushing `main`, run `but pull` (including linked worktrees), resolve conflicts while preserving all involved work, and run the relevant checks. Then push `main` directly.
-- Do not merge or publish unrelated work as part of a task. Deployments triggered by a `main` push follow the configured workflows.
+- Keep `origin/main` as GitButler's target. Do each task on its own local GitButler branch so parallel work can stay applied in the shared workspace. Use `but` for all version-control operations.
+- Commit only the task's files or hunks to its branch. Preserve other agents' uncommitted changes and branches. Do not push task branches or open pull requests.
+- When the task is ready to publish, run `but pull` to update the workspace and linked worktrees, resolve conflicts while preserving all involved work, and run relevant checks. Then use `but land <task-branch> --yes` to land that branch directly on `origin/main`. Land a whole stack only when all its branches belong to the task.
+- A land pushes `main` and may trigger the configured deployment workflows. Never land another task's branch without an explicit request.
 
 # Expo HAS CHANGED
 
