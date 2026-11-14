@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="shoulders" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#A7E2CF" stop-opacity="0.64"/>
+      <stop offset="0.38" stop-color="#87C8B6" stop-opacity="0.36"/>
+      <stop offset="0.82" stop-color="#77B6A8" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#77B6A8" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#shoulders)" d="M246 552V444c0-50 40-90 90-90 33 0 63 18 78 45 6-49 45-87 98-87s92 38 98 87c15-27 45-45 78-45 50 0 90 40 90 90v108z"/>
+</svg>

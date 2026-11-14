@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="cymbal" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#E7FFF1"/>
+      <stop offset="1" stop-color="#80C2AA"/>
+    </linearGradient>
+  </defs>
+  <g fill="#A4D0BF">
+    <rect x="392" y="504" width="16" height="126" rx="8"/>
+    <rect x="616" y="504" width="16" height="126" rx="8"/>
+  </g>
+  <g fill="url(#cymbal)">
+    <ellipse cx="400" cy="506" rx="68" ry="20"/>
+    <ellipse cx="624" cy="506" rx="68" ry="20"/>
+  </g>
+</svg>

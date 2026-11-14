@@ -1,0 +1,126 @@
+{
+  "features": ["specular-location"],
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.09020,0.47451,0.45882,1.00000",
+      "srgb:0.04314,0.20392,0.21961,1.00000"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.2,
+        "y": 0
+      },
+      "stop": {
+        "x": 0.8,
+        "y": 1
+      }
+    }
+  },
+  "fill-specializations": [
+    {
+      "appearance": "dark",
+      "value": {
+        "solid": "srgb:0.07843,0.12157,0.12157,1.00000"
+      }
+    }
+  ],
+  "groups": [
+    {
+      "name": "01 · Drum kit · pearl mint",
+      "lighting": "individual",
+      "specular": "inside",
+      "blur-material": 0.25,
+      "layers": [
+        {
+          "name": "Kick drum",
+          "image-name": "kick-drum.svg",
+          "glass": true
+        },
+        {
+          "name": "Cymbals and stands",
+          "image-name": "cymbals.svg",
+          "glass": true
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.3
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.25
+      }
+    },
+    {
+      "name": "02 · Saxophone · amber",
+      "lighting": "individual",
+      "specular": "inside",
+      "blur-material": 0.1,
+      "layers": [
+        {
+          "name": "Saxophone",
+          "image-name": "saxophone.svg",
+          "glass": true
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.3
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.2
+      }
+    },
+    {
+      "name": "03 · Guitar · coral",
+      "lighting": "individual",
+      "specular": "inside",
+      "blur-material": 0.1,
+      "layers": [
+        {
+          "name": "Guitar",
+          "image-name": "guitar.svg",
+          "glass": true
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.3
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.2
+      }
+    },
+    {
+      "name": "04 · Band · translucent teal",
+      "lighting": "individual",
+      "specular": "inside",
+      "layers": [
+        {
+          "name": "Band heads",
+          "image-name": "band-heads.svg",
+          "glass": true,
+          "opacity": 0.8
+        },
+        {
+          "name": "Fading shoulders",
+          "image-name": "band.svg",
+          "glass": false
+        }
+      ],
+      "shadow": {
+        "kind": "none",
+        "opacity": 0
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.35
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": ["iOS"]
+  }
+}

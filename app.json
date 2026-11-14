@@ -9,9 +9,9 @@
     "owner": "davidjbng",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
-      "bundleIdentifier": "com.anonymous.bandwithme",
-      "appleTeamId": "DY6QC7DS48",
+      "icon": "./assets/brand/AppIcon.icon",
+      "bundleIdentifier": "com.bandwithme",
+      "appleTeamId": "8C44VRC9M9",
       "associatedDomains": ["applinks:bandwithme.de"]
     },
     "android": {
